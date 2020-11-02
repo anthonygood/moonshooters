@@ -6,9 +6,15 @@
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true
 	},
-	
+
 	"files": [
-		"src/phaser.d.ts",
 		"src/main.ts"
+	],
+
+	"typeRoots": [
+    "./node_modules/phaser/types"
+	],
+	"types": [
+			"Phaser"
 	]
 }

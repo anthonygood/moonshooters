@@ -26,7 +26,7 @@ class TestScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.player, false);
 	}
 
-	update(time: number, delta:number) {
+	update(time: number, delta: number) {
 		this.player.angle += 1;
 		if (this.cursors.left.isDown) {
 			this.player.x -= 5;
