@@ -23,23 +23,35 @@ class Player {
     sprite.setScale(2);
     this.scene.anims.create({
       key: 'walk',
-      frameRate: 8,
+      frameRate: 6,
       repeat: -1,
-      frames: this.scene.anims.generateFrameNames(PLAYER_KEY, { suffix: '.png', prefix: 'walk_', start: 1, end: 4 }),
+      frames: this.getFrames('walk_', 4),
     });
     this.scene.anims.create({
       key: 'idle',
       frameRate: 2,
       repeat: -1,
-      frames: this.scene.anims.generateFrameNames(PLAYER_KEY, { suffix: '.png', prefix: 'idle_', start: 1, end: 2 }),
+      frames: this.getFrames('idle_', 2),
     });
     this.scene.anims.create({
       key: 'jump',
       frameRate: 2,
       repeat: -1,
-      frames: this.scene.anims.generateFrameNames(PLAYER_KEY, { suffix: '.png', prefix: 'jump_', start: 1, end: 2 }),
+      frames: this.getFrames('jump_', 2),
     });
-    this.sprite.anims.play('jump');
+    this.sprite.anims.play('walk');
+  }
+
+  private getFrames(prefix, end) {
+    return this.scene.anims.generateFrameNames(
+      PLAYER_KEY,
+      {
+        prefix,
+        suffix: '.png',
+        start: 1,
+        end,
+      }
+    )
   }
 
 	update(
