@@ -1,45 +1,47 @@
+import Player from './Player';
+
+const asset = (path: string) => `/assets/${path}`;
+
+const MAP_KEY = 'map';
+const LEVEL_KEY = 'level';
+const PLAYER_KEY = 'player';
+
 class TestScene extends Phaser.Scene {
-	player: Phaser.GameObjects.Sprite;
-	cursors: any;
+	player: Player;
+	cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 
 	constructor() {
     super({
 			key: 'TestScene'
 		});
+		this.player = new Player(this);
 	}
 
 	preload() {
-		this.load.tilemapTiledJSON('map', '/assets/tilemaps/desert.json');
-		this.load.image('Desert', '/assets/tilemaps/tmw_desert_spacing.png');
-		this.load.image('player', '/assets/sprites/mushroom.png');
+		// For some reason JSON tileset didn't work?
+		this.load.tilemapCSV(MAP_KEY, asset('tilemaps/Test Map.csv'));
+		this.load.image(LEVEL_KEY, asset('tilemaps/Block.png'));
+		// this.load.multiatlas(PLAYER_KEY, asset('sprites/bojo_sprites.json'), asset('sprites'));
+
+		this.player.preload();
 	}
 
 	create() {
-		var map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: 'map' });
-		var tileset: Phaser.Tilemaps.Tileset = map.addTilesetImage('Desert');
-		var layer: Phaser.Tilemaps.StaticTilemapLayer = map.createStaticLayer(0, tileset, 0, 0);
+		this.player.create();
 
-		this.player = this.add.sprite(100, 100, 'player');
+		const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: MAP_KEY });
+		const tileset: Phaser.Tilemaps.Tileset = map.addTilesetImage('Block', LEVEL_KEY);
+		const layer: Phaser.Tilemaps.StaticTilemapLayer = map.createStaticLayer(0, tileset, 0, 0);
+		layer.setCollisionByProperty({ collides: true });
+
 		this.cursors = this.input.keyboard.createCursorKeys();
 
 		this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-    this.cameras.main.startFollow(this.player, false);
+    this.cameras.main.startFollow(this.player.sprite, false);
 	}
 
 	update(time: number, delta: number) {
-		this.player.angle += 1;
-		if (this.cursors.left.isDown) {
-			this.player.x -= 5;
-		}
-		if (this.cursors.right.isDown) {
-			this.player.x += 5;
-		}
-		if (this.cursors.down.isDown) {
-			this.player.y += 5;
-		}
-		if (this.cursors.up.isDown) {
-			this.player.y -= 5;
-		}
+		this.player.update(time, delta, this.cursors);
 	}
 }
 
