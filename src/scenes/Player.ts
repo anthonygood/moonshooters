@@ -14,7 +14,9 @@ class Player {
   }
 
   create(): void {
-    this.sprite = this.scene.add.sprite(150, 50, PLAYER_KEY, 'idle_1.png');
+    // this.sprite = this.scene.add.sprite(150, 50, PLAYER_KEY, 'idle_1.png');
+    this.sprite = this.scene.physics.add.sprite(150, 50, PLAYER_KEY, 'idle_1.png');
+
 		this.sprite.setScale(4);
   }
 
