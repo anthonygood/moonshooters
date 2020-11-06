@@ -105,4 +105,34 @@ describe('StateMachine', () => {
       expect(init2).toHaveBeenCalled();
     });
   });
+
+  describe('tick state', () => {
+    it('calls tick function for each process() call where state does not change', () => {
+      const tick1 = jest.fn();
+      const tick2 = jest.fn();
+
+      const machine = StateMachine<any>('idle').tick(tick1)
+        .transitionTo('walk').when(data => data.walk)
+        .state('walk').tick(tick2);
+
+      expect(tick1).not.toHaveBeenCalled();
+      expect(tick2).not.toHaveBeenCalled();
+
+      machine.process({ walk: false });
+      machine.process({ walk: false });
+
+      expect(tick1).toHaveBeenCalledTimes(2);
+      expect(tick2).not.toHaveBeenCalled();
+
+      machine.process({ walk: true });
+
+      expect(tick1).toHaveBeenCalledTimes(2);
+      expect(tick2).not.toHaveBeenCalled();
+
+      machine.process({});
+
+      expect(tick1).toHaveBeenCalledTimes(2);
+      expect(tick2).toHaveBeenCalledTimes(1);
+    });
+  });
 });

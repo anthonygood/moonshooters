@@ -2,6 +2,7 @@ type State<Transition> = {
   name: string;
   transitions: Transition[];
   init?: Function;
+  tick?: Function;
 }
 
 type StateDict<TData> = { [Key: string]: State<TData> }
@@ -13,12 +14,16 @@ type PredicateTransition<TData> = {
 }
 
 export type TStateMachine<TData> = {
-  currentState: () => string;
+  // Builder functions for declaring state graph
   transitionTo: (stateName: string) => TStateMachine<TData>;
   when: (predicate: Predicate<TData>) => TStateMachine<TData>;
   or: (predicate: Predicate<TData>) => TStateMachine<TData>;
   andThen: (init: Function) => TStateMachine<TData>;
+  tick: (tick: Function) => TStateMachine<TData>;
   state: (stateName: string) => TStateMachine<TData>;
+
+  // Top-level controls
+  currentState: () => string;
   process: (data: TData) => TStateMachine<TData>;
   init: () => TStateMachine<TData>;
 };
@@ -62,6 +67,10 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
       destState.init = fn;
       return machine;
     },
+    tick: (fn: Function) => {
+      destState.tick = fn;
+      return machine;
+    },
     state: stateName => {
       const nominatedState = states[stateName];
       if (!nominatedState) {
@@ -82,6 +91,9 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
         currentStateName = transition.state;
         const { init } = states[currentStateName];
         init && init();
+      } else {
+        const { tick } = states[currentStateName];
+        tick && tick();
       }
       return machine;
     },
