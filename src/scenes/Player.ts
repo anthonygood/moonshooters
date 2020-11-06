@@ -11,6 +11,8 @@ type PlayerStateData = {
 };
 
 class Player {
+  // TODO: Define in map
+  readonly spawn = [150, 50];
   public scene: Phaser.Scene;
   public sprite: Phaser.Physics.Arcade.Sprite;
   public state: {
@@ -29,11 +31,10 @@ class Player {
   }
 
   create(): void {
-    const sprite = this.sprite = this.scene.physics.add.sprite(150, 50, PLAYER_KEY, 'idle_1.png');
+    const sprite = this.sprite = this.scene.physics.add.sprite(...this.spawn, PLAYER_KEY, 'idle_1.png');
     sprite.setDebug(true, true, 1);;
     sprite.setScale(3);
     sprite.setMaxVelocity(700, 1000);
-    // sprite.setCollideWorldBounds(true);
     sprite.body.setSize(20, 32);
 
     this.scene.anims.create({

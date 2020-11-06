@@ -7,8 +7,9 @@ const LEVEL_KEY = 'level';
 const BKG_KEY = 'sky';
 
 class TestScene extends Phaser.Scene {
-	player: Player;
-	cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+	public player: Player;
+	public cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+	public map: Phaser.Tilemaps.Tilemap;
 
 	constructor() {
     super({
@@ -26,7 +27,7 @@ class TestScene extends Phaser.Scene {
 
 	create() {
 		const background = this.add.image(0, 0, 'sky').setOrigin(0, 0);
-		const map: Phaser.Tilemaps.Tilemap = this.make.tilemap({ key: MAP_KEY });
+		const map: Phaser.Tilemaps.Tilemap = this.map = this.make.tilemap({ key: MAP_KEY });
 		const tileset: Phaser.Tilemaps.Tileset = map.addTilesetImage('Test Tiles', LEVEL_KEY);
 		const layer: Phaser.Tilemaps.StaticTilemapLayer = map.createStaticLayer(0, tileset, 0, 0);
 		layer.setCollisionByProperty({ collides: true });
@@ -52,6 +53,10 @@ class TestScene extends Phaser.Scene {
 	}
 
 	update(time: number, delta: number) {
+		if (this.player.sprite.body.top > this.map.heightInPixels) {
+			// respawn
+			this.player.sprite.setPosition(this.player.spawn[0], 0);
+		}
 		this.player.update(time, delta, this.cursors);
 	}
 }
