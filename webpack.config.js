@@ -9,8 +9,8 @@ var phaser = path.join(phaserModule, 'src/phaser.js')
 
 var definePlugin = new webpack.DefinePlugin({
     __DEV__: JSON.stringify(JSON.parse(process.env.BUILD_DEV || 'true')),
-    WEBGL_RENDERER: true, 
-    CANVAS_RENDERER: true 
+    WEBGL_RENDERER: true,
+    CANVAS_RENDERER: true
 })
 
 module.exports = {

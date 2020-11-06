@@ -4,13 +4,12 @@
 		"module": "commonjs",
 		"sourceMap": true,
 		"esModuleInterop": true,
-		"allowSyntheticDefaultImports": true
+		"allowSyntheticDefaultImports": true,
+    "skipLibCheck": true
 	},
-
 	"files": [
 		"src/main.ts"
 	],
-
 	"typeRoots": [
     "./node_modules/phaser/types"
 	],
