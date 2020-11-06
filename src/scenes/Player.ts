@@ -3,7 +3,7 @@ import { StateMachine, TStateMachine } from '../state/StateMachine';
 const PLAYER_KEY = 'player';
 const asset = (path: string) => `/assets/${path}`;
 
-const RUN_VELOCITY = 300;
+const RUN_VELOCITY = 1600;
 const JUMP_VELOCITY = 1000;
 
 type PlayerStateData = {
@@ -30,8 +30,9 @@ class Player {
 
   create(): void {
     const sprite = this.sprite = this.scene.physics.add.sprite(150, 50, PLAYER_KEY, 'idle_1.png');
-    sprite.debugShowVelocity = true;
+    sprite.setDebug(true, true, 1);;
     sprite.setScale(3);
+    sprite.setMaxVelocity(700, 1000);
 
     this.scene.anims.create({
       key: 'walk',
@@ -52,28 +53,36 @@ class Player {
       frames: this.getFrames('jump_', 2),
     });
 
+    const isOnGround = () => sprite.body.touching.down || sprite.body.blocked.down;
     this.state.direction = <TStateMachine<PlayerStateData>>StateMachine('right')
-      .transitionTo('left').when((data: PlayerStateData) => data.cursors.left.isDown).andThen(() => sprite.flipX = true)
-      .state('left').transitionTo('right').when((data: PlayerStateData) => data.cursors.right.isDown).andThen(() => sprite.flipX = false);
+      .transitionTo('left').when((data: PlayerStateData) => isOnGround() && data.cursors.left.isDown)
+      .andThen(() => sprite.flipX = true)
+      .state('left').transitionTo('right').when((data: PlayerStateData) => isOnGround() && data.cursors.right.isDown)
+      .andThen(() => sprite.flipX = false);
 
     const noDirectionPressed = (data: PlayerStateData) => !data.cursors.right.isDown && !data.cursors.left.isDown && !data.cursors.up.isDown;
-    const isOnGround = () => sprite.body.touching.down || sprite.body.blocked.down;
     const shouldJump = (data: PlayerStateData) => data.cursors.up.isDown && isOnGround();
     const leftOrRightIsPressed = (data: PlayerStateData) => data.cursors.right.isDown || data.cursors.left.isDown;
     const moveLeftRight = (data: PlayerStateData) => {
+      const change = isOnGround() ? RUN_VELOCITY : RUN_VELOCITY / 2;
       let velocity = 0;
-      if (data.cursors.right.isDown) velocity += RUN_VELOCITY;
-      if (data.cursors.left.isDown) velocity -= RUN_VELOCITY;
-      this.sprite.setVelocityX(velocity);
-    }
+      if (data.cursors.right.isDown) velocity += change;
+      if (data.cursors.left.isDown) velocity -= change;
+      this.sprite.setAccelerationX(velocity);
+    };
 
     this.state.action = <TStateMachine<PlayerStateData>>StateMachine('idle')
-      .andThen(() => sprite.anims.play('idle'))
+      .andThen(() => {
+        sprite.anims.play('idle');
+        sprite.setAccelerationX(0);
+      })
       .tick(() => this.sprite.setVelocityX(0))
       .transitionTo('jump').when(shouldJump)
       .transitionTo('walk').when(leftOrRightIsPressed)
 
-      .state('walk').andThen(() => sprite.anims.play('walk'))
+      .state('walk').andThen((data) => {
+        sprite.anims.play('walk');
+      })
       .tick(moveLeftRight)
       .transitionTo('idle').when(noDirectionPressed)
       .transitionTo('jump').when(shouldJump)
