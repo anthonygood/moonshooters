@@ -5,8 +5,8 @@ import TestScene from './scenes/PlayScene';
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'content',
-  width: 640,
-  height: 480,
+  width: 840,
+  height: 600,
   resolution: 1,
   backgroundColor: '#EDEEC9',
   scene: [
@@ -18,7 +18,8 @@ const config: Phaser.Types.Core.GameConfig = {
   physics: {
     default: 'arcade',
     arcade: {
-      gravity: { y: 300 },
+      tileBias: 64,
+      gravity: { y: 2500 },
       debug: false
     }
   }
