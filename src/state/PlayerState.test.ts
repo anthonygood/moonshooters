@@ -35,4 +35,28 @@ describe('StateMachine', () => {
 
     expect(machine.currentState()).toBe('idle');
   });
+
+  it('works with yet more complex state graph example', () => {
+    const machine = StateMachine('idle')
+      .transitionTo('walking').when(data => data.walk || data.key === '<walk>')
+      .state('walking')
+      .transitionTo('jumping').when(data => data.jump).or(data => data.jump === '<jump>')
+      // Can only transition to idle from jumping
+      .state('jumping')
+      .transitionTo('idle').when(data => data.idle).or(data => data.key === '<idle>');
+
+    expect(machine.currentState()).toBe('idle');
+
+    machine.process({ walk: true });
+    expect(machine.currentState()).toBe('walking');
+
+    machine.process({ key: '<idle>' });
+    expect(machine.currentState()).toBe('walking');
+
+    machine.process({ jump: true })
+    expect(machine.currentState()).toBe('jumping');
+
+    machine.process({ key: '<idle>' });
+    expect(machine.currentState()).toBe('idle');
+  });
 });

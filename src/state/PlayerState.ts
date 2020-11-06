@@ -30,7 +30,7 @@ export const StateMachine = (initialState: string) => {
       return machine;
     },
     transitionTo: (stateName: string) => {
-      if (stateName === currentStateName) {
+      if (stateName === homeState.name) {
         throw new TypeError(`Cannot transition to same state: '${stateName}'`)
       }
 
