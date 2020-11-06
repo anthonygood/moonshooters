@@ -33,6 +33,7 @@ class Player {
     sprite.setDebug(true, true, 1);;
     sprite.setScale(3);
     sprite.setMaxVelocity(700, 1000);
+    sprite.setCollideWorldBounds(true);
 
     this.scene.anims.create({
       key: 'walk',
