@@ -5,8 +5,8 @@ import TestScene from './scenes/PlayScene';
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'content',
-  width: 840,
-  height: 600,
+  width: 940,
+  height: 800,
   resolution: 1,
   backgroundColor: '#EDEEC9',
   scene: [
