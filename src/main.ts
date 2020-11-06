@@ -5,7 +5,7 @@ import TestScene from './scenes/PlayScene';
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'content',
-  width: 940,
+  width: 800,
   height: 800,
   resolution: 1,
   backgroundColor: '#EDEEC9',
@@ -13,7 +13,7 @@ const config: Phaser.Types.Core.GameConfig = {
     TestScene
   ],
   render: {
-    antialias: false
+    antialias: false,
   },
   physics: {
     default: 'arcade',

@@ -90,10 +90,10 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
       if (transition) {
         currentStateName = transition.state;
         const { init } = states[currentStateName];
-        init && init();
+        init && init(data);
       } else {
         const { tick } = states[currentStateName];
-        tick && tick();
+        tick && tick(data);
       }
       return machine;
     },
