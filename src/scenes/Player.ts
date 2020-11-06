@@ -1,15 +1,29 @@
+import { StateMachine, TStateMachine } from '../state/StateMachine';
+
 const PLAYER_KEY = 'player';
 const asset = (path: string) => `/assets/${path}`;
 
-const RUN_VELOCITY = 250;
-const JUMP_VELOCITY = 500;
+const RUN_VELOCITY = 300;
+const JUMP_VELOCITY = 1000;
+
+type PlayerStateData = {
+  cursors: Phaser.Types.Input.Keyboard.CursorKeys
+};
 
 class Player {
   public scene: Phaser.Scene;
   public sprite: Phaser.Physics.Arcade.Sprite;
+  public state: {
+    direction: TStateMachine<PlayerStateData>;
+    action: TStateMachine<PlayerStateData>;
+  }
 
   constructor(scene) {
     this.scene = scene;
+    this.state = {
+      direction: {},
+      action: {},
+    };
   }
 
   preload(): void {
@@ -19,8 +33,8 @@ class Player {
   create(): void {
     const sprite = this.sprite = this.scene.physics.add.sprite(150, 50, PLAYER_KEY, 'idle_1.png');
     sprite.debugShowVelocity = true;
+    sprite.setScale(3);
 
-    sprite.setScale(2);
     this.scene.anims.create({
       key: 'walk',
       frameRate: 6,
@@ -39,7 +53,30 @@ class Player {
       repeat: -1,
       frames: this.getFrames('jump_', 2),
     });
-    this.sprite.anims.play('walk');
+
+    this.state.direction = <TStateMachine<PlayerStateData>>StateMachine('right')
+      .transitionTo('left').when((data: PlayerStateData) => data.cursors.left.isDown).andThen(() => sprite.flipX = true)
+      .state('left').transitionTo('right').when((data: PlayerStateData) => data.cursors.right.isDown).andThen(() => sprite.flipX = false);
+
+    const noDirectionPressed = (data: PlayerStateData) => !data.cursors.right.isDown && !data.cursors.left.isDown && !data.cursors.up.isDown;
+    const isOnGround = () => sprite.body.touching.down || sprite.body.blocked.down;
+    const shouldJump = (data: PlayerStateData) => data.cursors.up.isDown && isOnGround();
+    const leftOrRightIsPressed = (data: PlayerStateData) => data.cursors.right.isDown || data.cursors.left.isDown;
+
+    this.state.action = <TStateMachine<PlayerStateData>>StateMachine('idle')
+      .andThen(() => sprite.anims.play('idle'))
+      .transitionTo('jump').when(shouldJump)
+      .transitionTo('walk').when(leftOrRightIsPressed)
+
+      .state('walk').andThen(() => sprite.anims.play('walk'))
+      .transitionTo('idle').when(noDirectionPressed)
+      .transitionTo('jump').when(shouldJump)
+
+      .state('jump').andThen(() => this.sprite.anims.play('jump', true))
+      // TODO: when on ground?
+      .transitionTo('idle').when((data: PlayerStateData) => noDirectionPressed(data) && isOnGround())
+      .transitionTo('walk').when((data: PlayerStateData) => leftOrRightIsPressed(data) && isOnGround())
+      .init();
   }
 
   private getFrames(prefix, end) {
@@ -59,18 +96,16 @@ class Player {
     delta: number,
     cursors: Phaser.Types.Input.Keyboard.CursorKeys
   ) {
-    // this.sprite.anims.play('walk');
+    // TODO: use state machine for movement
+    this.state.direction.process({ cursors });
+    this.state.action.process({ cursors });
     this.sprite.setVelocityX(0);
+
 		if (cursors.left.isDown) {
       this.sprite.setVelocityX(-RUN_VELOCITY);
 		}
 		if (cursors.right.isDown) {
       this.sprite.setVelocityX(RUN_VELOCITY);
-      // this.sprite.setFrame('walk_1.png');
-      // this.sprite.anims.play('walk');
-		}
-		if (cursors.down.isDown) {
-			this.sprite.y += 5;
 		}
 		if (cursors.up.isDown) {
       this.sprite.setVelocityY(-JUMP_VELOCITY);

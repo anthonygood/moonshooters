@@ -18,11 +18,8 @@ class TestScene extends Phaser.Scene {
 	}
 
 	preload() {
-		// For some reason JSON tileset didn't work?
 		this.load.tilemapTiledJSON(MAP_KEY, asset('tilemaps/Test Map.json'));
 		this.load.image(LEVEL_KEY, asset('tilemaps/Block.png'));
-		// this.load.multiatlas(PLAYER_KEY, asset('sprites/bojo_sprites.json'), asset('sprites'));
-
 		this.player.preload();
 	}
 
