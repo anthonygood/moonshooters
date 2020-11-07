@@ -1,4 +1,4 @@
-import Player from './Player';
+import Player from '../entities/Player';
 
 const asset = (path: string) => `/assets/${path}`;
 
