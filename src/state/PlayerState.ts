@@ -29,7 +29,7 @@ class PlayerState {
     this.direction = <PlayerState.Machine>StateMachine('right')
       .transitionTo('left').when(helpers.onGroundAnd(data => data.cursors.left.isDown))
       .andThen(() => sprite.flipX = true)
-      .state('left').transitionTo('right').when(helpers.onGroundAnd(data => data.cursors.left.isDown))
+      .state('left').transitionTo('right').when(helpers.onGroundAnd(data => data.cursors.right.isDown))
       .andThen(() => sprite.flipX = false);
 
     // Idle state
