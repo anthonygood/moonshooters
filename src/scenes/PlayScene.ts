@@ -1,4 +1,5 @@
 import Player from '../entities/Player';
+import Fog from '../entities/Fog';
 
 const asset = (path: string) => `/assets/${path}`;
 
@@ -32,11 +33,16 @@ class TestScene extends Phaser.Scene {
 		const map = this.map = this.make.tilemap({ key: MAP_KEY });
 		const tileset = map.addTilesetImage('Test Tiles', LEVEL_KEY);
 		const scrapers = map.addTilesetImage('Skyscrapers', BKG_KEY);
-		const l = map.createStaticLayer('Back scrapers', scrapers);
-		const m = map.createStaticLayer('Scrapers', scrapers);
+		const distantBackground = map.createStaticLayer('Back scrapers', scrapers, 0, -200);
+		new Fog(this).add('fog1');
+		const midBackground = map.createStaticLayer('Scrapers', scrapers, 0, -200);
+		new Fog(this).add('fog2');
 
-		m.scrollFactorX = 0.3;
-		l.scrollFactorX = 0.2;
+
+		midBackground.scrollFactorX = 0.3;
+		midBackground.scrollFactorY = 0.3;
+		distantBackground.scrollFactorX = 0.2;
+		distantBackground.scrollFactorY = 0.2;
 
 		const layer = map.createStaticLayer('World', tileset);
 		layer.setCollisionByProperty({ collides: true });
@@ -67,10 +73,6 @@ class TestScene extends Phaser.Scene {
 			this.player.sprite.setPosition(this.player.spawn[0], 0);
 		}
 		this.player.update(time, delta, this.cursors);
-
-		// this.mountainsBack.tilePosition.x -= 0.05;
-		// this.mountainsMid1.tilePosition.x -= 0.3;
-		// this.mountainsMid2.tilePosition.x -= 0.75; 
 	}
 }
 
