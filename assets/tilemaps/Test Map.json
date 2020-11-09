@@ -79,12 +79,12 @@
         {
          "columns":14,
          "firstgid":2,
-         "image":"..\/..\/..\/skyscraper tiles.png",
-         "imageheight":288,
-         "imagewidth":448,
-         "margin":0,
+         "image":"skyscraper_tiles_extruded.png",
+         "imageheight":306,
+         "imagewidth":476,
+         "margin":1,
          "name":"Skyscrapers",
-         "spacing":0,
+         "spacing":2,
          "tilecount":126,
          "tileheight":32,
          "tilewidth":32

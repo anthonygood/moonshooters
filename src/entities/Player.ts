@@ -26,9 +26,9 @@ class Player {
   create(): void {
     const [x, y] = this.spawn;
     const sprite = this.sprite = this.scene.physics.add.sprite(x, y, PLAYER_KEY, 'idle_1.png');
-    // sprite.setDebug(false, false, 1);
-    sprite.setScale(3);
-    sprite.setMaxVelocity(700, 1000);
+    sprite.setDebug(false, false, 1);
+    sprite.setScale(2);
+    sprite.setMaxVelocity(400, 1000);
     sprite.body.setSize(8, 30);
 
     this.scene.anims.create({

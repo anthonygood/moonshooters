@@ -22,7 +22,7 @@ class TestScene extends Phaser.Scene {
 	preload() {
 		this.load.tilemapTiledJSON(MAP_KEY, asset('tilemaps/Test Map.json'));
 		this.load.image(LEVEL_KEY, asset('tilemaps/Block.png'));
-		this.load.image(BKG_KEY, asset('tilemaps/skyscraper tiles.png'));
+		this.load.image(BKG_KEY, asset('tilemaps/skyscraper_tiles_extruded.png'));
 		this.load.image(SKY_KEY, 'assets/sky.png');
 		this.player.preload();
 	}
@@ -32,8 +32,11 @@ class TestScene extends Phaser.Scene {
 		const map = this.map = this.make.tilemap({ key: MAP_KEY });
 		const tileset = map.addTilesetImage('Test Tiles', LEVEL_KEY);
 		const scrapers = map.addTilesetImage('Skyscrapers', BKG_KEY);
-		map.createStaticLayer('Back scrapers', scrapers);
-		map.createStaticLayer('Scrapers', scrapers);
+		const l = map.createStaticLayer('Back scrapers', scrapers);
+		const m = map.createStaticLayer('Scrapers', scrapers);
+
+		m.scrollFactorX = 0.3;
+		l.scrollFactorX = 0.2;
 
 		const layer = map.createStaticLayer('World', tileset);
 		layer.setCollisionByProperty({ collides: true });
@@ -51,11 +54,11 @@ class TestScene extends Phaser.Scene {
 
 		// debug
 		const debugGraphics = this.add.graphics().setAlpha(.75);
-		layer.renderDebug(debugGraphics, {
-			tileColor: null, // Colour of non-colliding tiles
-			collidingTileColor: new Phaser.Display.Color(255, 255, 255, 255), // Color of colliding tiles
-			faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
-		});
+		// layer.renderDebug(debugGraphics, {
+		// 	tileColor: null, // Colour of non-colliding tiles
+		// 	collidingTileColor: new Phaser.Display.Color(255, 255, 255, 255), // Color of colliding tiles
+		// 	faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
+		// });
 	}
 
 	update(time: number, delta: number) {
@@ -64,6 +67,10 @@ class TestScene extends Phaser.Scene {
 			this.player.sprite.setPosition(this.player.spawn[0], 0);
 		}
 		this.player.update(time, delta, this.cursors);
+
+		// this.mountainsBack.tilePosition.x -= 0.05;
+		// this.mountainsMid1.tilePosition.x -= 0.3;
+		// this.mountainsMid2.tilePosition.x -= 0.75; 
 	}
 }
 
