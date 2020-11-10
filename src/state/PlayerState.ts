@@ -1,5 +1,4 @@
 import { StateMachine, TStateMachine } from './StateMachine';
-import { Near } from '../entities/Player';
 
 function Helpers({ sprite, velocities }: PlayerState.Config) {
   const isOnGround = () => sprite.body.touching.down || sprite.body.blocked.down;
@@ -24,11 +23,10 @@ function Helpers({ sprite, velocities }: PlayerState.Config) {
       return canClimb(data) && data.cursors.up.isDown;
     },
     climb: (data: PlayerState.ProcessParams) => {
-      const velocity = velocities.run;
+      const velocity = velocities.run / 4;
       let change = 0;
       if (data.cursors.up.isDown) change -= velocity;
       if (data.cursors.down.isDown) change += velocity;
-      sprite.setGravityY(0);
       sprite.setVelocityY(change);
     }
   };
@@ -42,7 +40,7 @@ class PlayerState {
     const helpers = Helpers(config);
     const { sprite, velocities } = config;
 
-    this.direction = <PlayerState.Machine>StateMachine('right')
+    const direction = this.direction = <PlayerState.Machine>StateMachine('right')
       .transitionTo('left').when(helpers.onGroundAnd(data => data.cursors.left.isDown))
       .andThen(() => sprite.flipX = true)
       .state('left').transitionTo('right').when(helpers.onGroundAnd(data => data.cursors.right.isDown))
@@ -53,7 +51,6 @@ class PlayerState {
       .andThen(() => {
         sprite.anims.play('idle');
         sprite.setAccelerationX(0);
-        // sprite.setAccelerationY(0);
       })
       .tick(() => sprite.setVelocityX(0))
       .transitionTo('jump').when(helpers.shouldJump)
@@ -79,12 +76,16 @@ class PlayerState {
     // Climb state
       .state('climb')
       .andThen(() => {
-        // play climbing animation...
-        console.log('start climb')
+        // TODO: play climbing animation...
         sprite.anims.play('jump', true);
-        sprite.setVelocityY(-10);
       })
       .tick(helpers.climb)
+      .forAtLeast(1)
+      .exit(() => {
+        sprite.setVelocity(0);
+        const forwardOrBack = direction.currentState() === 'right' ? +10 : -10;
+        sprite.setX(sprite.x + forwardOrBack);
+      })
       .transitionTo('idle').when((data: PlayerState.ProcessParams) => {
         console.log('idle: ', !helpers.canClimb(data),
         helpers.isOnGround());

@@ -1,8 +1,9 @@
 type State<TData> = {
   name: string;
   transitions: PredicateTransition<TData>[];
-  init?: Function;
-  tick?: Function;
+  init: Function;
+  tick: Function;
+  exit: Function;
   minTicks: number;
   tickCount: number;
 }
@@ -22,6 +23,7 @@ export type TStateMachine<TData> = {
   or: (predicate: Predicate<TData>) => TStateMachine<TData>;
   andThen: (init: Function) => TStateMachine<TData>;
   tick: (tick: Function) => TStateMachine<TData>;
+  exit: (exit: Function) => TStateMachine<TData>;
   forAtLeast: (count: number) => TStateMachine<TData>;
   state: (stateName: string) => TStateMachine<TData>;
 
@@ -37,7 +39,9 @@ const State = <TData>(name: string, minTicks = 0): State<TData> => {
     transitions: [],
     minTicks,
     tickCount: 0,
+    init: () => {},
     tick: () => {},
+    exit: () => {},
   }
 };
 
@@ -83,6 +87,10 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
       destState.tick = fn;
       return machine;
     },
+    exit: (fn: Function) => {
+      destState.exit = fn;
+      return machine;
+    },
     forAtLeast: count => {
       destState.minTicks = count;
       return machine;
@@ -107,6 +115,7 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
       const transition = transitions.find(transition => transition.predicate(data));
 
       if (transition && tickCount >= minTicks) {
+        currentState.exit(data);
         const nextState = states[transition.state];
         nextState.tickCount = 0; // re-initialise
         nextState.init && nextState.init(data);
