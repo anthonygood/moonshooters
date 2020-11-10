@@ -1,11 +1,15 @@
 import { StateMachine, TStateMachine } from './StateMachine';
+import { Near } from '../entities/Player';
 
 function Helpers({ sprite, velocities }: PlayerState.Config) {
   const isOnGround = () => sprite.body.touching.down || sprite.body.blocked.down;
+  const canClimb = (data: PlayerState.ProcessParams) => {
+    return data.near.climbable
+  };
   return {
     isOnGround,
     noDirectionPressed: (data: PlayerState.ProcessParams) => !data.cursors.right.isDown && !data.cursors.left.isDown && !data.cursors.up.isDown,
-    shouldJump: (data: PlayerState.ProcessParams) => data.cursors.up.isDown && isOnGround(),
+    shouldJump: (data: PlayerState.ProcessParams) => data.cursors.up.isDown && isOnGround() && !canClimb(data),
     leftOrRightIsPressed: (data: PlayerState.ProcessParams) => data.cursors.right.isDown || data.cursors.left.isDown,
     onGroundAnd: (fn: (any) => boolean) => (data: PlayerState.ProcessParams) => isOnGround() && fn(data),
     moveLeftRight: (data: PlayerState.ProcessParams) => {
@@ -15,6 +19,18 @@ function Helpers({ sprite, velocities }: PlayerState.Config) {
       if (data.cursors.left.isDown) velocity -= change;
       sprite.setAccelerationX(velocity);
     },
+    canClimb,
+    shouldClimb: (data: PlayerState.ProcessParams) => {
+      return canClimb(data) && data.cursors.up.isDown;
+    },
+    climb: (data: PlayerState.ProcessParams) => {
+      const velocity = velocities.run;
+      let change = 0;
+      if (data.cursors.up.isDown) change -= velocity;
+      if (data.cursors.down.isDown) change += velocity;
+      sprite.setGravityY(0);
+      sprite.setVelocityY(change);
+    }
   };
 };
 
@@ -37,16 +53,19 @@ class PlayerState {
       .andThen(() => {
         sprite.anims.play('idle');
         sprite.setAccelerationX(0);
+        // sprite.setAccelerationY(0);
       })
       .tick(() => sprite.setVelocityX(0))
       .transitionTo('jump').when(helpers.shouldJump)
       .transitionTo('walk').when(helpers.leftOrRightIsPressed)
+      .transitionTo('climb').when(helpers.shouldClimb)
 
     // Walk state
       .state('walk').andThen(() => sprite.anims.play('walk'))
       .tick(helpers.moveLeftRight)
       .transitionTo('idle').when(helpers.noDirectionPressed)
       .transitionTo('jump').when(helpers.shouldJump)
+      .transitionTo('climb').when(helpers.shouldClimb)
 
     // Jump state
       .state('jump').andThen(() => {
@@ -56,6 +75,21 @@ class PlayerState {
       .tick(helpers.moveLeftRight)
       .transitionTo('idle').when(helpers.onGroundAnd(helpers.noDirectionPressed))
       .transitionTo('walk').when(helpers.onGroundAnd(helpers.leftOrRightIsPressed))
+
+    // Climb state
+      .state('climb')
+      .andThen(() => {
+        // play climbing animation...
+        console.log('start climb')
+        sprite.anims.play('jump', true);
+        sprite.setVelocityY(-10);
+      })
+      .tick(helpers.climb)
+      .transitionTo('idle').when((data: PlayerState.ProcessParams) => {
+        console.log('idle: ', !helpers.canClimb(data),
+        helpers.isOnGround());
+        return !helpers.canClimb(data) || helpers.isOnGround()
+      })
       .init();
   }
 
@@ -67,7 +101,10 @@ class PlayerState {
 
 namespace PlayerState {
   export interface ProcessParams {
-    cursors: Phaser.Types.Input.Keyboard.CursorKeys
+    cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+    near: {
+      climbable: boolean;
+    };
   };
 
   export type Machine = TStateMachine<ProcessParams>;

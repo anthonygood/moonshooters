@@ -8,15 +8,23 @@ const VELOCITY = {
   JUMP: 1000,
 };
 
+export interface Near {
+  climbable: boolean;
+}
+
 class Player {
   // TODO: Define in map
   readonly spawn = [150, 50];
   public scene: Phaser.Scene;
   public sprite: Phaser.Physics.Arcade.Sprite;
   public state: PlayerState;
+  private near: Near;
 
   constructor(scene) {
     this.scene = scene;
+    this.near = {
+      climbable: false,
+    };
   }
 
   preload(): void {
@@ -50,7 +58,7 @@ class Player {
       frames: this.getFrames('jump_', 2),
     });
 
-    this.state = new PlayerState({ sprite, velocities: { jump: VELOCITY.JUMP, run: VELOCITY.RUN} })
+    this.state = new PlayerState({ sprite, near: this.near, velocities: { jump: VELOCITY.JUMP, run: VELOCITY.RUN} })
   }
 
   private getFrames(prefix, end) {
@@ -70,8 +78,14 @@ class Player {
     delta: number,
     cursors: Phaser.Types.Input.Keyboard.CursorKeys
   ) {
-    this.state.process({ cursors });
-	}
+    this.state.process({ cursors, near: this.near });
+    // Move into state machine
+    this.near.climbable = false;
+  }
+
+  nearClimbable() {
+    this.near.climbable = true;
+  }
 }
 
 export default Player;

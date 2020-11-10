@@ -22,7 +22,7 @@ class TestScene extends Phaser.Scene {
 
 	preload() {
 		this.load.tilemapTiledJSON(MAP_KEY, asset('tilemaps/Test Map.json'));
-		this.load.image(LEVEL_KEY, asset('tilemaps/Block.png'));
+		this.load.image(LEVEL_KEY, asset('tilemaps/platforms_extruded.png'));
 		this.load.image(BKG_KEY, asset('tilemaps/skyscraper_tiles_extruded.png'));
 		this.load.image(SKY_KEY, 'assets/sky.png');
 		this.player.preload();
@@ -31,7 +31,7 @@ class TestScene extends Phaser.Scene {
 	create() {
 		const sky = this.add.image(0, 0, SKY_KEY).setOrigin(0, 0);
 		const map = this.map = this.make.tilemap({ key: MAP_KEY });
-		const tileset = map.addTilesetImage('Test Tiles', LEVEL_KEY);
+		const tileset = map.addTilesetImage('Platforms', LEVEL_KEY);
 		const scrapers = map.addTilesetImage('Skyscrapers', BKG_KEY);
 		const distantBackground = map.createStaticLayer('Back scrapers', scrapers, 0, -200);
 		new Fog(this).add('fog1');
@@ -59,12 +59,16 @@ class TestScene extends Phaser.Scene {
 		this.cameras.main.startFollow(this.player.sprite, false);
 
 		// debug
+		window.game = this;
+		window.game.layer = layer;
+		const ladderIndices = layer.filterTiles(_ => _.properties.climbable).map(_ => _.index);
+		layer.setTileIndexCallback(ladderIndices, this.player.nearClimbable, this.player)
 		const debugGraphics = this.add.graphics().setAlpha(.75);
-		// layer.renderDebug(debugGraphics, {
-		// 	tileColor: null, // Colour of non-colliding tiles
-		// 	collidingTileColor: new Phaser.Display.Color(255, 255, 255, 255), // Color of colliding tiles
-		// 	faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
-		// });
+		layer.renderDebug(debugGraphics, {
+			tileColor: null, // Colour of non-colliding tiles
+			collidingTileColor: new Phaser.Display.Color(255, 255, 255, 255), // Color of colliding tiles
+			faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
+		});
 	}
 
 	update(time: number, delta: number) {
