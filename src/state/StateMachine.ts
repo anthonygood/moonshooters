@@ -56,10 +56,16 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
       return machine;
     },
     when: predicate => {
+      if (homeState.name === destState.name) {
+        throw new TypeError(`Cannot transition to same state: '${destState.name}'`)
+      }
       homeState.transitions.push({ predicate, state: destState.name });
       return machine;
     },
     or: predicate => {
+      if (homeState.name === destState.name) {
+        throw new TypeError(`Cannot transition to same state: '${destState.name}'`)
+      }
       homeState.transitions.push({ predicate, state: destState.name });
       return machine;
     },
@@ -76,11 +82,11 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
       if (!nominatedState) {
         throw new TypeError(`'${stateName}' not found in states: ${Object.keys(states)}`)
       }
-      homeState = nominatedState;
+      homeState = destState = nominatedState;
       return machine;
     },
     init: () => {
-      const { init } = states[currentStateName];
+      const { init } = states[initialState];
       init();
       return machine;
     },

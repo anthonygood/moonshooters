@@ -135,4 +135,50 @@ describe('StateMachine', () => {
       expect(tick2).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('chaining state transitions', () => {
+    it('can use .state() to declare different transitions', () => {
+      const idleInit = jest.fn();
+      const walkInit = jest.fn();
+      const walkTick = jest.fn();
+      const neverCall = jest.fn();
+      const machine = StateMachine<any>('idle').andThen(idleInit)
+        .transitionTo('walk').when(data => data.walk)
+        .transitionTo('never').when(() => false) // Never transition
+        .state('walk').andThen(walkInit).tick(walkTick)
+        .transitionTo('idle').when(data => !data.walk)
+        .state('never').andThen(neverCall)
+        .init();
+
+      expect(machine.currentState()).toBe('idle');
+
+      machine.process({ walk: true });
+      expect(machine.currentState()).toBe('walk');
+      expect(idleInit).toHaveBeenCalledTimes(1);
+      expect(walkInit).toHaveBeenCalledTimes(1);
+      expect(walkTick).not.toHaveBeenCalled();
+
+      machine.process({ walk: true });
+      expect(machine.currentState()).toBe('walk');
+      expect(idleInit).toHaveBeenCalledTimes(1);
+      expect(walkInit).toHaveBeenCalledTimes(1);
+      expect(walkTick).toHaveBeenCalledTimes(1);
+      expect(neverCall).not.toHaveBeenCalled();
+
+      machine.process({ walk: false });
+      expect(machine.currentState()).toBe('idle');
+      expect(idleInit).toHaveBeenCalledTimes(2);
+      expect(walkInit).toHaveBeenCalledTimes(1);
+      expect(walkTick).toHaveBeenCalledTimes(1);
+      expect(neverCall).not.toHaveBeenCalled();
+    });
+
+    it('throws if you declare invalid transition', () => {
+      expect(() => {
+        StateMachine<any>('idle')
+          .transitionTo('walk')
+          .state('walk').when(data => data.walk).andThen(jest.fn());
+      }).toThrow("Cannot transition to same state: 'walk'");
+    });
+  });
 });
