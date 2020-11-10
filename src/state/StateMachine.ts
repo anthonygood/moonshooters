@@ -1,8 +1,10 @@
-type State<Transition> = {
+type State<TData> = {
   name: string;
-  transitions: Transition[];
+  transitions: PredicateTransition<TData>[];
   init?: Function;
   tick?: Function;
+  minTicks: number;
+  tickCount: number;
 }
 
 type StateDict<TData> = { [Key: string]: State<TData> }
@@ -20,6 +22,7 @@ export type TStateMachine<TData> = {
   or: (predicate: Predicate<TData>) => TStateMachine<TData>;
   andThen: (init: Function) => TStateMachine<TData>;
   tick: (tick: Function) => TStateMachine<TData>;
+  forAtLeast: (count: number) => TStateMachine<TData>;
   state: (stateName: string) => TStateMachine<TData>;
 
   // Top-level controls
@@ -28,13 +31,26 @@ export type TStateMachine<TData> = {
   init: () => TStateMachine<TData>;
 };
 
+const State = <TData>(name: string, minTicks = 0): State<TData> => {
+  return {
+    name,
+    transitions: [],
+    minTicks,
+    tickCount: 0,
+    tick: () => {},
+  }
+};
+
 export const StateMachine = <TData>(initialState: string): TStateMachine<TData> => {
-  type Transition = PredicateTransition<TData>;
-  const states: StateDict<Transition> = {
-    [initialState]: {
-      transitions: [],
-      name: initialState,
-    },
+  // type Transition = PredicateTransition<TData>;
+  const states: StateDict<TData> = {
+    // [initialState]: {
+    //   transitions: [],
+    //   name: initialState,
+    //   minTicks: 0,
+    //   tickCount: 0,
+    // },
+    [initialState]: State(initialState),
   };
 
   // states used by the monad when building state graph
@@ -48,10 +64,13 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
         throw new TypeError(`Cannot transition to same state: '${stateName}'`)
       }
 
-      destState = states[stateName] = states[stateName] || {
-        name: stateName,
-        transitions: [],
-      };
+      // destState = states[stateName] = states[stateName] || {
+      //   name: stateName,
+      //   transitions: [],
+      //   minTicks: 0,
+      //   tickCount: 0,
+      // };
+      destState = states[stateName] = states[stateName] || State(stateName);
 
       return machine;
     },
@@ -77,6 +96,10 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
       destState.tick = fn;
       return machine;
     },
+    forAtLeast: count => {
+      destState.minTicks = count;
+      return machine;
+    },
     state: stateName => {
       const nominatedState = states[stateName];
       if (!nominatedState) {
@@ -91,15 +114,19 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
       return machine;
     },
     process: data => {
+      const currentState = states[currentStateName];
+      const { tickCount, minTicks } = currentState;
       const transitions: PredicateTransition<TData>[] = states[currentStateName].transitions;
       const transition = transitions.find(transition => transition.predicate(data));
-      if (transition) {
-        currentStateName = transition.state;
-        const { init } = states[currentStateName];
-        init && init(data);
+
+      if (transition && tickCount >= minTicks) {
+        const nextState = states[transition.state];
+        nextState.tickCount = 0; // re-initialise
+        nextState.init && nextState.init(data);
+        currentStateName = nextState.name;
       } else {
-        const { tick } = states[currentStateName];
-        tick && tick(data);
+        currentState.tick(data);
+        currentState.tickCount++;
       }
       return machine;
     },
