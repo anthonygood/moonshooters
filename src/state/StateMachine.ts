@@ -42,14 +42,7 @@ const State = <TData>(name: string, minTicks = 0): State<TData> => {
 };
 
 export const StateMachine = <TData>(initialState: string): TStateMachine<TData> => {
-  // type Transition = PredicateTransition<TData>;
   const states: StateDict<TData> = {
-    // [initialState]: {
-    //   transitions: [],
-    //   name: initialState,
-    //   minTicks: 0,
-    //   tickCount: 0,
-    // },
     [initialState]: State(initialState),
   };
 
@@ -64,12 +57,6 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
         throw new TypeError(`Cannot transition to same state: '${stateName}'`)
       }
 
-      // destState = states[stateName] = states[stateName] || {
-      //   name: stateName,
-      //   transitions: [],
-      //   minTicks: 0,
-      //   tickCount: 0,
-      // };
       destState = states[stateName] = states[stateName] || State(stateName);
 
       return machine;
