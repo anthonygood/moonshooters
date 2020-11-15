@@ -40,20 +40,27 @@ const COLOURS = {
 class NPC extends Player {
   static readonly layers = [
     // TODO: nest sprite JSON according to its layer?
-    [{ key: 'trousers',  optional: false, json: spriteJson('trousers:dark'), tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] }],
-    [{ key: 'shirt',     optional: false, json: spriteJson('shirt'),         tints: [COLOURS.white, ...Object.values(COLOURS.shirt), COLOURS.hair.ginger] }],
-    [{ key: 'tie',       optional: true, json: spriteJson('tie'),            tints: [COLOURS.grey, COLOURS.green, ...Object.values(COLOURS.tie)] }],
-    [{ key: 'jacket',    optional: false, json: spriteJson('jacket'),        tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] }],
-    [{ key: 'headhands', optional: false, json: spriteJson('headhands'),     tints: Object.values(COLOURS.skin) }],
+    [
+      { key: 'trousers:dark',  json: spriteJson('trousers:dark'), tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] },
+      { key: 'trousers:light', json: spriteJson('trousers:light'), tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] }
+    ],
+    [{ key: 'shirt', json: spriteJson('shirt:full'), tints: [COLOURS.white, ...Object.values(COLOURS.shirt), COLOURS.hair.ginger] }],
+    [
+      { key: 'tie',        optional: true, json: spriteJson('tie'),        tints: [COLOURS.grey, COLOURS.green, ...Object.values(COLOURS.tie)] },
+      { key: 'tie:skinny', optional: true, json: spriteJson('tie:skinny'), tints: [COLOURS.grey, COLOURS.green, ...Object.values(COLOURS.tie)] }
+
+    ],
+    [{ key: 'jacket',    optional: true, json: spriteJson('jacket'),    tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] }],
+    [{ key: 'headhands', json: spriteJson('headhands'), tints: Object.values(COLOURS.skin) }],
     // Mouth
     [
-      { key: 'mouth:plain', optional: false, json: spriteJson('mouth:plain') },
+      { key: 'mouth:plain', json: spriteJson('mouth:plain'), blendMode: 2 /* MULTIPLY */, tints: [COLOURS.skin.pink] }, // https://stackoverflow.com/questions/22434240/how-to-use-blending-in-phaserjs
     ],
     // Eyes
     [
-      { key: 'eyes:big',    optional: false, json: spriteJson('eyes:big') },
-      { key: 'eyes:big',    optional: false, json: spriteJson('eyes:small') },
-      { key: 'eyes:shifty', optional: false, json: spriteJson('eyes:shifty') },
+      { key: 'eyes:big',    json: spriteJson('eyes:big') },
+      { key: 'eyes:small',  json: spriteJson('eyes:small') },
+      { key: 'eyes:shifty', json: spriteJson('eyes:shifty') },
     ],
     // Hair
     [
@@ -66,23 +73,16 @@ class NPC extends Player {
   create() {
     super.create();
     this.tintSprites();
-    this.loopTint();
     this.loopSprites();
   }
 
   tintSprites() {
     this.container.iterate(sprite => {
-      const { tints } = this.findSprite(sprite);
+      const { blendMode, tints } = this.findSprite(sprite);
       const tint = sample(tints);
       tint && sprite.setTint(tint);
+      blendMode && (sprite.blendMode = blendMode);
     });
-  }
-
-  loopTint() {
-    setTimeout(() => {
-      this.tintSprites();
-      this.loopTint();
-    }, 500)
   }
 
   loopSprites() {
@@ -93,8 +93,9 @@ class NPC extends Player {
       this.container.iterate(sprite => {
         sprite.play(`${sprite.name}/${anim}`, true);
       });
+      this.tintSprites();
       this.loopSprites();
-    }, 1000);
+    }, 3000);
   }
 
   findSprite({ name }) {

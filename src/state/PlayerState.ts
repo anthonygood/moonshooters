@@ -2,11 +2,10 @@ import { StateMachine, TStateMachine } from './StateMachine';
 import { Physics } from 'phaser';
 
 function Helpers({ container, velocities }: PlayerState.Config) {
-  const setAnimation = name => {
+  const setAnimation = animName => {
     container.iterate((sprite) => {
-      const spriteKey = sprite.data.get('key');
       // TODO: validate animation name?
-      sprite.play(`${spriteKey}/${name}`, true);
+      sprite.play(`${sprite.name}/${animName}`, true);
     });
   };
 
