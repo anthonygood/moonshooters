@@ -1,21 +1,5 @@
 import PlayerState from '../state/PlayerState';
-import spriteJson from '../../assets/sprites/bojo_frames';
-import { createFramesForKey } from '../animations';
-
-const PLAYER_KEY = 'boris';
-const asset = (path: string) => `/assets/${path}`;
-
-const ANIMATIONS = {
-  suit: {
-    dark: 'suit/dark',
-  },
-  mask: 'mask',
-};
-
-const COLOURS = {
-  green: 0x89F94F,
-  blue: 0x4FE1FC,
-};
+import { createFramesForKey, spriteJson } from '../animations';
 
 const VELOCITY = {
   run: 1600,
@@ -34,21 +18,20 @@ class Player {
   public container: Phaser.GameObjects.Container;
   public state: PlayerState;
   private near: Near;
-  private sprites: object;
+  static readonly sprites: object = {
+    boris: spriteJson('bojo_frames'),
+  };
 
   constructor(scene) {
     this.scene = scene;
     this.near = {
       climbable: false,
     };
-    this.sprites = {
-      // TODO: layers for Boris' sprite
-      boris: spriteJson('bojo_frames'),
-    };
   }
 
   forEachSprite(fn) {
-    Object.entries(this.sprites).forEach(fn);
+    // @ts-ignore
+    Object.entries(this.constructor.sprites).forEach(fn);
   }
 
   preload(): void {
@@ -64,7 +47,9 @@ class Player {
     this.forEachSprite(([key]) => {
       createFramesForKey(this.scene)(key);
       const sprite = this.scene.add.sprite(16, 48, key)
-        .setData('key', key)
+        // .setData('key', key)
+        .setName(key)
+        // .setData('name', key)
         .setScale(3);
 
       container.add(sprite);
