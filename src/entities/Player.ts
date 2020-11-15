@@ -2,7 +2,7 @@ import PlayerState from '../state/PlayerState';
 import spriteJson from '../../assets/sprites/bojo_frames';
 import { createFramesForKey } from '../animations';
 
-const PLAYER_KEY = 'player';
+const PLAYER_KEY = 'boris';
 const asset = (path: string) => `/assets/${path}`;
 
 const ANIMATIONS = {
@@ -34,39 +34,47 @@ class Player {
   public container: Phaser.GameObjects.Container;
   public state: PlayerState;
   private near: Near;
+  private sprites: object;
 
   constructor(scene) {
     this.scene = scene;
     this.near = {
       climbable: false,
     };
+    this.sprites = {
+      // TODO: layers for Boris' sprite
+      boris: spriteJson('bojo_frames'),
+    };
+  }
+
+  forEachSprite(fn) {
+    Object.entries(this.sprites).forEach(fn);
   }
 
   preload(): void {
-    const boris = spriteJson('bojo_frames');
-    // TODO: layers for Boris' sprite
-    // @ts-ignore
-    this.scene.load.multiatlas(PLAYER_KEY, boris, asset('sprites'));
+    this.forEachSprite(([key, json]) => {
+      this.scene.load.multiatlas(key, json, '/assets/sprites');
+    })
   }
 
   create(): void {
     const [x, y] = this.spawn;
-    const sprite = this.scene.add.sprite(16, 48, PLAYER_KEY);
-
-    sprite.setData('key', PLAYER_KEY)
-      .setScale(3);
-
     const container = this.container = this.scene.add.container(x, y);
-    container.add([sprite]);
+
+    this.forEachSprite(([key]) => {
+      createFramesForKey(this.scene)(key);
+      const sprite = this.scene.add.sprite(16, 48, key)
+        .setData('key', key)
+        .setScale(3);
+
+      container.add(sprite);
+    });
 
     this.scene.physics.world.enable(container);
 
     (container.body as Phaser.Physics.Arcade.Body)
       .setMaxVelocity(400, 1000)
       .setSize(32, 96);
-
-    const spriteKeys = [PLAYER_KEY];
-    spriteKeys.forEach(createFramesForKey(this.scene));
 
     this.state = new PlayerState({ container, velocities: VELOCITY });
   }
