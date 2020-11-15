@@ -53,6 +53,7 @@ class Player {
       .setSize(32, 96);
 
     this.createSprites();
+    this.addSprites();
     this.state = new PlayerState({ container, velocities: VELOCITY });
   }
 
@@ -69,12 +70,19 @@ class Player {
   createSprites() {
     this.forEachSprite(({ key }) => {
       createFramesForKey(this.scene)(key);
-      const sprite = this.scene.add.sprite(16, 48, key)
-        .setName(key)
-        .setScale(3);
-
-      this.container.add(sprite);
     });
+  }
+
+  addSprites() {
+    this.forEachSprite(this.addSprite);
+  }
+
+  addSprite = ({ key }) => {
+    const sprite = this.scene.add.sprite(16, 48, key)
+      .setName(key)
+      .setScale(3);
+
+    this.container.add(sprite);
   }
 
   nearClimbable() {
