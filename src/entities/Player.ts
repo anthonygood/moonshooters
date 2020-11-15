@@ -31,6 +31,7 @@ class Player {
   readonly spawn = [50, 50];
   public scene: Phaser.Scene;
   public sprite: Phaser.Physics.Arcade.Sprite;
+  public container: Phaser.GameObjects.Container;
   public state: PlayerState;
   private near: Near;
 
@@ -44,25 +45,27 @@ class Player {
   preload(): void {
     const boris = spriteJson('bojo_frames');
     // TODO: layers for Boris' sprite
+    // @ts-ignore
     this.scene.load.multiatlas(PLAYER_KEY, boris, asset('sprites'));
   }
 
   create(): void {
     const [x, y] = this.spawn;
-    const sprite = this.sprite = this.scene.add.sprite(16, 48, PLAYER_KEY, 'idle_1.png');
+    const sprite = this.scene.add.sprite(16, 48, PLAYER_KEY, 'idle_1.png');
 
-    sprite.setData('key', PLAYER_KEY);
-    sprite.setScale(3);
+    sprite.setData('key', PLAYER_KEY)
+      .setScale(3);
 
     const container = this.container = this.scene.add.container(x, y);
     container.add([sprite]);
+
     this.scene.physics.world.enable(container);
-    container.body.setMaxVelocity(400, 1000);
-    container.body.setSize(32, 96);
 
-    // TODO: Set animations for each layer
+    (container.body as Phaser.Physics.Arcade.Body)
+      .setMaxVelocity(400, 1000)
+      .setSize(32, 96);
+
     const spriteKeys = [PLAYER_KEY];
-
     spriteKeys.forEach(createFramesForKey(this.scene));
 
     this.state = new PlayerState({ container, velocities: VELOCITY });
@@ -73,7 +76,7 @@ class Player {
     delta: number,
     cursors: Phaser.Types.Input.Keyboard.CursorKeys
   ) {
-    this.state.process({ cursors, near: this.near });
+    this.state.process({ cursors, near: this.near, time });
     // Move into state machine
     this.near.climbable = false;
     if (cursors.space.isDown) {

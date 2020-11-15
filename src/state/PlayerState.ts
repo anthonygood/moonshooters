@@ -90,7 +90,7 @@ class PlayerState {
     // Walk state
       .state('walk').andThen(() => helpers.setAnimation('walk'))
       .tick(helpers.moveLeftRight)
-      .transitionTo('idle').when(data => !data.cursors.left.isDown && !data.cursors.right.isDown)
+      .transitionTo('idle').when((data: PlayerState.ProcessParams) => !data.cursors.left.isDown && !data.cursors.right.isDown)
       .transitionTo('jump').when(helpers.shouldJump)
       .transitionTo('climb').when(helpers.shouldClimb)
 
