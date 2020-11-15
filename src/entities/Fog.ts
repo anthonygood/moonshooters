@@ -1,4 +1,7 @@
-const DEFAULT_COLOUR = '#74F0FB';
+const WHITE = '#FFFFFF';
+const DAY = '#74F0FB';
+const WARM = '#FF7300'
+const DEFAULT_COLOUR = DAY;
 const DEFAULT_OPACITY = 0.4;
 
 class Fog {

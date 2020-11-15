@@ -87,8 +87,6 @@ class PlayerState {
         sprite.setX(sprite.x + forwardOrBack);
       })
       .transitionTo('idle').when((data: PlayerState.ProcessParams) => {
-        console.log('idle: ', !helpers.canClimb(data),
-        helpers.isOnGround());
         return !helpers.canClimb(data) || helpers.isOnGround()
       })
       .init();

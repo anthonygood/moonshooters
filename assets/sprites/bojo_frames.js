@@ -1,7 +1,7 @@
-{
+const animationFrames = (imageName = 'bojo_frames') => ({
 	"textures": [
 		{
-			"image": "bojo_frames.png",
+			"image": `${imageName}.png`,
 			"format": "RGBA8888",
 			"size": {
 				"w": 64,
@@ -185,4 +185,6 @@
 		"version": "3.0",
 		"smartupdate": "$TexturePacker:SmartUpdate:5263d16d37ce3288e44b7f16278af5ea:7334d15aac6342574776a93252d3cd9c:a31c184cd566247cdb9c1e99bb78a9c4$"
 	}
-}
+})
+
+export default animationFrames;

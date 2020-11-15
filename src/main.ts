@@ -8,7 +8,7 @@ const config: Phaser.Types.Core.GameConfig = {
   width: 800,
   height: 800,
   resolution: 1,
-  backgroundColor: '#EDEEC9',
+  backgroundColor: '#FFFFFF',
   scene: [
     TestScene
   ],
