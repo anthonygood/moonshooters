@@ -10,6 +10,12 @@ export interface Near {
   climbable: boolean;
 }
 
+type SpriteLayer = {
+  key: string,
+  json: object,
+  tints?: number[], // representing possible colours
+};
+
 class Player {
   // TODO: Define in map
   readonly spawn = [50, 50];
@@ -18,9 +24,11 @@ class Player {
   public container: Phaser.GameObjects.Container;
   public state: PlayerState;
   private near: Near;
-  static readonly sprites: object = {
-    boris: spriteJson('bojo_frames'),
-  };
+  // A 2D array of Layer objects: a layer with multiple keys represents multiple possibilites,
+  // where only one will be rendered. Used for rendering different features.
+  static readonly layers: SpriteLayer[][] = [
+    [{ key: 'boris', json: spriteJson('bojo_frames') }],
+  ];
 
   constructor(scene) {
     this.scene = scene;
@@ -29,38 +37,22 @@ class Player {
     };
   }
 
-  forEachSprite(fn) {
-    // @ts-ignore
-    Object.entries(this.constructor.sprites).forEach(fn);
-  }
-
   preload(): void {
-    this.forEachSprite(([key, json]) => {
-      this.scene.load.multiatlas(key, json, '/assets/sprites');
+    this.forEachSprite(({ key, json }) => {
+      this.scene.load.multiatlas(key, json, '/assets/sprites')
     })
   }
 
   create(): void {
     const [x, y] = this.spawn;
     const container = this.container = this.scene.add.container(x, y);
-
-    this.forEachSprite(([key]) => {
-      createFramesForKey(this.scene)(key);
-      const sprite = this.scene.add.sprite(16, 48, key)
-        // .setData('key', key)
-        .setName(key)
-        // .setData('name', key)
-        .setScale(3);
-
-      container.add(sprite);
-    });
-
     this.scene.physics.world.enable(container);
 
     (container.body as Phaser.Physics.Arcade.Body)
       .setMaxVelocity(400, 1000)
       .setSize(32, 96);
 
+    this.createSprites();
     this.state = new PlayerState({ container, velocities: VELOCITY });
   }
 
@@ -74,8 +66,28 @@ class Player {
     this.near.climbable = false;
   }
 
+  createSprites() {
+    this.forEachSprite(({ key }) => {
+      createFramesForKey(this.scene)(key);
+      const sprite = this.scene.add.sprite(16, 48, key)
+        .setName(key)
+        .setScale(3);
+
+      this.container.add(sprite);
+    });
+  }
+
   nearClimbable() {
     this.near.climbable = true;
+  }
+
+  forEachLayer(fn) {
+    // @ts-ignore
+    this.constructor.layers.forEach(fn)
+  }
+
+  forEachSprite(fn) {
+    this.forEachLayer(layer => layer.forEach(fn))
   }
 }
 
