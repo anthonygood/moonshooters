@@ -51,7 +51,7 @@ class Player {
 
   create(): void {
     const [x, y] = this.spawn;
-    const sprite = this.scene.add.sprite(16, 48, PLAYER_KEY, 'idle_1.png');
+    const sprite = this.scene.add.sprite(16, 48, PLAYER_KEY);
 
     sprite.setData('key', PLAYER_KEY)
       .setScale(3);
@@ -79,15 +79,6 @@ class Player {
     this.state.process({ cursors, near: this.near, time });
     // Move into state machine
     this.near.climbable = false;
-    if (cursors.space.isDown) {
-      this.sprite.anims.play('halfspin', true).once('animationcomplete', () => {
-        this.sprite.flipX = true;
-        this.sprite.anims.play('halfspin', true).once('animationcomplete', () => {
-          this.sprite.flipX = false;
-          this.sprite.anims.play('halfspin', true);
-        });
-      });
-    }
   }
 
   nearClimbable() {
