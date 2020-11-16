@@ -39,12 +39,18 @@ const COLOURS = {
 
 class NPC extends Player {
   static readonly layers = [
-    // TODO: nest sprite JSON according to its layer?
+    // Trousers
     [
       { key: 'trousers:dark',  json: spriteJson('trousers:dark'), tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] },
       { key: 'trousers:light', json: spriteJson('trousers:light'), tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] }
     ],
-    [{ key: 'shirt', json: spriteJson('shirt:full'), tints: [COLOURS.white, ...Object.values(COLOURS.shirt), COLOURS.hair.ginger] }],
+    // Tops
+    [
+      { key: 'top', json: spriteJson('top:blank'), tints: [COLOURS.white, ...Object.values(COLOURS.shirt), COLOURS.hair.ginger] },
+      { key: 'shirt', json: spriteJson('shirt:full'), tints: [COLOURS.white, ...Object.values(COLOURS.shirt), COLOURS.hair.ginger] }
+    ],
+    // Ties
+    // TODO: define as sub-layer with shirt?
     [
       { key: 'tie',        optional: true, json: spriteJson('tie'),        tints: [COLOURS.grey, COLOURS.green, ...Object.values(COLOURS.tie)] },
       { key: 'tie:skinny', optional: true, json: spriteJson('tie:skinny'), tints: [COLOURS.grey, COLOURS.green, ...Object.values(COLOURS.tie)] }
