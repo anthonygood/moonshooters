@@ -1,3 +1,4 @@
+import { CursorKeyDriver, Driver } from '../state/Driver';
 import PlayerState from '../state/PlayerState';
 import { createFramesForKey, spriteJson } from '../animations';
 
@@ -21,6 +22,8 @@ class Player {
   // TODO: Define in map
   readonly spawn = [50, 50];
   readonly State = PlayerState;
+  readonly Driver = CursorKeyDriver;
+  private driver: Driver;
   public scene: Phaser.Scene;
   public sprite: Phaser.Physics.Arcade.Sprite;
   public container: Phaser.GameObjects.Container;
@@ -42,10 +45,12 @@ class Player {
   preload(): void {
     this.forEachSprite(({ key, json }) => {
       this.scene.load.multiatlas(key, json, '/assets/sprites')
-    })
+    });
   }
 
-  create(): void {
+  create(cursors): void {
+    this.driver = new this.Driver(cursors);
+
     const [x, y] = this.spawn;
     const container = this.container = this.scene.add.container(x, y);
     this.scene.physics.world.enable(container);
@@ -64,7 +69,7 @@ class Player {
     delta: number,
     cursors: Phaser.Types.Input.Keyboard.CursorKeys
   ) {
-    this.state.process({ cursors, near: this.near, time });
+    this.state.process({ cursors, driver: this.driver, near: this.near, time });
     // Move into state machine
     this.near.climbable = false;
   }

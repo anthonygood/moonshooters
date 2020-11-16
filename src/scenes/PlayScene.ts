@@ -50,7 +50,7 @@ class TestScene extends Phaser.Scene {
 
 		this.cursors = this.input.keyboard.createCursorKeys();
 
-		this.player.create();
+		this.player.create(this.cursors);
 		this.physics.add.collider(this.player.container, layer);
 
 		this.cameras.main.setBounds(0, 0, map.widthInPixels * MAP_SCALE, map.heightInPixels * MAP_SCALE);
