@@ -1,4 +1,5 @@
-import Player from './Player';
+import Player, { SpriteLayer } from './Player';
+import NPCState from '../state/PlayerState';
 import { spriteJson, createFramesForKey } from '../animations';
 
 const sample = (vals = []) =>
@@ -38,6 +39,7 @@ const COLOURS = {
 };
 
 class NPC extends Player {
+  readonly State = NPCState;
   static readonly layers = [
     // Trousers
     [
@@ -46,7 +48,7 @@ class NPC extends Player {
     ],
     // Tops
     [
-      { key: 'top', json: spriteJson('top:blank'), tints: [COLOURS.white, ...Object.values(COLOURS.shirt), COLOURS.hair.ginger] },
+      { key: 'top',   json: spriteJson('top:blank'),  tints: [COLOURS.white, ...Object.values(COLOURS.shirt), COLOURS.hair.ginger] },
       { key: 'shirt', json: spriteJson('shirt:full'), tints: [COLOURS.white, ...Object.values(COLOURS.shirt), COLOURS.hair.ginger] }
     ],
     // Ties
@@ -64,8 +66,8 @@ class NPC extends Player {
     ],
     // Eyes
     [
-      { key: 'eyes:big',    json: spriteJson('eyes:big') },
-      { key: 'eyes:small',  json: spriteJson('eyes:small') },
+      { key: 'eyes:big',    json: spriteJson('eyes:big')    },
+      { key: 'eyes:small',  json: spriteJson('eyes:small')  },
       { key: 'eyes:shifty', json: spriteJson('eyes:shifty') },
     ],
     // Hair
@@ -76,14 +78,29 @@ class NPC extends Player {
     [{ key: 'mask', optional: true, json: spriteJson('mask'), tints: [COLOURS.white, COLOURS.green, ...Object.values(COLOURS.mask)] } ],
   ];
 
+  // TODO: Define in map
+  readonly spawn = [150, 1000];
+
   create() {
     super.create();
     this.tintSprites();
     this.loopSprites();
   }
 
+  update(
+    time: number,
+    delta: number,
+    cursors: Phaser.Types.Input.Keyboard.CursorKeys
+  ) {
+    // 'AI' lol
+    // cursors.right.isDown = true;
+
+    this.state.process({ cursors, near: this.near, time });
+  }
+
   tintSprites() {
     this.container.iterate(sprite => {
+      // TODO: separate lookup object for tints?
       const { blendMode, tints } = this.findSprite(sprite);
       const tint = sample(tints);
       tint && sprite.setTint(tint);
@@ -104,9 +121,8 @@ class NPC extends Player {
     }, 3000);
   }
 
-  findSprite({ name }) {
-    // @ts-ignore
-    for (const layer of this.constructor.layers) {
+  findSprite({ name }): SpriteLayer {
+    for (const layer of NPC.layers) {
       for (const sprite of layer) {
         if (sprite.key === name) return sprite;
       }

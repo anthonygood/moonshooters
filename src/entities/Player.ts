@@ -10,20 +10,22 @@ export interface Near {
   climbable: boolean;
 }
 
-type SpriteLayer = {
+export type SpriteLayer = {
   key: string,
   json: object,
   tints?: number[], // representing possible colours
+  blendMode?: number,
 };
 
 class Player {
   // TODO: Define in map
   readonly spawn = [50, 50];
+  readonly State = PlayerState;
   public scene: Phaser.Scene;
   public sprite: Phaser.Physics.Arcade.Sprite;
   public container: Phaser.GameObjects.Container;
   public state: PlayerState;
-  private near: Near;
+  protected near: Near;
   // A 2D array of Layer objects: a layer with multiple keys represents multiple possibilites,
   // where only one will be rendered. Used for rendering different features.
   static readonly layers: SpriteLayer[][] = [
@@ -54,7 +56,7 @@ class Player {
 
     this.createSprites();
     this.addSprites();
-    this.state = new PlayerState({ container, velocities: VELOCITY });
+    this.state = new this.State({ container, velocities: VELOCITY });
   }
 
 	update(
