@@ -105,15 +105,12 @@ class NPC extends Player {
   }
 
   findSprite({ name }) {
-    // TODO yuk
-    try {
-      this.forEachSprite(sprite => {
-        if (sprite.key === name) throw sprite;
-      });
-    } catch (sprite) {
-      return sprite;
+    // @ts-ignore
+    for (const layer of this.constructor.layers) {
+      for (const sprite of layer) {
+        if (sprite.key === name) return sprite;
+      }
     }
-    return null;
   }
 
   addSprites() {
