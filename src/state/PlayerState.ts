@@ -1,5 +1,6 @@
-import { StateMachine, TStateMachine } from './StateMachine';
 import { Physics } from 'phaser';
+import { StateMachine, TStateMachine } from './StateMachine';
+import { Direction } from './Direction';
 
 function Helpers({ container, velocities }: PlayerState.Config) {
   const setAnimation = animName => {
@@ -15,8 +16,8 @@ function Helpers({ container, velocities }: PlayerState.Config) {
     return data.near.climbable
   };
 
-  const justPressed = (button, data, timeAgo = 200) => {
-    return data.time - button.timeDown < timeAgo;
+  const justPressed = (direction, data, timeAgo = 200) => {
+    return data.time - data.direction.timeDown(direction) < timeAgo;
   };
 
   return {
@@ -24,28 +25,28 @@ function Helpers({ container, velocities }: PlayerState.Config) {
     setAnimation,
     isOnGround,
     justPressed,
-    noDirectionPressed: (data: PlayerState.ProcessParams) => !data.cursors.right.isDown && !data.cursors.left.isDown && !data.cursors.up.isDown,
+    noDirectionPressed: (data: PlayerState.ProcessParams) => !data.direction.right && !data.direction.left && !data.direction.up,
     shouldJump: (data: PlayerState.ProcessParams) => {
-      return data.cursors.up.isDown && isOnGround() && !canClimb(data) && justPressed(data.cursors.up, data);
+      return data.direction.up && isOnGround() && !canClimb(data) && justPressed('up', data);
     },
-    leftOrRightJustPressed: (data: PlayerState.ProcessParams) => justPressed(data.cursors.right, data) || justPressed(data.cursors.left, data),
+    leftOrRightJustPressed: (data: PlayerState.ProcessParams) => justPressed('right', data) || justPressed('left', data),
     onGroundAnd: (fn: (any) => boolean) => (data: PlayerState.ProcessParams) => isOnGround() && fn(data),
     moveLeftRight: (data: PlayerState.ProcessParams) => {
       const change = isOnGround() ? velocities.run : velocities.jump / 2;
       let velocity = 0;
-      if (data.cursors.right.isDown) velocity += change;
-      if (data.cursors.left.isDown) velocity -= change;
+      if (data.direction.right) velocity += change;
+      if (data.direction.left) velocity -= change;
       body().setAccelerationX(velocity);
     },
     canClimb,
     shouldClimb: (data: PlayerState.ProcessParams) => {
-      return canClimb(data) && data.cursors.up.isDown;
+      return canClimb(data) && data.direction.up;
     },
     climb: (data: PlayerState.ProcessParams) => {
       const velocity = velocities.run / 4;
       let change = 0;
-      if (data.cursors.up.isDown) change -= velocity;
-      if (data.cursors.down.isDown) change += velocity;
+      if (data.direction.up) change -= velocity;
+      if (data.direction.down) change += velocity;
       body().setVelocityY(change);
     }
   };
@@ -63,8 +64,8 @@ class PlayerState {
       container.iterate(sprite => sprite.flipX = bool)
     };
 
-    const onlyLeft = data => data.cursors.left.isDown && !data.cursors.right.isDown;
-    const onlyRight = data => !data.cursors.left.isDown && data.cursors.right.isDown;
+    const onlyLeft = data => data.direction.left && !data.direction.right;
+    const onlyRight = data => !data.direction.left && data.direction.right;
 
     const direction = this.direction = <PlayerState.Machine>StateMachine('right')
       .transitionTo('left').when(helpers.onGroundAnd(onlyLeft))
@@ -75,9 +76,6 @@ class PlayerState {
     // Idle state
     this.action = <PlayerState.Machine>StateMachine('idle')
       .andThen(() => {
-        // sprite.anims.play('idle');
-        // sprite.setAccelerationX(0);
-        console.log('idllle');
         helpers.setAnimation('idle');
         helpers.body().setAccelerationX(0);
       })
@@ -89,7 +87,7 @@ class PlayerState {
     // Walk state
       .state('walk').andThen(() => helpers.setAnimation('walk'))
       .tick(helpers.moveLeftRight)
-      .transitionTo('idle').when((data: PlayerState.ProcessParams) => !data.cursors.left.isDown && !data.cursors.right.isDown)
+      .transitionTo('idle').when((data: PlayerState.ProcessParams) => !data.direction.left && !data.direction.right)
       .transitionTo('jump').when(helpers.shouldJump)
       .transitionTo('climb').when(helpers.shouldClimb)
 
@@ -132,7 +130,7 @@ class PlayerState {
 
 namespace PlayerState {
   export interface ProcessParams {
-    cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+    direction: Direction;
     near: {
       climbable: boolean;
     };

@@ -1,9 +1,52 @@
+import { Direction } from '../state/Direction';
 import Player, { SpriteLayer } from './Player';
 import NPCState from '../state/PlayerState';
 import { spriteJson, createFramesForKey } from '../animations';
 
 const sample = (vals = []) =>
-  vals[Math.floor(Math.random() * vals.length)]
+  vals[Math.floor(Math.random() * vals.length)];
+
+enum NPCDirection {
+  Left,
+  Right,
+  None
+};
+
+interface NPCDriver {
+  getDirection: () => Direction;
+  go: (NPCDirection) => void;
+  change: () => void;
+};
+
+const Driver: () => NPCDriver = () => {
+  let direction = NPCDirection.None;
+
+  const getDirection: () => Direction = () => ({
+    up: false,
+    down: false,
+    left: direction === NPCDirection.Left,
+    right: direction === NPCDirection.Right,
+    timeDown: () => 0,
+  });
+
+  const go = (newDirection: NPCDirection) =>
+    direction = newDirection;
+
+  const randomNewDirection = (direction: NPCDirection) => {
+    const otherDirections = Object.values(NPCDirection).filter(dir => dir !== direction);
+    return sample(otherDirections);
+  };
+
+  const change = () => {
+    go(randomNewDirection(direction));
+  };
+
+  return {
+    getDirection,
+    go,
+    change,
+  };
+};
 
 const COLOURS = {
   white: 0xF7F7F7,
@@ -39,7 +82,9 @@ const COLOURS = {
 };
 
 class NPC extends Player {
+  public spawned = false;
   readonly State = NPCState;
+  readonly driver: NPCDriver;
   static readonly layers = [
     // Trousers
     [
@@ -79,23 +124,42 @@ class NPC extends Player {
   ];
 
   // TODO: Define in map
-  readonly spawn = [150, 1000];
+  public spawn = [350, 1000];
 
-  create() {
-    super.create();
+  constructor(scene, spawn = [450, 1000]) {
+    super(scene);
+    this.spawn = spawn;
+    this.driver = Driver();
+  }
+
+  create(cursors) {
+    super.create(cursors);
     this.tintSprites();
-    this.loopSprites();
+    // this.loopSprites();
+    // this.direction = this.driver.getDirection();
+    this.move();
+    this.spawned = true;
+  }
+
+  getDirection() {
+    return this.driver.getDirection();
+  }
+
+  move() {
+    setTimeout(() => {
+      this.driver.change();
+      this.move();
+    }, sample([1000, 1500, 800]));
   }
 
   update(
     time: number,
-    delta: number,
-    cursors: Phaser.Types.Input.Keyboard.CursorKeys
+    delta: number
   ) {
+    // TODO: state machine for NPC driver
     // 'AI' lol
-    // cursors.right.isDown = true;
-
-    this.state.process({ cursors, near: this.near, time });
+    const direction = this.driver.getDirection();
+    this.state.process({ direction, near: this.near, time });
   }
 
   tintSprites() {
@@ -112,13 +176,9 @@ class NPC extends Player {
     setTimeout(() => {
       this.container.removeAll()
       this.addSprites();
-      const anim = sample(['idle', 'walk']);
-      this.container.iterate(sprite => {
-        sprite.play(`${sprite.name}/${anim}`, true);
-      });
       this.tintSprites();
       this.loopSprites();
-    }, 3000);
+    }, 1000);
   }
 
   findSprite({ name }): SpriteLayer {

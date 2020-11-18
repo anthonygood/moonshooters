@@ -1,4 +1,4 @@
-import { CursorKeyDriver, Driver } from '../state/Driver';
+import { CursorKeyDirection, Direction } from '../state/Direction';
 import PlayerState from '../state/PlayerState';
 import { createFramesForKey, spriteJson } from '../animations';
 
@@ -20,10 +20,10 @@ export type SpriteLayer = {
 
 class Player {
   // TODO: Define in map
-  readonly spawn = [50, 50];
+  readonly spawn = [650, 1000];
   readonly State = PlayerState;
-  readonly Driver = CursorKeyDriver;
-  private driver: Driver;
+  // readonly Direction = CursorKeyDirection;
+  protected direction: Direction;
   public scene: Phaser.Scene;
   public sprite: Phaser.Physics.Arcade.Sprite;
   public container: Phaser.GameObjects.Container;
@@ -49,7 +49,7 @@ class Player {
   }
 
   create(cursors): void {
-    this.driver = new this.Driver(cursors);
+    this.direction = this.getDirection(cursors);
 
     const [x, y] = this.spawn;
     const container = this.container = this.scene.add.container(x, y);
@@ -64,12 +64,15 @@ class Player {
     this.state = new this.State({ container, velocities: VELOCITY });
   }
 
+  getDirection(cursors): Direction {
+    return new CursorKeyDirection(cursors);
+  }
+
 	update(
     time: number,
-    delta: number,
-    cursors: Phaser.Types.Input.Keyboard.CursorKeys
+    delta: number
   ) {
-    this.state.process({ cursors, driver: this.driver, near: this.near, time });
+    this.state.process({ direction: this.direction, near: this.near, time });
     // Move into state machine
     this.near.climbable = false;
   }
