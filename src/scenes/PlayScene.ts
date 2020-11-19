@@ -32,7 +32,7 @@ class TestScene extends Phaser.Scene {
 		// this.load.tilemapTiledJSON(MAP_KEY, asset('tilemaps/Test Map.json'));
 		this.load.tilemapTiledJSON(MAP_KEY, asset('tilemaps/The City.json'))
 		this.load.image(LEVEL_KEY, asset('tilemaps/platforms_extruded.png'));
-		this.load.image(BKG_KEY, asset('tilemaps/skyscraper_tiles_extruded.grey.png'));
+		this.load.image(BKG_KEY, asset('tilemaps/skyscraper_tiles_extruded.png'));
 		this.load.image(SKY_KEY, 'assets/sky.png');
 
 		this.player.preload();
@@ -46,12 +46,12 @@ class TestScene extends Phaser.Scene {
 		const scrapers = map.addTilesetImage('Skyscrapers', BKG_KEY);
 
 		const wayBackground = map.createStaticLayer('Right back', scrapers, 0, -80);
-		new Fog(this, 0.7, DAY).add('fog1');
+		new Fog(this, 0.7, DAY, 1).add('fog1', true);
 
 		const distantBackground = map.createStaticLayer('Back scrapers', scrapers, 0, -120);
-		new Fog(this, 0.6, WHITE).add('fog2');
+		new Fog(this, 0.6, WHITE, 2).add('fog2', true);
 		const midBackground = map.createStaticLayer('Scrapers', scrapers, 0, 0);
-		new Fog(this, 0.3, WHITE).add('fog3');
+		new Fog(this, 0.3, WHITE, 3).add('fog3', true);
 
 		midBackground.scrollFactorX = 0.3;
 		midBackground.scrollFactorY = 0.9;
@@ -111,6 +111,7 @@ class TestScene extends Phaser.Scene {
 
 		if (npcToAdd) {
 			npcToAdd.create(this.cursors);
+			// npcToAdd.container.setDepth((NPCCount % 3) + 1)
 			this.physics.add.collider(npcToAdd.container, layer);
 
 			setTimeout(() => {
