@@ -3,61 +3,123 @@ export const DAY = '#74F0FB';
 export const WARM = '#FF7300';
 export const PINK = '#FF007b';
 export const DARKBLUE = '#080185';
+const DARKDARKBLUE = '#0a0654';
+const MIDNIGHTBLUE = '#05032e';
 
 const DEFAULT_COLOUR = DAY;
 const DEFAULT_OPACITY = 0.2;
 
-const getGradient = (a: string, b: string) => (
+const getGradient = (a: string, b: string, stops = [0, 1]) => (
   ctx: CanvasRenderingContext2D,
   height: number,
   width: number
 ) => {
-  const gradient = ctx.createLinearGradient(0, 0, width / 8, height);
-  gradient.addColorStop(0, a);
-  gradient.addColorStop(1, b);
+  const gradient = ctx.createLinearGradient(0, 0, 0, height);
+  const [firstStop, secondStop] = stops;
+  gradient.addColorStop(firstStop, a);
+  gradient.addColorStop(secondStop, b);
   return gradient;
 }
 
 export const GRADIENTS = {
   day: getGradient(WHITE, DAY),
-  night: getGradient(DARKBLUE, DAY),
+  dusk: getGradient(DARKBLUE, DAY),
+  night: getGradient(MIDNIGHTBLUE, DARKBLUE, [0.7, 1]),
   sunset: getGradient(WARM, PINK),
 };
 
-class Fog {
-  private scene: Phaser.Scene;
-  private colour: string | CanvasGradient;
-  private opacity: number;
-  private depth: number;
-  public image: Phaser.GameObjects.Image;
-
-  constructor(scene, opacity = DEFAULT_OPACITY, colour = DEFAULT_COLOUR, depth = 0) {
-    this.scene = scene;
-    this.colour = colour;
-    this.opacity = opacity;
-    this.depth = depth;
+type GradientFn = (ctx: CanvasRenderingContext2D, height: number, width: number) => CanvasGradient;
+type AddFog = (
+  config: {
+    scene: Phaser.Scene,
+    fill: string | GradientFn,
+    opacity: number,
+    key?: string,
+    blendMode?: 0 | 1 | 2,
+    depth?: number,
   }
+) => Phaser.GameObjects.Image;
 
-  add(key = 'fog', gradient = true) {
-    const { colour, opacity, scene } = this;
-    const { displayHeight: height, displayWidth: width  } = scene.cameras.main;
+export const addFog: AddFog = ({
+  scene,
+  fill,
+  opacity,
+  blendMode,
+  depth = 0,
+  key = `fog${depth}`,
+}) => {
+  const { displayHeight: height, displayWidth: width  } = scene.cameras.main;
 
-    const texture = scene.textures.createCanvas(key, width, height);
+  const texture = scene.textures.createCanvas(key, width, height);
+  const fillStyle = typeof fill === 'string' ? fill : fill(texture.context, height, width);
+  texture.context.fillStyle = fillStyle;
+  texture.context.fillRect(0, 0, width, height);
+  texture.refresh();
 
-    texture.context.fillStyle = gradient ? GRADIENTS.night(texture.context, height, width) : colour;
-    texture.context.fillRect(0, 0, width, height);
-    texture.refresh();
+  return scene.add.image(width / 2, height / 2, key)
+    .setAlpha(opacity)
+    .setScrollFactor(0)
+    .setBlendMode(blendMode)
+    .setDepth(depth);
+};
 
-    this.image = scene.add.image(width / 2, height / 2, key)
-      .setAlpha(opacity)
-      .setScrollFactor(0)
-      .setBlendMode(2)
-      // .setDepth(this.depth);
+const nightFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
+  addFog({
+    scene,
+    fill: GRADIENTS.night,
+    opacity: 1,
+    depth: 0,
+    blendMode: 0,
+  }),
+  addFog({
+    scene,
+    fill: GRADIENTS.night,
+    opacity: 0.7,
+    depth: 2,
+    blendMode: 2,
+  }),
+  addFog({
+    scene,
+    fill: GRADIENTS.night,
+    opacity: 0.6,
+    depth: 4,
+    blendMode: 0,
+  }),
+  addFog({
+    scene,
+    fill: GRADIENTS.dusk,
+    opacity: 0.3,
+    depth: 6,
+    blendMode: 0,
+  }),
+];
 
-    return this;
-  }
+const dayFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
+  addFog({
+    scene,
+    fill: GRADIENTS.day,
+    opacity: 0.7,
+    depth: 2,
+    blendMode: 0,
+  }),
+  addFog({
+    scene,
+    fill: GRADIENTS.day,
+    opacity: 0.6,
+    depth: 4,
+    blendMode: 2,
+  }),
+  addFog({
+    scene,
+    fill: GRADIENTS.day,
+    opacity: 0.3,
+    depth: 6,
+    blendMode: 2,
+  }),
+];
 
-  remove() {}
-}
+const ATMOSPHERE = {
+  night: nightFog,
+};
 
-export default Fog;
+export default ATMOSPHERE;
