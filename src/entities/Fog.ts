@@ -5,6 +5,7 @@ export const PINK = '#FF007b';
 export const DARKBLUE = '#080185';
 const DARKDARKBLUE = '#0a0654';
 const MIDNIGHTBLUE = '#05032e';
+const MORNINGYELLOW = '#fbfcca';
 
 const DEFAULT_COLOUR = DAY;
 const DEFAULT_OPACITY = 0.2;
@@ -94,6 +95,56 @@ const nightFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
   }),
 ];
 
+const duskFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
+  addFog({
+    scene,
+    fill: GRADIENTS.dusk,
+    opacity: 1,
+    depth: 0,
+    blendMode: 0,
+  }),
+  addFog({
+    scene,
+    fill: GRADIENTS.dusk,
+    opacity: 0.7,
+    depth: 2,
+    blendMode: 2,
+  }),
+  addFog({
+    scene,
+    fill: GRADIENTS.dusk,
+    opacity: 0.6,
+    depth: 4,
+    blendMode: 2,
+  }),
+];
+
+const sunsetFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
+  addFog({
+    scene,
+    fill: GRADIENTS.sunset,
+    opacity: 0.7,
+    depth: 2,
+    blendMode: 0,
+  }),
+  addFog({
+    scene,
+    fill: GRADIENTS.sunset,
+
+    opacity: 0.6,
+    depth: 4,
+    blendMode: 0,
+  }),
+  addFog({
+    scene,
+    fill: GRADIENTS.sunset,
+
+    opacity: 0.3,
+    depth: 6,
+    blendMode: 2,
+  }),
+];
+
 const dayFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
   addFog({
     scene,
@@ -118,7 +169,35 @@ const dayFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
   }),
 ];
 
+const morningFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
+  addFog({
+    scene,
+    fill: WHITE,
+    opacity: 0.7,
+    depth: 2,
+    blendMode: 0,
+  }),
+  addFog({
+    scene,
+    fill: WHITE,
+    opacity: 0.6,
+    depth: 4,
+    blendMode: 0,
+  }),
+  addFog({
+    scene,
+    fill: WHITE,
+    opacity: 0.3,
+    depth: 6,
+    blendMode: 2,
+  }),
+];
+
 const ATMOSPHERE = {
+  morning: morningFog,
+  day: dayFog,
+  sunset: sunsetFog,
+  dusk: duskFog,
   night: nightFog,
 };
 
