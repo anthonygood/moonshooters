@@ -61,6 +61,7 @@ const COLOURS = {
   },
   skin: {
     pale: 0xFDDCD4,
+    pale2: 0xfaefdc,
     pink: 0xFFC0B0,
     tan: 0xFFDA8C,
     brown: 0xCF7408,

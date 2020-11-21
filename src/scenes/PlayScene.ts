@@ -1,6 +1,8 @@
 import Player from '../entities/Player';
 import NPC from '../entities/NPC';
-import Fog, { WHITE, WARM, DAY, PINK } from '../entities/Fog';
+import Fog from '../entities/Fog';
+
+import * as json from '../../assets/tilemaps/The City.json';
 
 const asset = (path: string) => `/assets/${path}`;
 
@@ -11,6 +13,25 @@ const BKG_KEY = 'background';
 const BKG_BKG_KEY = 'back-background';
 const SKY_KEY = 'sky';
 const SPAWN_RATE = 250;
+const PINK_KEY = 'pink';
+
+// The index offset for avoiding collisions when generating dynamic tile IDs.
+const TILESET_OFFSET = 135;
+
+const addAlternativeCityTilesets = json => {
+	const [firstSet] = json.tilesets;
+	json.tilesets.push({ ...firstSet, name: 'Skyscrapers_alt', firstgid: TILESET_OFFSET });
+};
+
+const addAlternateCityTilemapIds = (json) => {
+	const backScraperLayer = json.layers[1];
+	backScraperLayer.data = backScraperLayer.data.map(id => {
+		if (id >= 1 && id <= 126) {
+			return id + 126 + 8;
+		}
+		return id;
+	});
+};
 
 class TestScene extends Phaser.Scene {
 	readonly NPCLimit = 30;
@@ -29,29 +50,28 @@ class TestScene extends Phaser.Scene {
 	}
 
 	preload() {
-		// this.load.tilemapTiledJSON(MAP_KEY, asset('tilemaps/Test Map.json'));
-		this.load.tilemapTiledJSON(MAP_KEY, asset('tilemaps/The City.json'))
+		addAlternativeCityTilesets(json);
+		addAlternateCityTilemapIds(json);
+		this.load.tilemapTiledJSON(MAP_KEY, json);
 		this.load.image(LEVEL_KEY, asset('tilemaps/platforms_extruded.png'));
-		this.load.image(BKG_KEY, asset('tilemaps/skyscraper_tiles_extruded.png'));
-		this.load.image(SKY_KEY, 'assets/sky.png');
+
+		this.load.image(BKG_KEY, asset('tilemaps/skyscraper_tiles_extruded.turquoise.png'));
+		this.load.image(PINK_KEY, asset('tilemaps/skyscraper_tiles_extruded.pink.png'));
 
 		this.player.preload();
 		this.NPCs.forEach(npc => npc.preload())
 	}
 
 	create() {
-		// const sky = this.add.image(0, 0, SKY_KEY).setOrigin(0, 0);
 		const map = this.map = this.make.tilemap({ key: MAP_KEY });
 		const tileset = map.addTilesetImage('Platforms', LEVEL_KEY);
 		const scrapers = map.addTilesetImage('Skyscrapers', BKG_KEY);
+		const pinkscrapers = map.addTilesetImage('Skyscrapers_alt', PINK_KEY);
 
-		const wayBackground = map.createStaticLayer('Right back', scrapers, 0, -80);
-		new Fog(this, 0.7, DAY, 1).add('fog1', true);
-
-		const distantBackground = map.createStaticLayer('Back scrapers', scrapers, 0, -120);
-		new Fog(this, 0.6, WHITE, 2).add('fog2', true);
-		const midBackground = map.createStaticLayer('Scrapers', scrapers, 0, 0);
-		new Fog(this, 0.3, WHITE, 3).add('fog3', true);
+		const wayBackground = map.createStaticLayer('Right back', scrapers, 0, 0).setDepth(1);
+		const distantBackground = map.createStaticLayer('Back scrapers', pinkscrapers, 0, 0).setDepth(3);
+		const midBackground = map.createStaticLayer('Scrapers', scrapers, 0, 0).setDepth(5);
+		const fogs = Fog.night(this);
 
 		midBackground.scrollFactorX = 0.3;
 		midBackground.scrollFactorY = 0.9;
@@ -60,7 +80,7 @@ class TestScene extends Phaser.Scene {
 		wayBackground.scrollFactorX = 0.1;
 		wayBackground.scrollFactorY = 0.9;
 
-		const layer = map.createStaticLayer('World', tileset);
+		const layer = map.createStaticLayer('World', tileset).setDepth(5);
 		layer.setCollisionByProperty({ collides: true });
 
 		midBackground.scale =
@@ -72,6 +92,7 @@ class TestScene extends Phaser.Scene {
 		this.cursors = this.input.keyboard.createCursorKeys();
 
 		this.player.create(this.cursors);
+		this.player.container.setDepth(6);
 		this.physics.add.collider(this.player.container, layer);
 
 		this.cameras.main.setBounds(0, 0, map.widthInPixels * MAP_SCALE, map.heightInPixels * MAP_SCALE);
@@ -111,7 +132,7 @@ class TestScene extends Phaser.Scene {
 
 		if (npcToAdd) {
 			npcToAdd.create(this.cursors);
-			// npcToAdd.container.setDepth((NPCCount % 3) + 1)
+			npcToAdd.container.setDepth((NPCCount % 2) + 5);
 			this.physics.add.collider(npcToAdd.container, layer);
 
 			setTimeout(() => {

@@ -6,11 +6,12 @@ export interface Direction {
   timeDown: (string) => number;
 }
 
-// Thin wrapper over cursor keys
+// Thin wrapper over cursor keys, Direction interface helps for driving NPCs
+// without implementing cursors' interface
 export class CursorKeyDirection implements Direction {
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 
-  constructor(cursors: Phaser.Types.Input.Keyboard.CursorKeys;) {
+  constructor(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
     this.cursors = cursors;
   }
   get up() {
