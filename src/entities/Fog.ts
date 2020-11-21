@@ -2,6 +2,7 @@ export const WHITE = '#FFFFFF';
 export const DAY = '#74F0FB';
 export const WARM = '#FF7300';
 export const PINK = '#FF007b';
+const PURPLE = '#c70074';
 export const DARKBLUE = '#080185';
 const DARKDARKBLUE = '#0a0654';
 const MIDNIGHTBLUE = '#05032e';
@@ -24,9 +25,10 @@ const getGradient = (a: string, b: string, stops = [0, 1]) => (
 
 export const GRADIENTS = {
   day: getGradient(WHITE, DAY),
+  sunset: getGradient(PURPLE, WARM),
   dusk: getGradient(DARKBLUE, DAY),
   night: getGradient(MIDNIGHTBLUE, DARKBLUE, [0.7, 1]),
-  sunset: getGradient(WARM, PINK),
+  nightNeon: getGradient(DARKBLUE, PINK),
 };
 
 type GradientFn = (ctx: CanvasRenderingContext2D, height: number, width: number) => CanvasGradient;
@@ -130,18 +132,16 @@ const sunsetFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
   addFog({
     scene,
     fill: GRADIENTS.sunset,
-
-    opacity: 0.6,
+    opacity: 0.5,
     depth: 4,
     blendMode: 0,
   }),
   addFog({
     scene,
-    fill: GRADIENTS.sunset,
-
+    fill: WARM,
     opacity: 0.3,
-    depth: 6,
-    blendMode: 2,
+    depth: 5,
+    blendMode: 0,
   }),
 ];
 
