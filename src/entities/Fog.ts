@@ -93,7 +93,7 @@ const nightFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
     fill: GRADIENTS.dusk,
     opacity: 0.3,
     depth: 6,
-    blendMode: 0,
+    blendMode: 2,
   }),
 ];
 
@@ -199,6 +199,7 @@ const ATMOSPHERE = {
   sunset: sunsetFog,
   dusk: duskFog,
   night: nightFog,
+  // nightNeon: nightNeon
 };
 
 export default ATMOSPHERE;
