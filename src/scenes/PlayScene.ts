@@ -1,7 +1,6 @@
 import Player from '../entities/Player';
 import NPC from '../entities/NPC';
-import Fog from '../entities/Fog';
-
+import Background from '../entities/Background';
 import * as json from '../../assets/tilemaps/The City.json';
 
 const asset = (path: string) => `/assets/${path}`;
@@ -9,32 +8,7 @@ const asset = (path: string) => `/assets/${path}`;
 const MAP_SCALE = 1.5;
 const MAP_KEY = 'map';
 const LEVEL_KEY = 'level';
-const DEFAULT_BKG_KEY = 'default-background-scrapers';
-const GREY_BKG_KEY = 'grey-background-scrapers';
-const TURQUOISE_BKG_KEY = 'turqouise-background-scrapers';
-const YELLOW_BKG_KEY = 'yellow-background-scrapers';
-const PINK_BKG_KEY = 'pink-background-scrapers';
-const GREEN_BKG_KEY = 'green-background-scrapers';
-
 const SPAWN_RATE = 250;
-
-// Create additional layers that just alias the background layer.
-// Everything is the same (including tile GIDS) except the name.
-// The different name allows you to add a different tileset image
-// for the same layer data, so you can apply a 'theme' per layer.
-const addAlternativeCityTilesets = (
-	json,
-	altCount = 1
-) => {
-	const [firstSet] = json.tilesets;
-
-	for (let i = 1; i <= altCount; i++) {
-		json.tilesets.push({
-			...firstSet,
-			name: `Skyscrapers_alt_${i}`,
-		});
-	}
-};
 
 class TestScene extends Phaser.Scene {
 	readonly NPCLimit = 30;
@@ -43,6 +17,7 @@ class TestScene extends Phaser.Scene {
 	public cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 	public map: Phaser.Tilemaps.Tilemap;
 	public NPCs: NPC[];
+	public background: Background;
 
 	constructor() {
     super({
@@ -50,19 +25,13 @@ class TestScene extends Phaser.Scene {
 		});
 		this.player = new Player(this);
 		this.NPCs = Array(this.NPCLimit).fill(0).map(() => new NPC(this));
+		this.background = new Background(this);
 	}
 
 	preload() {
-		addAlternativeCityTilesets(json, 5);
+		this.background.preload(json);
 		this.load.tilemapTiledJSON(MAP_KEY, json);
 		this.load.image(LEVEL_KEY, asset('tilemaps/platforms_extruded.png'));
-
-		this.load.image(DEFAULT_BKG_KEY, asset('tilemaps/skyscraper_tiles_extruded.png'));
-		this.load.image(TURQUOISE_BKG_KEY, asset('tilemaps/skyscraper_tiles_extruded.turquoise.png'));
-		this.load.image(PINK_BKG_KEY, asset('tilemaps/skyscraper_tiles_extruded.pink.png'));
-		this.load.image(YELLOW_BKG_KEY, asset('tilemaps/skyscraper_tiles_extruded.yellow.png'));
-		this.load.image(GREEN_BKG_KEY, asset('tilemaps/skyscraper_tiles_extruded.green.png'));
-		this.load.image(GREY_BKG_KEY, asset('tilemaps/skyscraper_tiles_extruded.grey.png'));
 
 		this.player.preload();
 		this.NPCs.forEach(npc => npc.preload())
@@ -71,36 +40,12 @@ class TestScene extends Phaser.Scene {
 	create() {
 		const map = this.map = this.make.tilemap({ key: MAP_KEY });
 		const tileset = map.addTilesetImage('Platforms', LEVEL_KEY);
-		const scrapers = map.addTilesetImage('Skyscrapers', DEFAULT_BKG_KEY);
-
-		// Alternate skyscraper colours
-		const green = map.addTilesetImage('Skyscrapers_alt_1', GREEN_BKG_KEY);
-		const yellow = map.addTilesetImage('Skyscrapers_alt_2', YELLOW_BKG_KEY);
-		const turqouise = map.addTilesetImage('Skyscrapers_alt_3', TURQUOISE_BKG_KEY);
-		const pink = map.addTilesetImage('Skyscrapers_alt_4', PINK_BKG_KEY);
-		const grey = map.addTilesetImage('Skyscrapers_alt_5', GREY_BKG_KEY);
-
-		// Apply alternate skyscraper tiles (or not)
-		const wayBackground = map.createStaticLayer('Right back', pink, 0, 0).setDepth(1);
-		const distantBackground = map.createStaticLayer('Back scrapers', pink, 0, 0).setDepth(3);
-		const midBackground = map.createStaticLayer('Scrapers', turqouise, 0, 0).setDepth(5);
-		Fog.sunset(this);
-
-		midBackground.scrollFactorX = 0.3;
-		midBackground.scrollFactorY = 0.9;
-		distantBackground.scrollFactorX = 0.2;
-		distantBackground.scrollFactorY = 0.8;
-		wayBackground.scrollFactorX = 0.1;
-		wayBackground.scrollFactorY = 0.9;
+		this.background.create(map, MAP_SCALE);
 
 		const layer = map.createStaticLayer('World', tileset).setDepth(5);
 		layer.setCollisionByProperty({ collides: true });
 
-		midBackground.scale =
-		layer.scale =
-		distantBackground.scale =
-		wayBackground.scale =
-		MAP_SCALE;
+		layer.scale = MAP_SCALE;
 
 		this.cursors = this.input.keyboard.createCursorKeys();
 
