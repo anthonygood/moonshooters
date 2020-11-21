@@ -128,6 +128,15 @@ class Background {
   }
 }
 
+export class Morning extends Background {
+  getTheme() {
+    const { blue, red } = this.variants;
+    return { layers: [red, blue, blue], fog: Fog.morning };
+  }
+}
+
+export const Day = Background;
+
 export class Sunset extends Background {
   getTheme() {
     const { turqouise, pink } = this.variants;
