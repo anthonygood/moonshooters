@@ -48,10 +48,10 @@ class Player {
     });
   }
 
-  create(cursors): void {
+  create(cursors, spawn: number[]): void {
     this.direction = this.getDirection(cursors);
 
-    const [x, y] = this.spawn;
+    const [x, y] = spawn;
     const container = this.container = this.scene.add.container(x, y);
     this.scene.physics.world.enable(container);
 

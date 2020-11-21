@@ -133,8 +133,8 @@ class NPC extends Player {
     this.driver = Driver();
   }
 
-  create(cursors) {
-    super.create(cursors);
+  create(cursors, spawn) {
+    super.create(cursors, spawn);
     this.tintSprites();
     // this.loopSprites();
     // this.direction = this.driver.getDirection();

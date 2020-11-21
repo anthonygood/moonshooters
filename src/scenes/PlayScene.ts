@@ -1,6 +1,6 @@
 import Player from '../entities/Player';
 import NPC from '../entities/NPC';
-import Background from '../entities/Background';
+import { Morning as Background } from '../entities/Background';
 import * as json from '../../assets/tilemaps/The City.json';
 
 const asset = (path: string) => `/assets/${path}`;
@@ -11,8 +11,11 @@ const LEVEL_KEY = 'level';
 const SPAWN_RATE = 250;
 
 class TestScene extends Phaser.Scene {
-	readonly NPCLimit = 30;
+	// TODO: some way to preload NPCs without hardcoding here?
+	// OR separate NPC asset preloading from rest of logic.
+	readonly NPCLimit = 17;
 	private NPCCount = 0;
+	private NPCSpawnPoints: Phaser.GameObjects.GameObject[];
 	public player: Player;
 	public cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 	public map: Phaser.Tilemaps.Tilemap;
@@ -39,6 +42,9 @@ class TestScene extends Phaser.Scene {
 
 	create() {
 		const map = this.map = this.make.tilemap({ key: MAP_KEY });
+		const playerSpawn = map.findObject('Objects', obj => obj.name === 'PlayerSpawn');
+		this.NPCSpawnPoints = map.filterObjects('Objects', obj => obj.name === 'NPCSpawn');
+
 		const tileset = map.addTilesetImage('Platforms', LEVEL_KEY);
 		this.background.create(map, MAP_SCALE);
 
@@ -49,14 +55,14 @@ class TestScene extends Phaser.Scene {
 
 		this.cursors = this.input.keyboard.createCursorKeys();
 
-		this.player.create(this.cursors);
+		this.player.create(this.cursors, [playerSpawn.x * MAP_SCALE, playerSpawn.y * MAP_SCALE]);
 		this.player.container.setDepth(6);
 		this.physics.add.collider(this.player.container, layer);
 
 		this.cameras.main.setBounds(0, 0, map.widthInPixels * MAP_SCALE, map.heightInPixels * MAP_SCALE);
 		this.cameras.main.startFollow(this.player.container, false);
 
-		setTimeout(() => this.spawnNPCs(layer), 3000);
+		this.spawnNPCs(layer);
 
 		// debug
 		window.game = this;
@@ -84,19 +90,16 @@ class TestScene extends Phaser.Scene {
 	}
 
 	spawnNPCs(layer: Phaser.Tilemaps.StaticTilemapLayer) {
-		const { NPCCount, NPCLimit } = this;
+		const { NPCs, NPCCount, NPCLimit, NPCSpawnPoints } = this;
 		const npcToAdd = this.NPCs[NPCCount];
 		this.NPCCount++;
 
-		if (npcToAdd) {
-			npcToAdd.create(this.cursors);
+		NPCSpawnPoints.forEach(({ x, y }, i) => {
+			const npcToAdd = NPCs[i];
+			npcToAdd.create(this.cursors, [x * MAP_SCALE, y * MAP_SCALE]);
 			npcToAdd.container.setDepth((NPCCount % 2) + 5);
 			this.physics.add.collider(npcToAdd.container, layer);
-
-			setTimeout(() => {
-				this.spawnNPCs(layer);
-			}, SPAWN_RATE)
-		}
+		});
 	}
 }
 
