@@ -1,6 +1,6 @@
 import { Direction } from '../state/Direction';
 import Player, { SpriteLayer, VELOCITY } from './Player';
-import { NPCState } from '../state/PlayerState';
+import NPCState from '../state/NPCState';
 import { spriteJson, createFramesForKey } from '../animations';
 
 const sample = (vals = []) =>
