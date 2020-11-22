@@ -1,5 +1,5 @@
 import Player from '../entities/Player';
-import NPC from '../entities/NPC';
+import NPC from '../entities/NPC/NPC';
 import { Morning as Background } from '../entities/Background';
 import * as json from '../../assets/tilemaps/The City.json';
 
