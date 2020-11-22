@@ -1,6 +1,6 @@
 import { Direction } from '../state/Direction';
-import Player, { SpriteLayer } from './Player';
-import NPCState from '../state/PlayerState';
+import Player, { SpriteLayer, VELOCITY } from './Player';
+import { NPCState } from '../state/PlayerState';
 import { spriteJson, createFramesForKey } from '../animations';
 
 const sample = (vals = []) =>
@@ -84,7 +84,7 @@ const COLOURS = {
 
 class NPC extends Player {
   public spawned = false;
-  readonly State = NPCState;
+  public state = NPCState;
   readonly driver: NPCDriver;
   static readonly layers = [
     // Trousers
@@ -121,7 +121,7 @@ class NPC extends Player {
       { key: 'hair:helmet',  optional: true, json: spriteJson('hair:helmet'),  tints: Object.values(COLOURS.hair) },
       { key: 'hair:balding', optional: true, json: spriteJson('hair:balding'), tints: Object.values(COLOURS.hair) },
     ],
-    [{ key: 'mask', optional: true, json: spriteJson('mask'), tints: [COLOURS.white, COLOURS.green, ...Object.values(COLOURS.mask)] } ],
+    [{ key: 'mask', json: spriteJson('mask'), tints: [COLOURS.white, COLOURS.green, ...Object.values(COLOURS.mask)] } ],
   ];
 
   // TODO: Define in map
@@ -136,10 +136,13 @@ class NPC extends Player {
   create(cursors, spawn) {
     super.create(cursors, spawn);
     this.tintSprites();
-    // this.loopSprites();
-    // this.direction = this.driver.getDirection();
+    this.toggleMask(); // hide
     this.move();
     this.spawned = true;
+  }
+
+  getStateMachine() {
+    return new NPCState({ container: this.container, velocities: VELOCITY, onTouch: () => this.toggleMask() });
   }
 
   getDirection() {
@@ -160,7 +163,9 @@ class NPC extends Player {
     // TODO: state machine for NPC driver
     // 'AI' lol
     const direction = this.driver.getDirection();
-    this.state.process({ direction, near: this.near, time });
+
+    const containerData = this.container.data && this.container.data.values;
+    this.state.process({ direction, near: this.near, time, containerData }); // input data
   }
 
   tintSprites() {
@@ -196,6 +201,11 @@ class NPC extends Player {
       const shouldAdd = sample([true, !sampleSprite.optional]);
       shouldAdd && this.addSprite(sampleSprite);
     });
+  }
+
+  toggleMask() {
+    const mask = this.container.getByName('mask');
+    mask.visible = !mask.visible;
   }
 
   createSprites() {

@@ -16,6 +16,7 @@ class TestScene extends Phaser.Scene {
 	readonly NPCLimit = 17;
 	private NPCCount = 0;
 	private NPCSpawnPoints: Phaser.GameObjects.GameObject[];
+	private playerSpawn: Phaser.GameObjects.GameObject;
 	public player: Player;
 	public cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 	public map: Phaser.Tilemaps.Tilemap;
@@ -42,7 +43,7 @@ class TestScene extends Phaser.Scene {
 
 	create() {
 		const map = this.map = this.make.tilemap({ key: MAP_KEY });
-		const playerSpawn = map.findObject('Objects', obj => obj.name === 'PlayerSpawn');
+		const playerSpawn = this.playerSpawn = map.findObject('Objects', obj => obj.name === 'PlayerSpawn');
 		this.NPCSpawnPoints = map.filterObjects('Objects', obj => obj.name === 'NPCSpawn');
 
 		const tileset = map.addTilesetImage('Platforms', LEVEL_KEY);
@@ -75,23 +76,29 @@ class TestScene extends Phaser.Scene {
 		// 	collidingTileColor: new Phaser.Display.Color(255, 255, 255, 255), // Color of colliding tiles
 		// 	faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
 		// });
+
+		this.NPCs.forEach(npc =>
+			this.physics.add.overlap(npc.container, this.player.container, (npcContainer, player) => {
+				npcContainer.setData('touchedByPlayer', true);
+			})
+		);
 	}
 
 	update(time: number, delta: number) {
 		if (this.player.container.body.top > this.map.heightInPixels * MAP_SCALE) {
-		// respawn
-			this.player.container.setPosition(this.player.spawn[0], 0);
+			// respawn
+			this.player.container.setPosition(this.playerSpawn.x, 0);
 		}
 		this.player.update(time, delta);
 
+		// TODO: only update NPCs nearby?
 		this.NPCs
 			.filter(npc => npc.spawned)
 			.forEach(npc => npc.update(time, delta));
 	}
 
 	spawnNPCs(layer: Phaser.Tilemaps.StaticTilemapLayer) {
-		const { NPCs, NPCCount, NPCLimit, NPCSpawnPoints } = this;
-		const npcToAdd = this.NPCs[NPCCount];
+		const { NPCs, NPCCount, NPCSpawnPoints } = this;
 		this.NPCCount++;
 
 		NPCSpawnPoints.forEach(({ x, y }, i) => {

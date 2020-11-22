@@ -2,7 +2,7 @@ import { CursorKeyDirection, Direction } from '../state/Direction';
 import PlayerState from '../state/PlayerState';
 import { createFramesForKey, spriteJson } from '../animations';
 
-const VELOCITY = {
+export const VELOCITY = {
   run: 1600,
   jump: 1000,
 };
@@ -19,10 +19,7 @@ export type SpriteLayer = {
 };
 
 class Player {
-  // TODO: Define in map
-  readonly spawn = [650, 1000];
   readonly State = PlayerState;
-  // readonly Direction = CursorKeyDirection;
   protected direction: Direction;
   public scene: Phaser.Scene;
   public sprite: Phaser.Physics.Arcade.Sprite;
@@ -61,7 +58,11 @@ class Player {
 
     this.createSprites();
     this.addSprites();
-    this.state = new this.State({ container, velocities: VELOCITY });
+    this.state = this.getStateMachine();
+  }
+
+  getStateMachine() {
+    return new PlayerState({ container: this.container, velocities: VELOCITY });
   }
 
   getDirection(cursors): Direction {
