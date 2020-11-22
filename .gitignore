@@ -10,6 +10,7 @@ phaserTilemapfix
 *.zip
 *.xcf
 *.wav
+*.pxd
 legacy*
 *.txt
 dump/
