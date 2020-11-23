@@ -10,6 +10,50 @@ const MAP_KEY = 'map';
 const LEVEL_KEY = 'level';
 const SPAWN_RATE = 250;
 
+class Score {
+	public scene: Phaser.Scene;
+	public current: number;
+	public penalty: number;
+	public outOf: number;
+	private container: Phaser.GameObjects.Text;
+	constructor(scene: Phaser.Scene, total: number) {
+		this.scene = scene;
+		this.current = 0;
+		this.penalty = 0;
+		this.outOf = total;
+	}
+
+	create() {
+		this.container = this.scene.add.text(10, 10, this.text(), this.style())
+			.setScrollFactor(0, 0)
+			.setDepth(6); // TODO: de-couple from scene layering or parameterise
+	}
+
+	update() {
+		this.container.setText(this.text());
+	}
+
+	increment() {
+		this.current++;
+	}
+	penalise() {
+		this.penalty++;
+	}
+	text() {
+		let str = `Score: ${this.current}/${this.outOf}`;
+
+		if (this.penalty) {
+			str += `\nSocial Distance Penalty: -${this.penalty}`;
+		}
+
+		return str;
+	}
+
+	style() {
+		return { fontSize: '24px', color: 'black' };
+	}
+}
+
 class TestScene extends Phaser.Scene {
 	// TODO: some way to preload NPCs without hardcoding here?
 	// OR separate NPC asset preloading from rest of logic.
@@ -17,6 +61,7 @@ class TestScene extends Phaser.Scene {
 	private NPCCount = 0;
 	private NPCSpawnPoints: Phaser.GameObjects.GameObject[];
 	private playerSpawn: Phaser.GameObjects.GameObject;
+	private score: Score;
 	public player: Player;
 	public cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 	public map: Phaser.Tilemaps.Tilemap;
@@ -30,6 +75,7 @@ class TestScene extends Phaser.Scene {
 		this.player = new Player(this);
 		this.NPCs = Array(this.NPCLimit).fill(0).map(() => new NPC(this));
 		this.background = new Background(this);
+		this.score = new Score(this, this.NPCs.length);
 	}
 
 	preload() {
@@ -64,6 +110,18 @@ class TestScene extends Phaser.Scene {
 		this.cameras.main.startFollow(this.player.container, false);
 
 		this.spawnNPCs(layer);
+		this.score.create();
+
+		this.NPCs.forEach(npc => {
+			this.physics.add.overlap(npc.container, this.player.container, (npcContainer, player) => {
+				!npcContainer.getData('touchedByPlayer') && this.score.increment();
+				npcContainer.setData('touchedByPlayer', true);
+
+				// TODO: 2 metre penalty radius
+				// apparently overlap uses fixed update so should be consistent regardless of framerate
+				this.score.penalise();
+			});
+		});
 
 		// debug
 		window.game = this;
@@ -76,12 +134,6 @@ class TestScene extends Phaser.Scene {
 		// 	collidingTileColor: new Phaser.Display.Color(255, 255, 255, 255), // Color of colliding tiles
 		// 	faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
 		// });
-
-		this.NPCs.forEach(npc =>
-			this.physics.add.overlap(npc.container, this.player.container, (npcContainer, player) => {
-				npcContainer.setData('touchedByPlayer', true);
-			})
-		);
 	}
 
 	update(time: number, delta: number) {
@@ -95,6 +147,8 @@ class TestScene extends Phaser.Scene {
 		this.NPCs
 			.filter(npc => npc.spawned)
 			.forEach(npc => npc.update(time, delta));
+
+		this.score.update();
 	}
 
 	spawnNPCs(layer: Phaser.Tilemaps.StaticTilemapLayer) {
