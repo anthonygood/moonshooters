@@ -17,7 +17,7 @@
          "name":"Right back",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":200,
          "x":0,
          "y":0
@@ -29,7 +29,7 @@
          "name":"Back scrapers",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":200,
          "x":0,
          "y":0
@@ -41,7 +41,7 @@
          "name":"Scrapers",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":200,
          "x":0,
          "y":0
@@ -117,6 +117,12 @@
                  "id":6,
                  "name":"NPCSpawn",
                  "point":true,
+                 "properties":[
+                        {
+                         "name":"modifier",
+                         "type":"string",
+                         "value":"idle"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -265,7 +271,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":6143,
+                 "x":6142,
                  "y":700
                 }, 
                 {
@@ -273,12 +279,59 @@
                  "id":19,
                  "name":"NPCSpawn",
                  "point":true,
+                 "properties":[
+                        {
+                         "name":"modifier",
+                         "type":"string",
+                         "value":"idle"
+                        }, 
+                        {
+                         "name":"yoyoma",
+                         "type":"string",
+                         "value":"foo"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":0,
                  "x":5087,
                  "y":477
+                }, 
+                {
+                 "height":0,
+                 "id":20,
+                 "name":"NPCSpawn",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"modifier",
+                         "type":"string",
+                         "value":"idle"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":3263,
+                 "y":191
+                }, 
+                {
+                 "height":0,
+                 "id":21,
+                 "name":"NPCSpawn",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"modifier",
+                         "type":"string",
+                         "value":"idle"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":4512,
+                 "y":512
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -287,7 +340,7 @@
          "y":0
         }],
  "nextlayerid":6,
- "nextobjectid":20,
+ "nextobjectid":22,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.4.2",

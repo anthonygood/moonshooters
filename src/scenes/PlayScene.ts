@@ -16,10 +16,14 @@ class Score {
 	public penalty: number;
 	public outOf: number;
 	private container: Phaser.GameObjects.Text;
-	constructor(scene: Phaser.Scene, total: number) {
+	constructor(scene: Phaser.Scene, total = 0) {
 		this.scene = scene;
 		this.current = 0;
 		this.penalty = 0;
+		this.outOf = total;
+	}
+
+	setTotal(total: number) {
 		this.outOf = total;
 	}
 
@@ -58,8 +62,6 @@ class TestScene extends Phaser.Scene {
 	// TODO: some way to preload NPCs without hardcoding here?
 	// OR separate NPC asset preloading from rest of logic.
 	readonly NPCLimit = 17;
-	private NPCCount = 0;
-	private NPCSpawnPoints: Phaser.GameObjects.GameObject[];
 	private playerSpawn: Phaser.GameObjects.GameObject;
 	private score: Score;
 	public player: Player;
@@ -73,9 +75,9 @@ class TestScene extends Phaser.Scene {
 			key: 'The City'
 		});
 		this.player = new Player(this);
-		this.NPCs = Array(this.NPCLimit).fill(0).map(() => new NPC(this));
 		this.background = new Background(this);
-		this.score = new Score(this, this.NPCs.length);
+		this.score = new Score(this);
+		this.NPCs = [];
 	}
 
 	preload() {
@@ -84,14 +86,12 @@ class TestScene extends Phaser.Scene {
 		this.load.image(LEVEL_KEY, asset('tilemaps/platforms_extruded.png'));
 
 		this.player.preload();
-		this.NPCs.forEach(npc => npc.preload())
+		NPC.preload(this);
 	}
 
 	create() {
 		const map = this.map = this.make.tilemap({ key: MAP_KEY });
 		const playerSpawn = this.playerSpawn = map.findObject('Objects', obj => obj.name === 'PlayerSpawn');
-		this.NPCSpawnPoints = map.filterObjects('Objects', obj => obj.name === 'NPCSpawn');
-
 		const tileset = map.addTilesetImage('Platforms', LEVEL_KEY);
 		this.background.create(map, MAP_SCALE);
 
@@ -152,14 +152,23 @@ class TestScene extends Phaser.Scene {
 	}
 
 	spawnNPCs(layer: Phaser.Tilemaps.StaticTilemapLayer) {
-		const { NPCs, NPCCount, NPCSpawnPoints } = this;
-		this.NPCCount++;
+		const { NPCs, cursors, map, physics, score } = this;
 
-		NPCSpawnPoints.forEach(({ x, y }, i) => {
-			const npcToAdd = NPCs[i];
-			npcToAdd.create(this.cursors, [x * MAP_SCALE, y * MAP_SCALE]);
-			npcToAdd.container.setDepth((NPCCount % 2) + 5);
-			this.physics.add.collider(npcToAdd.container, layer);
+		const spawnPoints = map.filterObjects('Objects', obj => obj.name === 'NPCSpawn');
+		const npcCount = spawnPoints.length;
+
+		score.setTotal(npcCount);
+
+		spawnPoints
+			.forEach(({ properties = [], x, y }) => {
+				const npc = new NPC(this);
+				const modifiers = {
+					idle: properties.find(({ name, value}) => name === 'modifier' && value === 'idle'),
+				};
+				npc.create(cursors, [x * MAP_SCALE, y * MAP_SCALE], modifiers);
+				npc.container.setDepth((npcCount % 2) + 5);
+				physics.add.collider(npc.container, layer);
+				NPCs.push(npc);
 		});
 	}
 }

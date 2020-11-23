@@ -7,6 +7,10 @@ import Driver, { NPCDriver } from './Driver';
 const sample = (vals = []) =>
   vals[Math.floor(Math.random() * vals.length)];
 
+type Modifiers = {
+  idle?: boolean;
+};
+
 class NPC extends Player {
   public spawned = false;
   public state = NPCState;
@@ -52,22 +56,35 @@ class NPC extends Player {
   // TODO: Define in map
   public spawn = [350, 1000];
 
+  static preload(scene) {
+    NPC.layers.forEach(layer => layer.forEach(({ key, json }) => {
+      scene.load.multiatlas(key, json, '/assets/sprites');
+    }));
+  }
+
   constructor(scene, spawn = [450, 1000]) {
     super(scene);
     this.spawn = spawn;
     this.driver = Driver();
   }
 
-  create(cursors, spawn) {
+  create(cursors, spawn, modifiers?: Modifiers) {
     super.create(cursors, spawn);
     this.tintSprites();
     this.toggleMask(); // hide
-    this.move();
     this.spawned = true;
+
+    if (!modifiers || !modifiers.idle) this.move();
   }
 
   getStateMachine() {
-    return new NPCState({ container: this.container, velocities: VELOCITY, onTouch: () => this.toggleMask() });
+    return new NPCState({
+      container: this.container,
+      velocities: VELOCITY,
+      onTouch: () => {
+        this.toggleMask();
+      }
+    });
   }
 
   getDirection() {
@@ -78,7 +95,7 @@ class NPC extends Player {
     setTimeout(() => {
       this.driver.change();
       this.move();
-    }, sample([1000, 1500, 800]));
+    }, sample([800, 1000, 1500]));
   }
 
   update(
