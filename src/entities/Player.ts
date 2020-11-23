@@ -2,9 +2,19 @@ import { CursorKeyDirection, Direction } from '../state/Direction';
 import PlayerState from '../state/PlayerState';
 import { createFramesForKey, spriteJson } from '../animations';
 
+// max speed levels:
+//  LEVEL  | RUN |  JUMP
+//  lvl 1  | 400 |  1,000
+//  lvl 2  | 600 |  1,100
+//  lvl 3  | 800 |  1,200
+
 export const VELOCITY = {
   run: 1600,
-  jump: 1000,
+  jump: 1400,
+  max: {
+    x: 400,
+    y: 1000,
+  }
 };
 
 export interface Near {
@@ -53,7 +63,7 @@ class Player {
     this.scene.physics.world.enable(container);
 
     (container.body as Phaser.Physics.Arcade.Body)
-      .setMaxVelocity(400, 1000)
+      .setMaxVelocity(VELOCITY.max.x, VELOCITY.max.y)
       .setSize(32, 96);
 
     this.createSprites();
@@ -73,7 +83,7 @@ class Player {
     time: number,
     delta: number
   ) {
-    this.state.process({ direction: this.direction, near: this.near, time });
+    this.state.process({ direction: this.direction, near: this.near, time, delta });
     // Move into state machine
     this.near.climbable = false;
   }

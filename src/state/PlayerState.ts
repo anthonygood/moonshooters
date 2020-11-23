@@ -52,11 +52,38 @@ function Helpers({ container, velocities }: PlayerState.Config) {
   };
 };
 
+type Recording = {
+  count: number;
+  time: number;
+  current?: number;
+  longest?: number;
+};
+
+const Recording = () => ({
+  time: 0,
+  count: 0,
+  current: 0,
+  longest: 0,
+});
+
 class PlayerState {
   private direction: PlayerState.Machine;
   private action: PlayerState.Machine;
 
+  public flightRecorder: {
+    idle: Recording;
+    jump: Recording;
+    left: Recording;
+    right: Recording;
+  }
+
   constructor(config: PlayerState.Config) {
+    this.flightRecorder = {
+      jump: Recording(),
+      idle: Recording(),
+      left: Recording(),
+      right: Recording(),
+    };
     const helpers = Helpers(config);
     const { container, velocities } = config;
 
@@ -69,17 +96,38 @@ class PlayerState {
 
     const direction = this.direction = <PlayerState.Machine>StateMachine('right')
       .transitionTo('left').when(helpers.onGroundAnd(onlyLeft))
-      .andThen(flipX(true))
+      .andThen(() => {
+        flipX(true)();
+        this.flightRecorder.left.count++;
+      })
+      .tick((data: PlayerState.ProcessParams) => {
+        this.flightRecorder.left.time += data.delta;
+      })
       .state('left').transitionTo('right').when(helpers.onGroundAnd(onlyRight))
-      .andThen(flipX(false));
+      .andThen(() => {
+        flipX(false)();
+        this.flightRecorder.right.count++;
+      })
+      .tick((data: PlayerState.ProcessParams) => {
+        this.flightRecorder.right.time += data.delta;
+      });
 
     // Idle state
     this.action = <PlayerState.Machine>StateMachine('idle')
       .andThen(() => {
         helpers.setAnimation('idle');
         helpers.body().setAccelerationX(0);
+        this.flightRecorder.idle.count++;
       })
-      .tick(() => helpers.body().setVelocityX(0))
+      .tick((data: PlayerState.ProcessParams) => {
+        helpers.body().setVelocityX(0);
+        this.flightRecorder.idle.time += data.delta;
+        this.flightRecorder.idle.current += data.delta;
+      })
+      .exit(() => {
+        this.flightRecorder.idle.longest = Math.max(this.flightRecorder.idle.longest, this.flightRecorder.idle.current);
+        this.flightRecorder.idle.current = 0;
+      })
       .transitionTo('jump').when(helpers.shouldJump)
       .transitionTo('walk').when(data => onlyLeft(data) || onlyRight(data))
       .transitionTo('climb').when(helpers.shouldClimb)
@@ -95,8 +143,17 @@ class PlayerState {
       .state('jump').andThen(() => {
         helpers.body().setVelocityY(-velocities.jump);
         helpers.setAnimation('jump');
+        this.flightRecorder.jump.count++;
       })
-      .tick(helpers.moveLeftRight)
+      .tick((data: PlayerState.ProcessParams) => {
+        helpers.moveLeftRight(data);
+        this.flightRecorder.jump.time += data.delta;
+        this.flightRecorder.jump.current += data.delta;
+      })
+      .exit(() => {
+        this.flightRecorder.jump.longest = Math.max(this.flightRecorder.jump.longest, this.flightRecorder.jump.current);
+        this.flightRecorder.jump.current = 0;
+      })
       .transitionTo('idle').when(helpers.isOnGround)
       .transitionTo('walk').when(helpers.onGroundAnd(data => onlyLeft(data) || onlyRight(data)))
 
@@ -130,6 +187,7 @@ class PlayerState {
 
 namespace PlayerState {
   export interface ProcessParams {
+    delta: number;
     direction: Direction;
     near: {
       climbable: boolean;
