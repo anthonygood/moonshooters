@@ -1,16 +1,16 @@
 import 'phaser';
 
-import TestScene from './scenes/PlayScene';
+import TheCity from './scenes/TheCity';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'content',
-  width: 800,
-  height: 800,
+  width: window.innerWidth,
+  height: window.innerHeight,
   resolution: 1,
   backgroundColor: '#FFFFFF',
   scene: [
-    TestScene
+    TheCity,
   ],
   render: {
     antialias: false,
@@ -25,7 +25,11 @@ const config: Phaser.Types.Core.GameConfig = {
       gravity: { y: 2500 },
       // debug: true,
     }
-  }
+  },
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH
+  },
 };
 
 new Phaser.Game(config);
