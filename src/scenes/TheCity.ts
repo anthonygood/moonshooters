@@ -1,74 +1,65 @@
+import Score from '../entities/Score';
 import Player from '../entities/Player';
 import NPC from '../entities/NPC/NPC';
 import { Morning as Background } from '../entities/Background';
 import * as json from '../../assets/tilemaps/The City.json';
+import ATMOSPHERE from '../entities/Fog';
 
 const asset = (path: string) => `/assets/${path}`;
 
 const MAP_SCALE = 1.5;
 const MAP_KEY = 'map';
 const LEVEL_KEY = 'level';
-const SPAWN_RATE = 250;
 
-class Score {
-	public scene: Phaser.Scene;
-	public current: number;
-	public penalty: number;
-	public outOf: number;
-	private container: Phaser.GameObjects.Text;
-	constructor(scene: Phaser.Scene, total = 0) {
-		this.scene = scene;
-		this.current = 0;
-		this.penalty = 0;
-		this.outOf = total;
-	}
+const EndOfLevelReport = (scene: TheCity, score: Score) => {
+	const { start, end, cameras, add } = scene;
+	const timeTakenSec = Math.floor((end - start) / 1000);
+	const timeTakenMin = Math.floor(timeTakenSec / 60)
+	const timeTaken = `${timeTakenMin ? timeTakenMin + 'm ' : ''}${timeTakenSec % 60}s`;
+	const pass = Math.floor(score.current / score.outOf * 100) > .5;
+	const heading = `LEVEL ${pass ? 'CLEARED' : 'FAILED'}`;
+	const currentVal = score.current * 100;
+	const penalty = score.penalty;
+	const timeBonus = 500 - timeTakenSec;
+	const total = timeBonus + currentVal - penalty;
+  const body = !pass ? `
+   ${heading}
+   ------------
 
-	setTotal(total: number) {
-		this.outOf = total;
-	}
+         MASKED:  ${score.current} / ${score.outOf}
+` :
+`   ${heading}
+	  ------------
 
-	create() {
-		this.container = this.scene.add.text(10, 10, this.text(), this.style())
-			.setScrollFactor(0, 0)
-			.setDepth(6); // TODO: de-couple from scene layering or parameterise
-	}
+         MASKED:  ${score.current} / ${score.outOf}
+                 +${total}
 
-	update() {
-		this.container.setText(this.text());
-	}
+           TIME:  ${timeTaken}
+                 +${timeBonus}
 
-	increment() {
-		this.current++;
-	}
-	penalise() {
-		this.penalty++;
-	}
-	text() {
-		let str = `Score: ${this.current}/${this.outOf}`;
+SOCIAL DISTANCE: ${penalty || ' ' + penalty}
 
-		if (this.penalty) {
-			str += `\nSocial Distance Penalty: -${this.penalty}`;
-		}
+          TOTAL:  ${total}`;
+	const screenCenterX = scene.cameras.main.width / 2;
+	const text = scene.add.text(screenCenterX, 300, body, {
+		color: 'white',
+		fontSize: 36,
+	});
+	text.setOrigin(0.5)
+		.setScrollFactor(0)
+		.setDepth(6);
+	ATMOSPHERE.endLevel(scene);
+};
 
-		return str;
-	}
-
-	style() {
-		return { fontSize: '24px', color: 'black' };
-	}
-}
-
-class TestScene extends Phaser.Scene {
-	// TODO: some way to preload NPCs without hardcoding here?
-	// OR separate NPC asset preloading from rest of logic.
-	readonly NPCLimit = 17;
-	private playerSpawn: Phaser.GameObjects.GameObject;
+class TheCity extends Phaser.Scene {
 	private score: Score;
 	public player: Player;
 	public cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 	public map: Phaser.Tilemaps.Tilemap;
 	public NPCs: NPC[];
 	public background: Background;
+	public start: Date;
+	public end: Date;
 
 	constructor() {
     super({
@@ -91,7 +82,6 @@ class TestScene extends Phaser.Scene {
 
 	create() {
 		const map = this.map = this.make.tilemap({ key: MAP_KEY });
-		const playerSpawn = this.playerSpawn = map.findObject('Objects', obj => obj.name === 'PlayerSpawn');
 		const tileset = map.addTilesetImage('Platforms', LEVEL_KEY);
 		this.background.create(map, MAP_SCALE);
 
@@ -102,6 +92,7 @@ class TestScene extends Phaser.Scene {
 
 		this.cursors = this.input.keyboard.createCursorKeys();
 
+		const playerSpawn = map.findObject('Objects', obj => obj.name === 'PlayerSpawn');
 		this.player.create(this.cursors, [playerSpawn.x * MAP_SCALE, playerSpawn.y * MAP_SCALE]);
 		this.player.container.setDepth(6);
 		this.physics.add.collider(this.player.container, layer);
@@ -121,6 +112,8 @@ class TestScene extends Phaser.Scene {
 				// apparently overlap uses fixed update so should be consistent regardless of framerate
 				this.score.penalise();
 			});
+
+			this.start = new Date();
 		});
 
 		// debug
@@ -137,18 +130,19 @@ class TestScene extends Phaser.Scene {
 	}
 
 	update(time: number, delta: number) {
-		if (this.player.container.body.top > this.map.heightInPixels * MAP_SCALE) {
+		if (!this.end && this.player.container.body.top > this.map.heightInPixels * MAP_SCALE) {
 			// respawn
-			this.player.container.setPosition(this.playerSpawn.x, 0);
+			// this.player.container.setPosition(this.playerSpawn.x, 0);
+			this.end = new Date;
+			EndOfLevelReport(this, this.score);
+		} else {
+			this.player.update(time, delta);
 		}
-		this.player.update(time, delta);
 
 		// TODO: only update NPCs nearby?
 		this.NPCs
 			.filter(npc => npc.spawned)
 			.forEach(npc => npc.update(time, delta));
-
-		this.score.update();
 	}
 
 	spawnNPCs(layer: Phaser.Tilemaps.StaticTilemapLayer) {
@@ -173,4 +167,4 @@ class TestScene extends Phaser.Scene {
 	}
 }
 
-export default TestScene;
+export default TheCity;

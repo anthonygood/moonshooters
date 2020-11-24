@@ -1,3 +1,4 @@
+const BLACK = 'black';
 export const WHITE = '#FFFFFF';
 export const DAY = '#74F0FB';
 export const WARM = '#FF7300';
@@ -193,6 +194,33 @@ const morningFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
   }),
 ];
 
+const endLevelFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
+  addFog({
+    scene,
+    fill: BLACK,
+    opacity: 1,
+    depth: 2,
+    blendMode: 0,
+    key: 'endLevel1',
+  }),
+  addFog({
+    scene,
+    fill: BLACK,
+    opacity: 0.6,
+    depth: 4,
+    blendMode: 2,
+    key: 'endLevel2',
+  }),
+  addFog({
+    scene,
+    fill: BLACK,
+    opacity: 0.6,
+    depth: 5,
+    blendMode: 2,
+    key: 'endLevel3',
+  }),
+];
+
 const ATMOSPHERE = {
   morning: morningFog,
   day: dayFog,
@@ -200,6 +228,7 @@ const ATMOSPHERE = {
   dusk: duskFog,
   night: nightFog,
   // nightNeon: nightNeon
+  endLevel: endLevelFog,
 };
 
 export default ATMOSPHERE;
