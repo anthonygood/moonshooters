@@ -16,7 +16,7 @@ const EndOfLevelReport = (scene: TheCity, score: Score) => {
 	const timeTakenSec = Math.floor((end - start) / 1000);
 	const timeTakenMin = Math.floor(timeTakenSec / 60)
 	const timeTaken = `${timeTakenMin ? timeTakenMin + 'm ' : ''}${timeTakenSec % 60}s`;
-	const pass = Math.floor(score.current / score.outOf * 100) > .5;
+  const pass = score.current && (score.current / score.outOf) > .5;
 	const heading = `LEVEL ${pass ? 'CLEARED' : 'FAILED'}`;
 	const currentVal = score.current * 100;
 	const penalty = score.penalty;
@@ -66,12 +66,21 @@ class TheCity extends Phaser.Scene {
 			key: 'The City'
 		});
 		this.player = new Player(this);
-		this.background = new Background(this);
+		this.background = this.getBackground();
 		this.score = new Score(this);
 		this.NPCs = [];
-	}
+  }
+
+  getBackground() {
+    return new Background(this);
+  }
+
+  getLevelJson() {
+    return json;
+  }
 
 	preload() {
+    const json = this.getLevelJson();
 		this.background.preload(json);
 		this.load.tilemapTiledJSON(MAP_KEY, json);
 		this.load.image(LEVEL_KEY, asset('tilemaps/platforms_extruded.png'));

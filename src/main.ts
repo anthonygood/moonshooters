@@ -1,6 +1,7 @@
 import 'phaser';
 
 import TheCity from './scenes/TheCity';
+import TheCityII from './scenes/TheCityII';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -10,7 +11,8 @@ const config: Phaser.Types.Core.GameConfig = {
   resolution: 1,
   backgroundColor: '#FFFFFF',
   scene: [
-    TheCity,
+    // TheCity,
+    TheCityII,
   ],
   render: {
     antialias: false,
