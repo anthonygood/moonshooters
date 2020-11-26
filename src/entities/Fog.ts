@@ -54,7 +54,10 @@ export const addFog: AddFog = ({
 }) => {
   const { displayHeight: height, displayWidth: width  } = scene.cameras.main;
 
-  const texture = scene.textures.createCanvas(key, width, height);
+  const texture: Phaser.Textures.CanvasTexture = scene.textures.exists(key) ?
+    scene.textures.get(key) :
+    scene.textures.createCanvas(key, width, height);
+
   const fillStyle = typeof fill === 'string' ? fill : fill(texture.context, height, width);
   texture.context.fillStyle = fillStyle;
   texture.context.fillRect(0, 0, width, height);
@@ -159,14 +162,14 @@ const dayFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
     fill: GRADIENTS.day,
     opacity: 0.6,
     depth: 4,
-    blendMode: 2,
+    blendMode: 0,
   }),
   addFog({
     scene,
     fill: GRADIENTS.day,
     opacity: 0.3,
     depth: 6,
-    blendMode: 2,
+    blendMode: 0,
   }),
 ];
 

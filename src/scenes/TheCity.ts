@@ -1,4 +1,4 @@
-import Score from '../entities/Score';
+import Score, { EndOfLevelReport } from '../entities/Score';
 import Player from '../entities/Player';
 import NPC from '../entities/NPC/NPC';
 import { Morning as Background } from '../entities/Background';
@@ -11,46 +11,6 @@ const MAP_SCALE = 1.5;
 const MAP_KEY = 'map';
 const LEVEL_KEY = 'level';
 
-const EndOfLevelReport = (scene: TheCity, score: Score) => {
-	const { start, end, cameras, add } = scene;
-	const timeTakenSec = Math.floor((end - start) / 1000);
-	const timeTakenMin = Math.floor(timeTakenSec / 60)
-	const timeTaken = `${timeTakenMin ? timeTakenMin + 'm ' : ''}${timeTakenSec % 60}s`;
-  const pass = score.current && (score.current / score.outOf) > .5;
-	const heading = `LEVEL ${pass ? 'CLEARED' : 'FAILED'}`;
-	const currentVal = score.current * 100;
-	const penalty = score.penalty;
-	const timeBonus = 500 - timeTakenSec;
-	const total = timeBonus + currentVal - penalty;
-  const body = !pass ? `
-   ${heading}
-   ------------
-
-         MASKED:  ${score.current} / ${score.outOf}
-` :
-`   ${heading}
-	  ------------
-
-         MASKED:  ${score.current} / ${score.outOf}
-                 +${total}
-
-           TIME:  ${timeTaken}
-                 +${timeBonus}
-
-SOCIAL DISTANCE: ${penalty || ' ' + penalty}
-
-          TOTAL:  ${total}`;
-	const screenCenterX = scene.cameras.main.width / 2;
-	const text = scene.add.text(screenCenterX, 300, body, {
-		color: 'white',
-		fontSize: 36,
-	});
-	text.setOrigin(0.5)
-		.setScrollFactor(0)
-		.setDepth(6);
-	ATMOSPHERE.endLevel(scene);
-};
-
 class TheCity extends Phaser.Scene {
 	private score: Score;
 	public player: Player;
@@ -58,14 +18,12 @@ class TheCity extends Phaser.Scene {
 	public map: Phaser.Tilemaps.Tilemap;
 	public NPCs: NPC[];
 	public background: Background;
-	public start: Date;
-	public end: Date;
 
 	constructor() {
     super({
 			key: 'The City'
 		});
-		this.player = new Player(this);
+    this.player = new Player(this);
 		this.background = this.getBackground();
 		this.score = new Score(this);
 		this.NPCs = [];
@@ -90,6 +48,7 @@ class TheCity extends Phaser.Scene {
 	}
 
 	create() {
+		console.log('scene::create!!!')
 		const map = this.map = this.make.tilemap({ key: MAP_KEY });
 		const tileset = map.addTilesetImage('Platforms', LEVEL_KEY);
 		this.background.create(map, MAP_SCALE);
@@ -101,7 +60,7 @@ class TheCity extends Phaser.Scene {
 
 		this.cursors = this.input.keyboard.createCursorKeys();
 
-		const playerSpawn = map.findObject('Objects', obj => obj.name === 'PlayerSpawn');
+		const playerSpawn = this.playerSpawn = map.findObject('Objects', obj => obj.name === 'PlayerSpawn');
 		this.player.create(this.cursors, [playerSpawn.x * MAP_SCALE, playerSpawn.y * MAP_SCALE]);
 		this.player.container.setDepth(6);
 		this.physics.add.collider(this.player.container, layer);
@@ -121,8 +80,6 @@ class TheCity extends Phaser.Scene {
 				// apparently overlap uses fixed update so should be consistent regardless of framerate
 				this.score.penalise();
 			});
-
-			this.start = new Date();
 		});
 
 		// debug
@@ -139,11 +96,18 @@ class TheCity extends Phaser.Scene {
 	}
 
 	update(time: number, delta: number) {
-		if (!this.end && this.player.container.body.top > this.map.heightInPixels * MAP_SCALE) {
-			// respawn
-			// this.player.container.setPosition(this.playerSpawn.x, 0);
-			this.end = new Date;
-			EndOfLevelReport(this, this.score);
+    const fallenBelowBounds = this.player.container.body.top > this.map.heightInPixels * MAP_SCALE;
+		if (fallenBelowBounds) {
+      if (!this.score.end) {
+				this.score.finish();
+      } else {
+        if (this.cursors.space.isDown) {
+					this.player.destroy();
+					this.NPCs.forEach(npc => npc.destroy());
+					this.NPCs = [];
+					this.scene.restart();
+        }
+      }
 		} else {
 			this.player.update(time, delta);
 		}

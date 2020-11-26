@@ -12,7 +12,7 @@ export const VELOCITY = {
   run: 1600,
   jump: 1400,
   max: {
-    x: 400,
+    x: 600,
     y: 1000,
   }
 };
@@ -51,8 +51,13 @@ class Player {
 
   preload(): void {
     this.forEachSprite(({ key, json }) => {
-      this.scene.load.multiatlas(key, json, '/assets/sprites')
+      if (this.scene.textures.exists(key)) return;
+      this.scene.load.multiatlas(key, json, '/assets/sprites');
     });
+  }
+
+  destroy(): void {
+    this.container.destroy();
   }
 
   create(cursors, spawn: number[]): void {
