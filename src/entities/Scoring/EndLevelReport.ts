@@ -28,17 +28,20 @@ SOCIAL DISTANCE: ${penalty || ' ' + penalty}
 `;
 
 export const EndLevelReport = (scene: Phaser.Scene, score: Score) => {
-	const { pass, start, end } = score;
-	const timeTakenSec = Math.floor((end - start) / 1000);
-	const timeTakenMin = Math.floor(timeTakenSec / 60)
-	const timeTaken = `${timeTakenMin ? timeTakenMin + 'm ' : ''}${timeTakenSec % 60}s`;
-  // const pass = score.current && (score.current / score.outOf) > .5;
+	const { pass, time, } = score;
+	const timeTakenMin = Math.floor(time.sec / 60);
+	const timeTaken = `${timeTakenMin ? timeTakenMin + 'm ' : ''}${time.sec % 60}s`;
 	const heading = `LEVEL ${pass ? 'CLEARED' : 'FAILED'}`;
-	const currentVal = score.current * 100;
 	const penalty = score.penalty;
-	const timeBonus = 500 - timeTakenSec;
-	const total = timeBonus + currentVal - penalty;
-  const body = !pass ? failText({ heading, score }) : passText({ heading, score, total, timeTaken, timeBonus, penalty });
+	const total = score.total;
+  const body = !pass ? failText({ heading, score }) : passText({
+    heading,
+    score,
+    total,
+    timeTaken,
+    timeBonus: time.bonus,
+    penalty
+  });
 
 	const screenCenterX = scene.cameras.main.width / 2;
 	const text = scene.add.text(screenCenterX, 300, body, {

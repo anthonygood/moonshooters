@@ -65,8 +65,13 @@ class Score {
 	public end: Date;
 	public pass: boolean;
 	public total: number;
-	public time: number;
-	public timeBonus: number;
+	// public time: number;
+	public time: {
+		total: number;
+		sec: number;
+		bonus: number;
+	};
+	// public timeBonus: number;
 	private container: Phaser.GameObjects.Text;
 	constructor(scene: Phaser.Scene, total = 0) {
 		this.scene = scene;
@@ -88,13 +93,20 @@ class Score {
 	}
 
 	finish() {
-		const { current, outOf, penalty, scene, start } = this;
-		const end = this.end = new Date();
-		const time = this.time = start - end;
+		const { current, outOf, penalty, start } = this;
 		this.pass = current && (current / outOf) > .5;
 
+		const end = this.end = new Date();
+		const time = start - end;
 		const timeTakenSec = Math.floor(time / 1000);
-		const timeBonus = this.timeBonus = 500 - timeTakenSec;
+		const timeBonus = 500 - timeTakenSec;
+
+		this.time = {
+			total: time,
+			sec: timeTakenSec,
+			bonus: timeBonus,
+		};
+
 		this.total = timeBonus + current - penalty;
 	}
 
