@@ -1,4 +1,4 @@
-import ATMOSPHERE from '../entities/Fog';
+import ATMOSPHERE from '../Fog';
 
 const failText = ({ heading, score }) => `
 ${heading}
@@ -27,11 +27,11 @@ SOCIAL DISTANCE: ${penalty || ' ' + penalty}
 `;
 
 export const EndOfLevelReport = (scene: Phaser.Scene, score: Score) => {
-	const { start, end } = score;
+	const { pass, start, end } = score;
 	const timeTakenSec = Math.floor((end - start) / 1000);
 	const timeTakenMin = Math.floor(timeTakenSec / 60)
 	const timeTaken = `${timeTakenMin ? timeTakenMin + 'm ' : ''}${timeTakenSec % 60}s`;
-  const pass = score.current && (score.current / score.outOf) > .5;
+  // const pass = score.current && (score.current / score.outOf) > .5;
 	const heading = `LEVEL ${pass ? 'CLEARED' : 'FAILED'}`;
 	const currentVal = score.current * 100;
 	const penalty = score.penalty;
@@ -63,7 +63,10 @@ class Score {
 	public outOf: number;
 	public start: Date;
 	public end: Date;
-	private disposeReport: () => void;
+	public pass: boolean;
+	public total: number;
+	public time: number;
+	public timeBonus: number;
 	private container: Phaser.GameObjects.Text;
 	constructor(scene: Phaser.Scene, total = 0) {
 		this.scene = scene;
@@ -77,7 +80,6 @@ class Score {
 	create() {
 		this.start = new Date();
 		this.end = null;
-		this.disposeReport && this.disposeReport();
 		this.current = 0;
 		this.penalty = 0;
 		this.container = this.scene.add.text(10, 10, this.text(), this.style())
@@ -86,8 +88,14 @@ class Score {
 	}
 
 	finish() {
-		this.end = new Date();
-		this.disposeReport = EndOfLevelReport(this.scene, this);
+		const { current, outOf, penalty, scene, start } = this;
+		const end = this.end = new Date();
+		const time = this.time = start - end;
+		this.pass = current && (current / outOf) > .5;
+
+		const timeTakenSec = Math.floor(time / 1000);
+		const timeBonus = this.timeBonus = 500 - timeTakenSec;
+		this.total = timeBonus + current - penalty;
 	}
 
 	update() {

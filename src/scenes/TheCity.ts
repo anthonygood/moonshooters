@@ -1,9 +1,9 @@
-import Score, { EndOfLevelReport } from '../entities/Score';
+import EndLevelReport from '../entities/Scoring/EndLevelReport';
+import Score from '../entities/Scoring/Score';
 import Player from '../entities/Player';
 import NPC from '../entities/NPC/NPC';
 import { Morning as Background } from '../entities/Background';
 import * as json from '../../assets/tilemaps/The City.json';
-import ATMOSPHERE from '../entities/Fog';
 
 const asset = (path: string) => `/assets/${path}`;
 
@@ -18,6 +18,7 @@ class TheCity extends Phaser.Scene {
 	public map: Phaser.Tilemaps.Tilemap;
 	public NPCs: NPC[];
 	public background: Background;
+	private disposeReport: () => void;
 
 	constructor() {
     super({
@@ -100,9 +101,11 @@ class TheCity extends Phaser.Scene {
 		if (fallenBelowBounds) {
       if (!this.score.end) {
 				this.score.finish();
+				this.disposeReport = EndLevelReport(this, this.score);
       } else {
         if (this.cursors.space.isDown) {
 					this.player.destroy();
+					this.disposeReport();
 					this.NPCs.forEach(npc => npc.destroy());
 					this.NPCs = [];
 					this.scene.restart();
