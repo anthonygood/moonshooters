@@ -123,8 +123,8 @@ class Background {
   }
 
   getTheme() {
-    const { blue } = this.variants;
-    return { layers: [blue, blue, blue], fog: Fog.day };
+    const { blue, grey } = this.variants;
+    return { layers: [blue, grey, blue], fog: Fog.day };
   }
 }
 

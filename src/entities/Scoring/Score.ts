@@ -65,28 +65,44 @@ class Score {
 	public end: Date;
 	public pass: boolean;
 	public total: number;
-	// public time: number;
+	public penaltyAcrossAllLives: number;
 	public time: {
 		total: number;
 		sec: number;
 		bonus: number;
 	};
+	public deaths: number;
 	// public timeBonus: number;
 	private container: Phaser.GameObjects.Text;
 	constructor(scene: Phaser.Scene, total = 0) {
 		this.scene = scene;
 		this.outOf = total;
+		this.deaths = 0;
 	}
 
 	setTotal(total: number) {
 		this.outOf = total;
 	}
 
+	// Create is called when player restarts level, so consider player death here.
 	create() {
+		if (this.start) {
+			console.log('Score reset!');
+			// Increment things
+			this.deaths++;
+			this.penaltyAcrossAllLives += this.penalty;
+
+			// Reset things
+			// this.end = null;
+			// this.current = 0;
+			// this.penalty = 0;
+		}
+
 		this.start = new Date();
 		this.end = null;
 		this.current = 0;
 		this.penalty = 0;
+
 		this.container = this.scene.add.text(10, 10, this.text(), this.style())
 			.setScrollFactor(0, 0)
 			.setDepth(6); // TODO: de-couple from scene layering or parameterise
@@ -97,9 +113,9 @@ class Score {
 		this.pass = current && (current / outOf) > .5;
 
 		const end = this.end = new Date();
-		const time = start - end;
+		const time = end - start;
 		const timeTakenSec = Math.floor(time / 1000);
-		const timeBonus = 500 - timeTakenSec;
+		const timeBonus = this.pass ? 500 - timeTakenSec : 0;
 
 		this.time = {
 			total: time,

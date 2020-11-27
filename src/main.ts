@@ -11,7 +11,7 @@ const config: Phaser.Types.Core.GameConfig = {
   resolution: 1,
   backgroundColor: '#FFFFFF',
   scene: [
-    // TheCity,
+    TheCity,
     TheCityII,
   ],
   render: {

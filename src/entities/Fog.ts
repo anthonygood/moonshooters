@@ -202,8 +202,8 @@ const endLevelFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
     scene,
     fill: BLACK,
     opacity: 1,
-    depth: 2,
-    blendMode: 0,
+    depth: 3,
+    blendMode: 2,
     key: 'endLevel1',
   }),
   addFog({

@@ -4,7 +4,7 @@ import { Direction } from '../../state/Direction';
 const sample = (vals = []) =>
   vals[Math.floor(Math.random() * vals.length)];
 
-enum NPCDirection {
+export enum NPCDirection {
   Left,
   Right,
   None
@@ -12,7 +12,7 @@ enum NPCDirection {
 
 export interface NPCDriver {
   getDirection: () => Direction;
-  go: (NPCDirection) => void;
+  go: (direction: NPCDirection) => void;
   change: () => void;
 };
 

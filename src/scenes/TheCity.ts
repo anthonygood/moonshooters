@@ -1,15 +1,31 @@
 import EndLevelReport from '../entities/Scoring/EndLevelReport';
 import Score from '../entities/Scoring/Score';
+import { rate } from '../entities/Scoring/Rater';
 import Player from '../entities/Player';
-import NPC from '../entities/NPC/NPC';
+import NPC, { Modifiers } from '../entities/NPC/NPC';
 import { Morning as Background } from '../entities/Background';
 import * as json from '../../assets/tilemaps/The City.json';
+import { NPCDirection } from '../entities/NPC/Driver';
 
 const asset = (path: string) => `/assets/${path}`;
 
 const MAP_SCALE = 1.5;
-const MAP_KEY = 'map';
+// const MAP_KEY = 'TheCity';
 const LEVEL_KEY = 'level';
+
+const getModifiersFromProps = (properties) => {
+	const modifier = properties.find(({ name }) => name === 'modifier');
+	if (!modifier) return {};
+
+	const moveOnTouch = modifier.value.includes('moveLeftOnTouch') ? NPCDirection.Left :
+		modifier.value.includes('moveRightOnTouch') ? NPCDirection.Right :
+			null;
+
+	return <Modifiers>{
+		idle: modifier.value.includes('idle'),
+		moveOnTouch
+	};
+}
 
 class TheCity extends Phaser.Scene {
 	private score: Score;
@@ -20,28 +36,31 @@ class TheCity extends Phaser.Scene {
 	public background: Background;
 	private disposeReport: () => void;
 
-	constructor() {
-    super({
-			key: 'The City'
-		});
+	constructor(key = 'The City') {
+		super({ key });
     this.player = new Player(this);
 		this.background = this.getBackground();
 		this.score = new Score(this);
 		this.NPCs = [];
-  }
+	}
 
   getBackground() {
     return new Background(this);
   }
 
   getLevelJson() {
+		console.log('TheCity.getLevelJson');
     return json;
-  }
+	}
+
+	getMapKey() {
+		return 'TheCity';
+	}
 
 	preload() {
     const json = this.getLevelJson();
 		this.background.preload(json);
-		this.load.tilemapTiledJSON(MAP_KEY, json);
+		this.load.tilemapTiledJSON(this.getMapKey(), json);
 		this.load.image(LEVEL_KEY, asset('tilemaps/platforms_extruded.png'));
 
 		this.player.preload();
@@ -49,8 +68,7 @@ class TheCity extends Phaser.Scene {
 	}
 
 	create() {
-		console.log('scene::create!!!')
-		const map = this.map = this.make.tilemap({ key: MAP_KEY });
+		const map = this.map = this.make.tilemap({ key: this.getMapKey() });
 		const tileset = map.addTilesetImage('Platforms', LEVEL_KEY);
 		this.background.create(map, MAP_SCALE);
 
@@ -101,14 +119,15 @@ class TheCity extends Phaser.Scene {
 		if (fallenBelowBounds) {
       if (!this.score.end) {
 				this.score.finish();
-				this.disposeReport = EndLevelReport(this, this.score);
+				const ratings = rate(this.score, this.player.state.flightRecorder);
+				this.disposeReport = EndLevelReport(this, this.score, ratings.join('\n'));
       } else {
         if (this.cursors.space.isDown) {
 					this.player.destroy();
 					this.disposeReport();
 					this.NPCs.forEach(npc => npc.destroy());
 					this.NPCs = [];
-					this.scene.restart();
+					this.score.pass ? this.nextScene() : this.scene.restart();
         }
       }
 		} else {
@@ -132,14 +151,16 @@ class TheCity extends Phaser.Scene {
 		spawnPoints
 			.forEach(({ properties = [], x, y }) => {
 				const npc = new NPC(this);
-				const modifiers = {
-					idle: properties.find(({ name, value}) => name === 'modifier' && value === 'idle'),
-				};
+				const modifiers = getModifiersFromProps(properties);
 				npc.create(cursors, [x * MAP_SCALE, y * MAP_SCALE], modifiers);
 				npc.container.setDepth((npcCount % 2) + 5);
 				physics.add.collider(npc.container, layer);
 				NPCs.push(npc);
 		});
+	}
+
+	nextScene() {
+		return this.scene.start('The CityII');
 	}
 }
 

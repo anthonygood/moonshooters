@@ -2,13 +2,14 @@ import COLOURS from './Colours';
 import Player, { SpriteLayer, VELOCITY } from '../Player';
 import NPCState from '../../state/NPCState';
 import { spriteJson, createFramesForKey } from '../../animations';
-import Driver, { NPCDriver } from './Driver';
+import Driver, { NPCDirection, NPCDriver } from './Driver';
 
 const sample = (vals = []) =>
   vals[Math.floor(Math.random() * vals.length)];
 
-type Modifiers = {
+export type Modifiers = {
   idle?: boolean;
+  moveOnTouch?: NPCDirection;
 };
 
 class NPC extends Player {
@@ -53,8 +54,7 @@ class NPC extends Player {
     [{ key: 'mask', json: spriteJson('mask'), tints: [COLOURS.white, COLOURS.green, ...Object.values(COLOURS.mask)] } ],
   ];
 
-  // TODO: Define in map
-  public spawn = [350, 1000];
+  private modifiers: Modifiers;
 
   static preload(scene) {
     NPC.layers.forEach(layer => layer.forEach(({ key, json }) => {
@@ -74,6 +74,7 @@ class NPC extends Player {
     this.tintSprites();
     this.toggleMask(); // hide
     this.spawned = true;
+    this.modifiers = modifiers;
 
     if (!modifiers || !modifiers.idle) this.move();
   }
@@ -84,6 +85,7 @@ class NPC extends Player {
       velocities: VELOCITY,
       onTouch: () => {
         this.toggleMask();
+        this.modifiers.moveOnTouch && this.driver.go(this.modifiers.moveOnTouch);
       }
     });
   }
@@ -93,6 +95,7 @@ class NPC extends Player {
   }
 
   move() {
+    // TODO: manage in state machine?
     setTimeout(() => {
       this.driver.change();
       this.move();

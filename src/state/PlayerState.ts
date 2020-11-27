@@ -66,16 +66,17 @@ const Recording = () => ({
   longest: 0,
 });
 
+export type FlightRecorder = {
+  idle: Recording;
+  jump: Recording;
+  left: Recording;
+  right: Recording;
+};
+
 class PlayerState {
   private direction: PlayerState.Machine;
   private action: PlayerState.Machine;
-
-  public flightRecorder: {
-    idle: Recording;
-    jump: Recording;
-    left: Recording;
-    right: Recording;
-  }
+  public flightRecorder: FlightRecorder;
 
   constructor(config: PlayerState.Config) {
     this.flightRecorder = {
@@ -154,8 +155,8 @@ class PlayerState {
         this.flightRecorder.jump.longest = Math.max(this.flightRecorder.jump.longest, this.flightRecorder.jump.current);
         this.flightRecorder.jump.current = 0;
       })
-      .transitionTo('idle').when(helpers.isOnGround)
       .transitionTo('walk').when(helpers.onGroundAnd(data => onlyLeft(data) || onlyRight(data)))
+      .transitionTo('idle').when(helpers.isOnGround)
 
     // Climb state
       .state('climb')

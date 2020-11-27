@@ -195,7 +195,6 @@ const getFrames = (scene: Phaser.Scene, prefix: string, end: number, key: string
 };
 
 export const createFramesForKey = (scene: Phaser.Scene) => (key: string) => {
-  console.log(`setting some anim for`, key, `${key}/idle`);
   scene.anims.create({
     key: `${key}/walk`,
     frameRate: 6,
