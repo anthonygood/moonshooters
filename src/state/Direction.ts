@@ -29,7 +29,6 @@ export class CursorKeyDirection implements Direction {
 
   timeDown(direction: 'up' | 'down' | 'left' | 'right') {
     const key = this.cursors[direction];
-    console.log('timeDown', direction, key);
     return key ? key.timeDown : 0;
   }
 }
