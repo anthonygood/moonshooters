@@ -1,8 +1,8 @@
 import TheCity from './TheCity';
-import { Day as Background } from '../entities/Background';
-import * as json from '../../assets/tilemaps/The City II.json';
+import { Sunset as Background } from '../entities/Background';
+import * as json from '../../assets/tilemaps/The City III.json';
 
-export default class TheCityII extends TheCity {
+export default class TheCityIII extends TheCity {
   constructor() {
 		super('The CityII');
   }
@@ -23,3 +23,4 @@ export default class TheCityII extends TheCity {
 		return this.scene.start('The City');
 	}
 }
+
