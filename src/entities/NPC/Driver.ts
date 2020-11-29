@@ -5,9 +5,9 @@ const sample = (vals = []) =>
   vals[Math.floor(Math.random() * vals.length)];
 
 export enum NPCDirection {
-  Left,
-  Right,
-  None
+  Left = 'Left',
+  Right = 'Right',
+  None = 'None',
 };
 
 export interface NPCDriver {

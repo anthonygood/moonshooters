@@ -56,6 +56,7 @@ class Player {
     });
   }
 
+  // TODO: more cleanup?
   destroy(): void {
     this.container.destroy();
   }

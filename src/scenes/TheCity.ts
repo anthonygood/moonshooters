@@ -6,15 +6,12 @@ import NPC, { Modifiers } from '../entities/NPC/NPC';
 import { Morning as Background } from '../entities/Background';
 import * as json from '../../assets/tilemaps/The City.json';
 import { NPCDirection } from '../entities/NPC/Driver';
-import Van from '../entities/Van';
 
-
-const MAP_SCALE = 1.5;
+export const MAP_SCALE = 1.5;
 const LEVEL_KEY = 'level';
 const VAN_KEY = 'van';
 
 const asset = (path: string) => `/assets/${path}`;
-const mapScale = num => num * MAP_SCALE;
 
 const getModifiersFromProps = (properties) => {
 	const modifier = properties.find(({ name }) => name === 'modifier');
@@ -30,20 +27,12 @@ const getModifiersFromProps = (properties) => {
 	};
 }
 
-const id = properites => properites.find(prop => prop.name === 'id').value;
-
-const getBoundaryForVan = (map: Phaser.Tilemaps.Tilemap, van) => {
-	const vanId = id(van.properties);
-	return map.findObject('Objects', obj => obj.name === 'VanBoundary' && id(obj.properties) === vanId);
-}
-
 class TheCity extends Phaser.Scene {
 	private score: Score;
 	public player: Player;
 	public cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 	public map: Phaser.Tilemaps.Tilemap;
 	public NPCs: NPC[];
-	public van: Van;
 	public background: Background;
 	private disposeReport: () => void;
 
@@ -53,7 +42,6 @@ class TheCity extends Phaser.Scene {
 		this.background = this.getBackground();
 		this.score = new Score(this);
 		this.NPCs = [];
-		this.van = new Van(this);
 	}
 
   getBackground() {
@@ -78,7 +66,6 @@ class TheCity extends Phaser.Scene {
 
 		this.player.preload();
 		NPC.preload(this);
-		Van.preload(this);
 	}
 
 	create() {
@@ -93,7 +80,7 @@ class TheCity extends Phaser.Scene {
 
 		this.cursors = this.input.keyboard.createCursorKeys();
 
-		const playerSpawn = this.playerSpawn = map.findObject('Objects', obj => obj.name === 'PlayerSpawn');
+		const playerSpawn = map.findObject('Objects', obj => obj.name === 'PlayerSpawn');
 		this.player.create(this.cursors, [playerSpawn.x * MAP_SCALE, playerSpawn.y * MAP_SCALE]);
 		this.player.container.setDepth(7);
 		this.physics.add.collider(this.player.container, layer);
@@ -104,6 +91,7 @@ class TheCity extends Phaser.Scene {
 		this.spawnNPCs(layer);
 		this.score.create();
 
+		// TODO: dispose with overlap listeners?
 		this.NPCs.forEach(npc => {
 			this.physics.add.overlap(npc.container, this.player.container, (npcContainer, _player) => {
 				!npcContainer.getData('touchedByPlayer') && this.score.increment();
@@ -115,35 +103,22 @@ class TheCity extends Phaser.Scene {
 			});
 		});
 
-		const van = this.map.findObject('Objects', obj => obj.name === 'VanSpawn');
-		const boundary = getBoundaryForVan(map, van);
-		this.van.create(mapScale(van.x), mapScale(van.y - 10), mapScale(boundary.x));
-
-		this.physics.add.overlap(this.van.container, this.player.container, (_van, player) => {
-			if (player.getData('roadkill')) return;
-			player.setData('roadkill', true);
-			// this.player.container.setRotation(-1.5);
-			// this.player.container.body.setSize(
-			// 	this.player.container.body.height,
-			// 	2
-			// ).setVelocityX(-1000);
-			this.end();
-		});
-
 		// debug
 		window.game = this;
 	}
 
 	update(time: number, delta: number) {
-    const fallenBelowBounds = this.player.container.body.top > this.map.heightInPixels * MAP_SCALE;
-		if (fallenBelowBounds || this.score.end) {
-			if (!this.score.end) this.end();
+		const fallenBelowBounds = this.player.container.body.top > this.map.heightInPixels * MAP_SCALE;
+		const roadkill = this.player.container.getData('roadkill');
+
+		if (this.score.end) {
 			if (this.cursors.space.isDown) this.restart();
 		} else {
-			this.player.update(time, delta);
+			if (fallenBelowBounds || roadkill) this.end();
 		}
 
-		this.van.update();
+		// Don't keep updating player out of level bounds
+		if (!fallenBelowBounds) this.player.update(time, delta);
 
 		// TODO: only update NPCs nearby?
 		this.NPCs
@@ -158,7 +133,6 @@ class TheCity extends Phaser.Scene {
 	}
 
 	restart() {
-		this.player.destroy();
 		this.disposeReport();
 		this.NPCs.forEach(npc => npc.destroy());
 		this.NPCs = [];

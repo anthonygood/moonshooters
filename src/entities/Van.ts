@@ -5,10 +5,10 @@ const VELOCITY = 500;
 
 class Van {
   public container: Phaser.GameObjects.GameObject;
+  public direction: NPCDirection;
   private scene: Phaser.Scene;
   private spawn: [number, number];
   private boundary: number;
-  private direction: NPCDirection;
 
   static preload(scene) {
 		scene.load.image(VAN_KEY, '/assets/sprites/white van.png');
@@ -63,6 +63,11 @@ class Van {
       body.x = spawnX;
       body.y = spawnY;
     }
+  }
+
+  // TODO: more cleanup?
+  destroy(): void {
+    this.container.destroy();
   }
 }
 
