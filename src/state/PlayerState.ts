@@ -1,15 +1,17 @@
 import { Physics } from 'phaser';
 import { StateMachine, TStateMachine } from './StateMachine';
 import { Direction } from './Direction';
+import { NPCDirection } from '../entities/NPC/Driver';
 
 function Helpers({ container, velocities }: PlayerState.Config) {
-  const setAnimation = animName => {
-    container.iterate((sprite) => {
+  const setAnimation = (animName: string, index = 0) => {
+    container.iterate((sprite: Phaser.GameObjects.Sprite) => {
       // TODO: validate animation name?
-      sprite.play(`${sprite.name}/${animName}`, true);
+      sprite.play(`${sprite.name}/${animName}`, true, index);
     });
   };
 
+  const roadkill = () => container.getData('roadkill');
   const body = (): Physics.Arcade.Body => container.body as Physics.Arcade.Body; // TODO: better?
   const isOnGround = () => body().touching.down || body().blocked.down;
   const canClimb = (data: PlayerState.ProcessParams) => {
@@ -25,6 +27,7 @@ function Helpers({ container, velocities }: PlayerState.Config) {
     setAnimation,
     isOnGround,
     justPressed,
+    roadkill,
     noDirectionPressed: (data: PlayerState.ProcessParams) => !data.direction.right && !data.direction.left && !data.direction.up,
     shouldJump: (data: PlayerState.ProcessParams) => {
       return data.direction.up && isOnGround() && !canClimb(data) && justPressed('up', data);
@@ -48,7 +51,7 @@ function Helpers({ container, velocities }: PlayerState.Config) {
       if (data.direction.up) change -= velocity;
       if (data.direction.down) change += velocity;
       body().setVelocityY(change);
-    }
+    },
   };
 };
 
@@ -104,6 +107,7 @@ class PlayerState {
       .tick((data: PlayerState.ProcessParams) => {
         this.flightRecorder.left.time += data.delta;
       })
+      .transitionTo('roadkill').when(helpers.roadkill)
       .state('left').transitionTo('right').when(helpers.onGroundAnd(onlyRight))
       .andThen(() => {
         flipX(false)();
@@ -111,7 +115,8 @@ class PlayerState {
       })
       .tick((data: PlayerState.ProcessParams) => {
         this.flightRecorder.right.time += data.delta;
-      });
+      })
+      .transitionTo('roadkill').when(helpers.roadkill);
 
     // Idle state
     this.action = <PlayerState.Machine>StateMachine('idle')
@@ -129,6 +134,7 @@ class PlayerState {
         this.flightRecorder.idle.longest = Math.max(this.flightRecorder.idle.longest, this.flightRecorder.idle.current);
         this.flightRecorder.idle.current = 0;
       })
+      .transitionTo('roadkill').when(helpers.roadkill)
       .transitionTo('jump').when(helpers.shouldJump)
       .transitionTo('walk').when(data => onlyLeft(data) || onlyRight(data))
       .transitionTo('climb').when(helpers.shouldClimb)
@@ -139,6 +145,7 @@ class PlayerState {
       .transitionTo('idle').when((data: PlayerState.ProcessParams) => !data.direction.left && !data.direction.right)
       .transitionTo('jump').when(helpers.shouldJump)
       .transitionTo('climb').when(helpers.shouldClimb)
+      .transitionTo('roadkill').when(helpers.roadkill)
 
     // Jump state
       .state('jump').andThen(() => {
@@ -155,8 +162,25 @@ class PlayerState {
         this.flightRecorder.jump.longest = Math.max(this.flightRecorder.jump.longest, this.flightRecorder.jump.current);
         this.flightRecorder.jump.current = 0;
       })
+      .transitionTo('roadkill').when(helpers.roadkill)
       .transitionTo('walk').when(helpers.onGroundAnd(data => onlyLeft(data) || onlyRight(data)))
       .transitionTo('idle').when(helpers.isOnGround)
+
+      .state('roadkill')
+      .andThen(() => {
+        const direction = helpers.roadkill();
+        const rotation = direction === NPCDirection.Left ? -1.5 : 1.5;
+        const velocityX = direction === NPCDirection.Left ? -1000 : 1000;
+        container.iterate((sprite: Phaser.GameObjects.Sprite) => {
+          sprite.anims.stop();
+          sprite.setFrame('idle_1.png');
+        });
+        container.setRotation(rotation);
+        helpers.body().setSize(helpers.body().height, 20)
+          .stop()
+          .setVelocityX(velocityX)
+          .setVelocityY(-1000);
+      })
 
     // Climb state
       .state('climb')

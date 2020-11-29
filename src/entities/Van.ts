@@ -1,7 +1,7 @@
 import { NPCDirection } from './NPC/Driver';
 
 const VAN_KEY = 'van';
-const VELOCITY = 500;
+const VELOCITY = 750;
 
 class Van {
   public container: Phaser.GameObjects.GameObject;
