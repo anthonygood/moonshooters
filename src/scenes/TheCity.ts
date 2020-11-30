@@ -94,8 +94,11 @@ class TheCity extends Phaser.Scene {
 		// TODO: dispose with overlap listeners?
 		this.NPCs.forEach(npc => {
 			this.physics.add.overlap(npc.container, this.player.container, (npcContainer, _player) => {
-				!npcContainer.getData('touchedByPlayer') && this.score.increment();
-				npcContainer.setData('touchedByPlayer', true);
+				if (!npcContainer.getData('touchedByPlayer')) {
+					this.score.increment();
+					this.score.update();
+					npcContainer.setData('touchedByPlayer', true);
+				}
 
 				// TODO: 2 metre penalty radius
 				// apparently overlap uses fixed update so should be consistent regardless of framerate

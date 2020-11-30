@@ -63,7 +63,6 @@ class Score {
 	public outOf: number;
 	public start: Date;
 	public end: Date;
-	public pass: boolean;
 	public total: number;
 	public penaltyAcrossAllLives: number;
 	public time: {
@@ -72,7 +71,6 @@ class Score {
 		bonus: number;
 	};
 	public deaths: number;
-	// public timeBonus: number;
 	private container: Phaser.GameObjects.Text;
 	constructor(scene: Phaser.Scene, total = 0) {
 		this.scene = scene;
@@ -87,15 +85,9 @@ class Score {
 	// Create is called when player restarts level, so consider player death here.
 	create() {
 		if (this.start) {
-			console.log('Score reset!');
 			// Increment things
 			this.deaths++;
 			this.penaltyAcrossAllLives += this.penalty;
-
-			// Reset things
-			// this.end = null;
-			// this.current = 0;
-			// this.penalty = 0;
 		}
 
 		this.start = new Date();
@@ -103,14 +95,18 @@ class Score {
 		this.current = 0;
 		this.penalty = 0;
 
-		this.container = this.scene.add.text(10, 10, this.text(), this.style())
+		this.container = this.scene.add.text(10, this.scene.cameras.main.height - 50, this.text(), this.style())
 			.setScrollFactor(0, 0)
 			.setDepth(6); // TODO: de-couple from scene layering or parameterise
 	}
 
+	get pass() {
+		const { current, outOf } = this;
+		return current && (current / outOf) > .5;
+	}
+
 	finish() {
-		const { current, outOf, penalty, start } = this;
-		this.pass = current && (current / outOf) > .5;
+		const { current, penalty, start } = this;
 
 		const end = this.end = new Date();
 		const time = end - start;
@@ -124,10 +120,15 @@ class Score {
 		};
 
 		this.total = timeBonus + current - penalty;
+		this.hide();
 	}
 
 	update() {
 		this.container.setText(this.text());
+	}
+
+	hide() {
+		this.container.setText('');
 	}
 
 	increment() {
@@ -139,17 +140,17 @@ class Score {
 	}
 
 	text() {
-		let str = `Score: ${this.current}/${this.outOf}`;
-
-		if (this.penalty) {
-			str += `\nSocial Distance Penalty: -${this.penalty}`;
-		}
-
-		return str;
+		const { pass } = this;
+		return `${pass ? '⭐️' : ''}😷${this.current}/${this.outOf}`;
 	}
 
 	style() {
-		return { fontSize: '24px', color: 'black' };
+		return {
+			fontSize: '32px',
+			color: 'white',
+			stroke: 'black',
+			strokeThickness: 5,
+		};
 	}
 }
 
