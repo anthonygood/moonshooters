@@ -20,6 +20,6 @@ export default class TheCityII extends TheCity {
 	}
 
 	nextScene() {
-		return this.scene.start('The City');
+		return this.scene.start('The CityIII');
 	}
 }

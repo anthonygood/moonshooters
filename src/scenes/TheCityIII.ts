@@ -4,7 +4,7 @@ import * as json from '../../assets/tilemaps/The City III.json';
 
 export default class TheCityIII extends TheCity {
   constructor() {
-		super('The CityII');
+		super('The CityIII');
   }
 
   getBackground() {
@@ -16,11 +16,11 @@ export default class TheCityIII extends TheCity {
   }
 
   getMapKey() {
-		return 'TheCityII';
+		return 'TheCityIII';
 	}
 
 	nextScene() {
-		return this.scene.start('The City');
+		return this.scene.start('The CityIV');
 	}
 }
 

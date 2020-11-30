@@ -2,6 +2,8 @@ import 'phaser';
 
 import TheCity from './scenes/TheCity';
 import TheCityII from './scenes/TheCityII';
+import TheCityIII from './scenes/TheCityIII';
+import TheCityIV from './scenes/TheCityIV';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -13,6 +15,8 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: [
     TheCity,
     TheCityII,
+    TheCityIII,
+    TheCityIV,
   ],
   render: {
     antialias: false,
@@ -20,9 +24,9 @@ const config: Phaser.Types.Core.GameConfig = {
   physics: {
     default: 'arcade',
     arcade: {
-      debugShowBody: true,
-      debugShowVelocity: true,
-      debugBodyColor: 10,
+      // debugShowBody: true,
+      // debugShowVelocity: true,
+      // debugBodyColor: 10,
       tileBias: 32,
       gravity: { y: 2500 },
       // debug: true,
