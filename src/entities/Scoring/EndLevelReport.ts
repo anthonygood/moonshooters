@@ -12,19 +12,19 @@ ${ratings || ''}
 PRESS SPACE
 `;
 
-const passText = ({ heading, score, total, timeTaken, timeBonus, penalty, ratings }) =>
+const passText = ({ heading, score, timeFormatted, ratings }) =>
 `   ${heading}
-	  ------------
+	  -------------
 
 MASKED:  ${score.current} / ${score.outOf}
-+${total}
++${score.currentVal}
 
-TIME:  ${timeTaken}
-+${timeBonus}
+TIME:  ${timeFormatted}
++${score.time.bonus}
 
-SOCIAL DISTANCE: ${penalty || ' ' + penalty}
+SOCIAL DISTANCE: ${score.penalty || ' ' + score.penalty}
 
-TOTAL:  ${total}
+TOTAL:  ${score.total}
 
 ${ratings || ''}
 
@@ -34,17 +34,12 @@ PRESS SPACE
 export const EndLevelReport = (scene: Phaser.Scene, score: Score, ratings: string) => {
 	const { pass, time, } = score;
 	const timeTakenMin = Math.floor(time.sec / 60);
-	const timeTaken = `${timeTakenMin ? timeTakenMin + 'm ' : ''}${time.sec % 60}s`;
+	const timeFormatted = `${timeTakenMin ? timeTakenMin + 'm ' : ''}${time.sec % 60}s`;
 	const heading = `LEVEL ${pass ? 'CLEARED' : 'FAILED'}`;
-	const penalty = score.penalty;
-	const total = score.total;
   const body = !pass ? failText({ heading, score, ratings }) : passText({
     heading,
     score,
-    total,
-    timeTaken,
-    timeBonus: time.bonus,
-    penalty,
+    timeFormatted,
     ratings,
   });
 
