@@ -5,7 +5,7 @@ const failText = ({ heading, score, ratings }) => `
 ${heading}
 ------------
 
-MASKED:  ${score.current} / ${score.outOf}
+ASSISTED:  ${score.current} / ${score.outOf}
 
 ${ratings || ''}
 
@@ -16,7 +16,7 @@ const passText = ({ heading, score, timeFormatted, ratings }) =>
 `   ${heading}
 	  -------------
 
-MASKED:  ${score.current} / ${score.outOf}
+ASSISTED:  ${score.current} / ${score.outOf}
 +${score.currentVal}
 
 TIME:  ${timeFormatted}
