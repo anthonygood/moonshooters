@@ -52,7 +52,7 @@ class Score {
 		const { current, penalty, start } = this;
 
 		const end = this.end = new Date();
-		const time = end - start;
+		const time = Number(end) - Number(start);
 		const timeTakenSec = Math.floor(time / 1000);
 		const timeBonus = this.pass ? 500 - timeTakenSec : 0;
 

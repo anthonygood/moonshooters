@@ -25,7 +25,13 @@ const getModifiersFromProps = (properties) => {
 		idle: modifier.value.includes('idle'),
 		moveOnTouch
 	};
-}
+};
+
+export interface SpawnPoint extends Phaser.GameObjects.GameObject {
+	properties: any[],
+	x: number,
+	y: number,
+};
 
 class TheCity extends Phaser.Scene {
 	private score: Score;
@@ -57,8 +63,10 @@ class TheCity extends Phaser.Scene {
 	}
 
 	preload() {
-    const json = this.getLevelJson();
+		const json = this.getLevelJson();
+		// @ts-ignore
 		this.background.preload(json);
+		// @ts-ignore
 		this.load.tilemapTiledJSON(this.getMapKey(), json);
 		this.load.image(LEVEL_KEY, asset('tilemaps/platforms_extruded.png'));
 
@@ -80,7 +88,7 @@ class TheCity extends Phaser.Scene {
 
 		this.cursors = this.input.keyboard.createCursorKeys();
 
-		const playerSpawn = map.findObject('Objects', obj => obj.name === 'PlayerSpawn');
+		const playerSpawn = map.findObject('Objects', obj => obj.name === 'PlayerSpawn') as SpawnPoint;
 		this.player.create(this.cursors, [playerSpawn.x * MAP_SCALE, playerSpawn.y * MAP_SCALE]);
 		this.player.container.setDepth(7);
 		this.physics.add.collider(this.player.container, layer);
@@ -107,11 +115,12 @@ class TheCity extends Phaser.Scene {
 		});
 
 		// debug
+		// @ts-ignore
 		window.game = this;
 	}
 
 	update(time: number, delta: number) {
-		const fallenBelowBounds = this.player.container.body.top > this.map.heightInPixels * MAP_SCALE;
+		const fallenBelowBounds = (<Phaser.Physics.Arcade.Body>this.player.container.body).top > this.map.heightInPixels * MAP_SCALE;
 		const roadkill = this.player.container.getData('roadkill');
 
 		if (this.score.end) {
@@ -151,7 +160,7 @@ class TheCity extends Phaser.Scene {
 		score.setTotal(npcCount);
 
 		spawnPoints
-			.forEach(({ properties = [], x, y }) => {
+			.forEach(({ properties = [], x, y }: SpawnPoint) => {
 				const npc = new NPC(this);
 				const modifiers = getModifiersFromProps(properties);
 				npc.create(cursors, [x * MAP_SCALE, y * MAP_SCALE], modifiers);

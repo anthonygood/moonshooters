@@ -14,7 +14,7 @@ export type Modifiers = {
 
 class NPC extends Player {
   public spawned = false;
-  public state = NPCState;
+  public state: NPCState;
   readonly driver: NPCDriver;
   static readonly layers = [
     // Trousers
@@ -63,9 +63,8 @@ class NPC extends Player {
     }));
   }
 
-  constructor(scene, spawn = [450, 1000]) {
+  constructor(scene) {
     super(scene);
-    this.spawn = spawn;
     this.driver = Driver();
   }
 
@@ -111,7 +110,7 @@ class NPC extends Player {
     const direction = this.driver.getDirection();
 
     const containerData = this.container.data && this.container.data.values;
-    this.state.process({ direction, near: this.near, time, containerData }); // input data
+    this.state.process({ delta, direction, near: this.near, time, containerData }); // input data
   }
 
   tintSprites() {
@@ -150,7 +149,7 @@ class NPC extends Player {
   }
 
   toggleMask() {
-    const mask = this.container.getByName('mask');
+    const mask: any = this.container.getByName('mask');
     mask.visible = !mask.visible;
   }
 

@@ -29,7 +29,6 @@ export type SpriteLayer = {
 };
 
 class Player {
-  readonly State = PlayerState;
   protected direction: Direction;
   public scene: Phaser.Scene;
   public sprite: Phaser.Physics.Arcade.Sprite;

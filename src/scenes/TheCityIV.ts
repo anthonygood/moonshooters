@@ -1,4 +1,4 @@
-import TheCity, { MAP_SCALE } from './TheCity';
+import TheCity, { MAP_SCALE, SpawnPoint } from './TheCity';
 import { Dusk as Background } from '../entities/Background';
 import * as json from '../../assets/tilemaps/The CityIV.json';
 import Van from '../entities/Van';
@@ -8,7 +8,7 @@ const id = properites => properites.find(prop => prop.name === 'id').value;
 
 const getBoundaryForVan = (map: Phaser.Tilemaps.Tilemap, van) => {
 	const vanId = id(van.properties);
-	return map.findObject('Objects', obj => obj.name === 'VanBoundary' && id(obj.properties) === vanId);
+	return map.findObject('Objects', (obj: SpawnPoint) => obj.name === 'VanBoundary' && id(obj.properties) === vanId);
 }
 
 export default class TheCityIV extends TheCity {
@@ -38,6 +38,7 @@ export default class TheCityIV extends TheCity {
     return new Background(this);
   }
 
+  // @ts-ignore
   getLevelJson() {
     return json;
   }
@@ -60,8 +61,8 @@ export default class TheCityIV extends TheCity {
     const { map } = this;
 
     const vanSpawns = map.filterObjects('Objects', obj => obj.name === 'VanSpawn');
-    vanSpawns.forEach(vanSpawn => {
-      const boundary = getBoundaryForVan(map, vanSpawn);
+    vanSpawns.forEach((vanSpawn: SpawnPoint) => {
+      const boundary = getBoundaryForVan(map, vanSpawn) as SpawnPoint;
       const van = new Van(this);
       van.create(mapScale(vanSpawn.x), mapScale(vanSpawn.y - 10), mapScale(boundary.x));
 

@@ -51,7 +51,7 @@ class Van {
 
   update() {
     const { boundary, container, direction, spawn: [spawnX, spawnY] } = this;
-    const { body } = container;
+    const body = <Phaser.Physics.Arcade.Body>container.body;
 
     // Determine which 'direction' to perform boundary check for,
     // according to which direction the body is moving.

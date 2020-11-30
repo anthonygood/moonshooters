@@ -55,7 +55,7 @@ export const addFog: AddFog = ({
   const { displayHeight: height, displayWidth: width  } = scene.cameras.main;
 
   const texture: Phaser.Textures.CanvasTexture = scene.textures.exists(key) ?
-    scene.textures.get(key) :
+    scene.textures.get(key) as Phaser.Textures.CanvasTexture :
     scene.textures.createCanvas(key, width, height);
 
   const fillStyle = typeof fill === 'string' ? fill : fill(texture.context, height, width);

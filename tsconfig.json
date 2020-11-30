@@ -1,11 +1,13 @@
 {
 	"compilerOptions": {
-		"target": "es5",
+		"target": "ESNext",
 		"module": "commonjs",
 		"sourceMap": true,
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,
-    "skipLibCheck": true
+		"skipLibCheck": true,
+		"resolveJsonModule": true,
+		"types": []
 	},
 	"files": [
 		"src/main.ts"
