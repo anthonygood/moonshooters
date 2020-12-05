@@ -1,4 +1,4 @@
-import { CursorKeyOrPointerDirection, Direction } from '../state/Direction';
+import { Direction, CursorKeyDirection, PointerDirection } from '../state/Direction';
 import PlayerState from '../state/PlayerState';
 import { createFramesForKey, spriteJson } from '../animations';
 
@@ -80,12 +80,11 @@ class Player {
   }
 
   getDirection(cursors): Direction {
-    return new CursorKeyOrPointerDirection(
-      cursors,
-      this.scene.input,
-      this.scene.cameras.main,
-      this.container
-    );
+    const isDesktop = this.scene.game.device.os.desktop;
+
+    return isDesktop ?
+      new CursorKeyDirection(cursors) :
+      new PointerDirection(this.scene.input, this.container);
   }
 
 	update(

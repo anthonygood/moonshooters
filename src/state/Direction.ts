@@ -37,12 +37,13 @@ const POINTER_MARGIN = 50;
 export class PointerDirection implements Direction {
   private input: Phaser.Input.InputPlugin;
   private player: Phaser.GameObjects.Container;
-  private camera: Phaser.Cameras.Scene2D.Camera;
 
-  constructor(input, player, camera) {
+  constructor(
+    input: Phaser.Input.InputPlugin,
+    player: Phaser.GameObjects.Container
+  ) {
     this.input = input;
     this.player = player;
-    this.camera = camera;
   }
 
   get pointer() {
@@ -69,8 +70,11 @@ export class PointerDirection implements Direction {
   }
 
   positionX() {
-    const { camera, pointer } = this;
-    return pointer.x + camera.scrollX;
+    const { pointer } = this;
+
+    if (!pointer.camera) return null;
+
+    return pointer.x + pointer.camera.scrollX;
   }
 
   timeDown(direction: 'up' | 'down' | 'left' | 'right') {
@@ -89,7 +93,7 @@ export class CursorKeyOrPointerDirection implements Direction {
     player: Phaser.GameObjects.Container
   ) {
     this.cursorDirection = new CursorKeyDirection(cursors);
-    this.pointerDirection = new PointerDirection(input, player, camera);
+    this.pointerDirection = new PointerDirection(input, player);
   }
 
   get up() {
