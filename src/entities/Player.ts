@@ -1,4 +1,4 @@
-import { CursorKeyDirection, Direction } from '../state/Direction';
+import { CursorKeyOrPointerDirection, Direction } from '../state/Direction';
 import PlayerState from '../state/PlayerState';
 import { createFramesForKey, spriteJson } from '../animations';
 
@@ -51,7 +51,7 @@ class Player {
   preload(): void {
     this.forEachSprite(({ key, json }) => {
       if (this.scene.textures.exists(key)) return;
-      this.scene.load.multiatlas(key, json, '/assets/sprites');
+      this.scene.load.multiatlas(key, json, './assets/sprites');
     });
   }
 
@@ -61,8 +61,6 @@ class Player {
   }
 
   create(cursors, spawn: number[]): void {
-    this.direction = this.getDirection(cursors);
-
     const [x, y] = spawn;
     const container = this.container = this.scene.add.container(x, y);
     this.scene.physics.world.enable(container);
@@ -73,6 +71,7 @@ class Player {
 
     this.createSprites();
     this.addSprites();
+    this.direction = this.getDirection(cursors);
     this.state = this.getStateMachine();
   }
 
@@ -81,7 +80,11 @@ class Player {
   }
 
   getDirection(cursors): Direction {
-    return new CursorKeyDirection(cursors);
+    return new CursorKeyOrPointerDirection(
+      cursors,
+      this.scene.input.activePointer,
+      this.container
+    );
   }
 
 	update(

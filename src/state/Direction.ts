@@ -26,9 +26,70 @@ export class CursorKeyDirection implements Direction {
   get right() {
     return this.cursors.right.isDown;
   }
-
   timeDown(direction: 'up' | 'down' | 'left' | 'right') {
     const key = this.cursors[direction];
     return key ? key.timeDown : 0;
+  }
+}
+
+const POINTER_MARGIN = 50;
+
+export class PointerDirection implements Direction {
+  private pointer: Phaser.Input.Pointer;
+  private player: Phaser.GameObjects.Container; // container
+  constructor(pointer, player) {
+    this.pointer = pointer;
+    this.player = player;
+  }
+  get up() {
+    return this.pointer.isDown;
+  }
+  get down() {
+    return false;
+  }
+  get left() {
+    const position = this.positionX();
+    return position && this.positionX() < this.player.x - POINTER_MARGIN;
+  }
+  get right() {
+    const position = this.positionX();
+
+    return position && this.positionX() > this.player.x + POINTER_MARGIN;
+  }
+  positionX() {
+    const { camera, x } = this.pointer;
+
+    if (!camera) return null;
+    return x + camera.scrollX;
+  }
+  timeDown(direction: 'up' | 'down' | 'left' | 'right') {
+    return this[direction] ? this.pointer.downTime : 0;
+  }
+}
+
+export class CursorKeyOrPointerDirection implements Direction {
+  private cursorDirection: CursorKeyDirection;
+  private pointerDirection: PointerDirection;
+  constructor(cursors, pointer, player) {
+    this.cursorDirection = new CursorKeyDirection(cursors);
+    this.pointerDirection = new PointerDirection(pointer, player);
+  }
+  get up() {
+    return this.cursorDirection.up || this.pointerDirection.up;
+  }
+  get down() {
+    return this.cursorDirection.down || this.pointerDirection.down;
+  }
+  get left() {
+    return this.cursorDirection.left || this.pointerDirection.left;
+  }
+  get right() {
+    return this.cursorDirection.right || this.pointerDirection.right;
+  }
+  timeDown(direction: 'up' | 'down' | 'left' | 'right') {
+    return this.cursorDirection.timeDown(direction) || this.pointerDirection.timeDown(direction);
+  }
+  positionX() {
+    return this.pointerDirection.positionX();
   }
 }
