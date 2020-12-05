@@ -35,33 +35,44 @@ export class CursorKeyDirection implements Direction {
 const POINTER_MARGIN = 50;
 
 export class PointerDirection implements Direction {
-  private pointer: Phaser.Input.Pointer;
-  private player: Phaser.GameObjects.Container; // container
-  constructor(pointer, player) {
-    this.pointer = pointer;
+  private input: Phaser.Input.InputPlugin;
+  private player: Phaser.GameObjects.Container;
+  private camera: Phaser.Cameras.Scene2D.Camera;
+
+  constructor(input, player, camera) {
+    this.input = input;
     this.player = player;
+    this.camera = camera;
   }
+
+  get pointer() {
+    return this.input.activePointer;
+  }
+
   get up() {
     return this.pointer.isDown;
   }
+
   get down() {
     return false;
   }
+
   get left() {
     const position = this.positionX();
     return position && this.positionX() < this.player.x - POINTER_MARGIN;
   }
+
   get right() {
     const position = this.positionX();
 
     return position && this.positionX() > this.player.x + POINTER_MARGIN;
   }
-  positionX() {
-    const { camera, x } = this.pointer;
 
-    if (!camera) return null;
-    return x + camera.scrollX;
+  positionX() {
+    const { camera, pointer } = this;
+    return pointer.x + camera.scrollX;
   }
+
   timeDown(direction: 'up' | 'down' | 'left' | 'right') {
     return this[direction] ? this.pointer.downTime : 0;
   }
@@ -70,25 +81,37 @@ export class PointerDirection implements Direction {
 export class CursorKeyOrPointerDirection implements Direction {
   private cursorDirection: CursorKeyDirection;
   private pointerDirection: PointerDirection;
-  constructor(cursors, pointer, player) {
+
+  constructor(
+    cursors: Phaser.Types.Input.Keyboard.CursorKeys,
+    input: Phaser.Input.InputPlugin,
+    camera: Phaser.Cameras.Scene2D.Camera,
+    player: Phaser.GameObjects.Container
+  ) {
     this.cursorDirection = new CursorKeyDirection(cursors);
-    this.pointerDirection = new PointerDirection(pointer, player);
+    this.pointerDirection = new PointerDirection(input, player, camera);
   }
+
   get up() {
     return this.cursorDirection.up || this.pointerDirection.up;
   }
+
   get down() {
     return this.cursorDirection.down || this.pointerDirection.down;
   }
+
   get left() {
     return this.cursorDirection.left || this.pointerDirection.left;
   }
+
   get right() {
     return this.cursorDirection.right || this.pointerDirection.right;
   }
+
   timeDown(direction: 'up' | 'down' | 'left' | 'right') {
     return this.cursorDirection.timeDown(direction) || this.pointerDirection.timeDown(direction);
   }
+
   positionX() {
     return this.pointerDirection.positionX();
   }

@@ -82,7 +82,8 @@ class Player {
   getDirection(cursors): Direction {
     return new CursorKeyOrPointerDirection(
       cursors,
-      this.scene.input.activePointer,
+      this.scene.input,
+      this.scene.cameras.main,
       this.container
     );
   }
