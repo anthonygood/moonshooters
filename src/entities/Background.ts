@@ -9,7 +9,7 @@ const GREEN_BKG_KEY = 'green-background-scrapers';
 const ORANGE = 'orange-background-scrapers';
 const RED = 'red-background-scrapers';
 
-const asset = (path: string) => `/assets/${path}`;
+const asset = (path: string) => `./assets/${path}`;
 
 // Create additional layers that just alias the background layer.
 // Everything is the same (including tile GIDS) except the name.

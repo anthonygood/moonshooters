@@ -11,7 +11,7 @@ class Van {
   private boundary: number;
 
   static preload(scene) {
-		scene.load.image(VAN_KEY, '/assets/sprites/white van.png');
+		scene.load.image(VAN_KEY, './assets/sprites/white van.png');
   }
 
   constructor(scene) {

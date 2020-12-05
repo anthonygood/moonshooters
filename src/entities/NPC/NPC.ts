@@ -59,7 +59,7 @@ class NPC extends Player {
   static preload(scene) {
     NPC.layers.forEach(layer => layer.forEach(({ key, json }) => {
       if (scene.textures.exists(key)) return;
-      scene.load.multiatlas(key, json, '/assets/sprites');
+      scene.load.multiatlas(key, json, './assets/sprites');
     }));
   }
 

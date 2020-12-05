@@ -6,12 +6,13 @@ import NPC, { Modifiers } from '../entities/NPC/NPC';
 import { Morning as Background } from '../entities/Background';
 import * as json from '../../assets/tilemaps/The City.json';
 import { NPCDirection } from '../entities/NPC/Driver';
+// import COLOURS from '../entities/NPC/Colours';
 
 export const MAP_SCALE = 1.5;
 const LEVEL_KEY = 'level';
 const VAN_KEY = 'van';
 
-const asset = (path: string) => `/assets/${path}`;
+const asset = (path: string) => `./assets/${path}`;
 
 const getModifiersFromProps = (properties) => {
 	const modifier = properties.find(({ name }) => name === 'modifier');
@@ -124,13 +125,20 @@ class TheCity extends Phaser.Scene {
 		const roadkill = this.player.container.getData('roadkill');
 
 		if (this.score.end) {
-			if (this.cursors.space.isDown) this.restart();
+			if (this.cursors.space.isDown || this.input.activePointer.isDown) this.restart();
 		} else {
 			if (fallenBelowBounds || roadkill) this.end();
 		}
 
 		// Don't keep updating player out of level bounds
 		if (!fallenBelowBounds) this.player.update(time, delta);
+
+		// if (this.playerRect) this.playerRect.destroy();
+		// if (this.pointerRect) this.pointerRect.destroy();
+
+		// this.playerRect = this.add.rectangle(this.player.container.x, 0, 6, 2000, COLOURS.blue).setDepth(10);
+		// this.pointerRect = this.add.rectangle(this.player.direction.positionX(), 0, 6, 2000, COLOURS.green).setDepth(10);
+
 
 		// TODO: only update NPCs nearby?
 		this.NPCs
