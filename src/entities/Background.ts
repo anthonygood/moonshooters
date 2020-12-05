@@ -30,14 +30,13 @@ const addAlternativeCityTilesets = (
 };
 
 class Background {
-	private scene: Phaser.Scene;
+  private scene: Phaser.Scene;
+  private optimised: boolean;
   protected variants: { [key: string]: Phaser.Tilemaps.Tileset }
 	constructor(
 		scene: Phaser.Scene
-		// map: Phaser.Tilemaps.Tilemap
 	) {
-		this.scene = scene;
-		// this.map = map;
+    this.scene = scene;
 	}
 
 	preload(json: JSON) {
@@ -58,6 +57,8 @@ class Background {
 	}
 
 	create(map: Phaser.Tilemaps.Tilemap, scale) {
+    this.optimised = !this.scene.game.device.os.desktop;
+
     // Blue default
 		const blue = map.addTilesetImage('Skyscrapers', DEFAULT_BKG_KEY);
 
@@ -107,13 +108,11 @@ class Background {
     const { layers: [first, second, third], fog } = theme;
 
 		// TODO: parameterise depth? or at least shallowest depth?
-		const wayBackground = map.createStaticLayer('Right back', first, 0, 0).setDepth(1);
-		const distantBackground = map.createStaticLayer('Back scrapers', second, 0, 0).setDepth(3);
+    const wayBackground = map.createStaticLayer('Right back', first, 0, 0).setDepth(1);
     const midBackground = map.createStaticLayer('Scrapers', third, 0, 0).setDepth(5);
+    const distantBackground = map.createStaticLayer('Back scrapers', second, 0, 0).setDepth(3);
 
-    midBackground.tilemap.images
-
-    fog(this.scene);
+    !this.optimised && fog(this.scene);
 
     return {
       wayBackground,

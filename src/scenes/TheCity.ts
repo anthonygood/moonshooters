@@ -6,7 +6,6 @@ import NPC, { Modifiers } from '../entities/NPC/NPC';
 import { Morning as Background } from '../entities/Background';
 import * as json from '../../assets/tilemaps/The City.json';
 import { NPCDirection } from '../entities/NPC/Driver';
-// import COLOURS from '../entities/NPC/Colours';
 
 export const MAP_SCALE = 1.5;
 const LEVEL_KEY = 'level';
