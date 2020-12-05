@@ -60,13 +60,13 @@ export class PointerDirection implements Direction {
 
   get left() {
     const position = this.positionX();
-    return position && this.positionX() < this.player.x - POINTER_MARGIN;
+    return this.pointer.isDown && position && position < this.player.x - POINTER_MARGIN;
   }
 
   get right() {
     const position = this.positionX();
 
-    return position && this.positionX() > this.player.x + POINTER_MARGIN;
+    return this.pointer.isDown && position && position > this.player.x + POINTER_MARGIN;
   }
 
   positionX() {
