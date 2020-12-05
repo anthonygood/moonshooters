@@ -112,7 +112,7 @@ class Background {
     const midBackground = map.createStaticLayer('Scrapers', third, 0, 0).setDepth(5);
     const distantBackground = map.createStaticLayer('Back scrapers', second, 0, 0).setDepth(3);
 
-    !this.optimised && fog(this.scene);
+    fog(this.scene);
 
     return {
       wayBackground,

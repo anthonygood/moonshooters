@@ -45,7 +45,7 @@ class TheCity extends Phaser.Scene {
 	constructor(key = 'The City') {
 		super({ key });
     this.player = new Player(this);
-		// this.background = this.getBackground();
+		this.background = this.getBackground();
 		this.score = new Score(this);
 		this.NPCs = [];
 	}
@@ -65,7 +65,7 @@ class TheCity extends Phaser.Scene {
 	preload() {
 		const json = this.getLevelJson();
 		// @ts-ignore
-		// this.background.preload(json);
+		this.background.preload(json);
 		// @ts-ignore
 		this.load.tilemapTiledJSON(this.getMapKey(), json);
 		this.load.image(LEVEL_KEY, asset('tilemaps/platforms_extruded.png'));
@@ -79,7 +79,7 @@ class TheCity extends Phaser.Scene {
 	create() {
 		const map = this.map = this.make.tilemap({ key: this.getMapKey() });
 		const tileset = map.addTilesetImage('Platforms', LEVEL_KEY);
-		// this.background.create(map, MAP_SCALE);
+		this.background.create(map, MAP_SCALE);
 
 		const layer = map.createStaticLayer('World', tileset).setDepth(6);
 		layer.setCollisionByProperty({ collides: true });
@@ -96,23 +96,23 @@ class TheCity extends Phaser.Scene {
 		this.cameras.main.setBounds(0, 0, map.widthInPixels * MAP_SCALE, map.heightInPixels * MAP_SCALE);
 		this.cameras.main.startFollow(this.player.container, false);
 
-		this.spawnNPCs(layer);
+		// this.spawnNPCs(layer);
 		this.score.create();
 
 		// TODO: dispose with overlap listeners?
-		this.NPCs.forEach(npc => {
-			this.physics.add.overlap(npc.container, this.player.container, (npcContainer, _player) => {
-				if (!npcContainer.getData('touchedByPlayer')) {
-					this.score.increment();
-					this.score.update();
-					npcContainer.setData('touchedByPlayer', true);
-				}
+		// this.NPCs.forEach(npc => {
+		// 	this.physics.add.overlap(npc.container, this.player.container, (npcContainer, _player) => {
+		// 		if (!npcContainer.getData('touchedByPlayer')) {
+		// 			this.score.increment();
+		// 			this.score.update();
+		// 			npcContainer.setData('touchedByPlayer', true);
+		// 		}
 
-				// TODO: 2 metre penalty radius
-				// apparently overlap uses fixed update so should be consistent regardless of framerate
-				this.score.penalise();
-			});
-		});
+		// 		// TODO: 2 metre penalty radius
+		// 		// apparently overlap uses fixed update so should be consistent regardless of framerate
+		// 		this.score.penalise();
+		// 	});
+		// });
 
 		// debug
 		// @ts-ignore
@@ -140,9 +140,9 @@ class TheCity extends Phaser.Scene {
 
 
 		// TODO: only update NPCs nearby?
-		this.NPCs
-			.filter(npc => npc.spawned)
-			.forEach(npc => npc.update(time, delta));
+		// this.NPCs
+		// 	.filter(npc => npc.spawned)
+		// 	.forEach(npc => npc.update(time, delta));
 	}
 
 	end() {
