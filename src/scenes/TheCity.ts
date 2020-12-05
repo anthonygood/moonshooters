@@ -140,9 +140,9 @@ class TheCity extends Phaser.Scene {
 
 
 		// TODO: only update NPCs nearby?
-		this.NPCs
-			.filter(npc => npc.spawned)
-			.forEach(npc => npc.update(time, delta));
+		// this.NPCs
+		// 	.filter(npc => npc.spawned)
+		// 	.forEach(npc => npc.update(time, delta));
 	}
 
 	end() {
