@@ -33,7 +33,7 @@ const config: Phaser.Types.Core.GameConfig = {
     }
   },
   input: {
-    activePointers: 2,
+    activePointers: 3,
   },
   scale: {
     mode: Phaser.Scale.FIT,
