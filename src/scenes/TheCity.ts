@@ -96,23 +96,23 @@ class TheCity extends Phaser.Scene {
 		this.cameras.main.setBounds(0, 0, map.widthInPixels * MAP_SCALE, map.heightInPixels * MAP_SCALE);
 		this.cameras.main.startFollow(this.player.container, false);
 
-		// this.spawnNPCs(layer);
+		this.spawnNPCs(layer);
 		this.score.create();
 
 		// TODO: dispose with overlap listeners?
-		// this.NPCs.forEach(npc => {
-		// 	this.physics.add.overlap(npc.container, this.player.container, (npcContainer, _player) => {
-		// 		if (!npcContainer.getData('touchedByPlayer')) {
-		// 			this.score.increment();
-		// 			this.score.update();
-		// 			npcContainer.setData('touchedByPlayer', true);
-		// 		}
+		this.NPCs.forEach(npc => {
+			this.physics.add.overlap(npc.container, this.player.container, (npcContainer, _player) => {
+				if (!npcContainer.getData('touchedByPlayer')) {
+					this.score.increment();
+					this.score.update();
+					npcContainer.setData('touchedByPlayer', true);
+				}
 
-		// 		// TODO: 2 metre penalty radius
-		// 		// apparently overlap uses fixed update so should be consistent regardless of framerate
-		// 		this.score.penalise();
-		// 	});
-		// });
+				// TODO: 2 metre penalty radius
+				// apparently overlap uses fixed update so should be consistent regardless of framerate
+				this.score.penalise();
+			});
+		});
 
 		// debug
 		// @ts-ignore
@@ -140,9 +140,9 @@ class TheCity extends Phaser.Scene {
 
 
 		// TODO: only update NPCs nearby?
-		// this.NPCs
-		// 	.filter(npc => npc.spawned)
-		// 	.forEach(npc => npc.update(time, delta));
+		this.NPCs
+			.filter(npc => npc.spawned)
+			.forEach(npc => npc.update(time, delta));
 	}
 
 	end() {

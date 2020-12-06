@@ -12,6 +12,16 @@ export type Modifiers = {
   moveOnTouch?: NPCDirection;
 };
 
+const VERTICAL_MARGIN = 64;
+const HORIZONTAL_MARGIN = 32;
+
+const containerInView = (container: Phaser.GameObjects.Container, camera: Phaser.Cameras.Scene2D.Camera) => {
+  const withinX = container.x > camera.scrollX - HORIZONTAL_MARGIN && container.x < camera.scrollX + camera.width + HORIZONTAL_MARGIN;
+  const withinY = container.y > camera.scrollY - VERTICAL_MARGIN && container.y < camera.scrollY + camera.height + VERTICAL_MARGIN;
+
+  return withinX && withinY;
+}
+
 class NPC extends Player {
   public spawned = false;
   public state: NPCState;
@@ -105,6 +115,8 @@ class NPC extends Player {
     time: number,
     delta: number
   ) {
+    // Check container visibility
+    this.container.visible = containerInView(this.container, this.scene.cameras.main);
     // TODO: state machine for NPC driver
     // 'AI' lol
     const direction = this.driver.getDirection();
