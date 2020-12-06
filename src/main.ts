@@ -32,6 +32,9 @@ const config: Phaser.Types.Core.GameConfig = {
       // debug: true,
     }
   },
+  input: {
+    activePointers: 2,
+  },
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH

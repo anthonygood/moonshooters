@@ -47,11 +47,15 @@ export class PointerDirection implements Direction {
   }
 
   get pointer() {
-    return this.input.activePointer;
+    return this.input.pointer1;
+  }
+
+  get pointer2() {
+    return this.input.pointer2;
   }
 
   get up() {
-    return this.pointer.isDown;
+    return this.pointer.isDown && this.pointer2.isDown;
   }
 
   get down() {
