@@ -82,6 +82,7 @@ export class PointerDirection implements Direction {
   }
 
   timeDown(direction: 'up' | 'down' | 'left' | 'right') {
-    return this[direction] ? this.pointer.downTime : 0;
+    if (direction === 'up') return this.up && this.pointer2.downTime;
+    return this.pointer.downTime;
   }
 }
