@@ -274,4 +274,56 @@ describe('StateMachine', () => {
       expect(walkTick).toHaveBeenCalledTimes(4);
     });
   });
+
+  describe('events', () => {
+    it('can subscribe to state machine events', () => {
+      const onWalk = jest.fn();
+      const machine = StateMachine<any>('idle')
+        .transitionTo('walk').when(data => data.walk)
+        .on('walk', onWalk);
+
+      expect(onWalk).not.toHaveBeenCalled();
+
+      machine.process({});
+      expect(onWalk).not.toHaveBeenCalled();
+
+      machine.process({ walk: true });
+      expect(onWalk).toHaveBeenCalled();
+    });
+
+    it('correctly calls subscribers for multiple state changes', () => {
+      const onWalk = jest.fn();
+      const onWalk2 = jest.fn();
+      const machine = StateMachine<any>('idle')
+        .transitionTo('walk').when(data => data.walk)
+        .state('walk').transitionTo('idle').when(data => !data.walk)
+        .on('walk', onWalk)
+        .on('walk', onWalk2);
+
+
+      machine.process({});
+      expect(onWalk).not.toHaveBeenCalled();
+      expect(onWalk2).not.toHaveBeenCalled();
+
+
+      machine.process({ walk: true });
+      expect(onWalk).toHaveBeenCalledTimes(1);
+      expect(onWalk2).toHaveBeenCalledTimes(1);
+
+      // Don't call again on tick
+      machine.process({ walk: true });
+      expect(onWalk).toHaveBeenCalledTimes(1);
+      expect(onWalk2).toHaveBeenCalledTimes(1);
+
+      // Don't call again on transition to other state
+      machine.process({ walk: false });
+      expect(onWalk).toHaveBeenCalledTimes(1);
+      expect(onWalk2).toHaveBeenCalledTimes(1);
+
+      // Call again on second transition to walk state
+      machine.process({ walk: true });
+      expect(onWalk).toHaveBeenCalledTimes(2);
+      expect(onWalk2).toHaveBeenCalledTimes(2);
+    });
+  });
 });

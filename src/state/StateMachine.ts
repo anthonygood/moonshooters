@@ -6,6 +6,7 @@ type State<TData> = {
   exit: Function;
   minTicks: number;
   tickCount: number;
+  subscriptions: Function[];
 }
 
 type StateDict<TData> = { [Key: string]: State<TData> }
@@ -27,6 +28,9 @@ export type TStateMachine<TData> = {
   forAtLeast: (count: number) => TStateMachine<TData>;
   state: (stateName: string) => TStateMachine<TData>;
 
+  // Event subscription
+  on: (stateName: string, fn: Function) => TStateMachine<TData>;
+
   // Top-level controls
   currentState: () => string;
   process: (data: TData) => TStateMachine<TData>;
@@ -34,12 +38,30 @@ export type TStateMachine<TData> = {
 };
 
 const State = <TData>(name: string, minTicks = 0): State<TData> => {
+  // event subscriptions
+  const subscriptions = [];
+
+  const initialiser = (fn = () => {}) => () => {
+    fn();
+    subscriptions.forEach(fn => fn());
+  };
+
+  let init = initialiser();
+
   return {
     name,
     transitions: [],
+    subscriptions,
     minTicks,
     tickCount: 0,
-    init: () => {},
+
+    set init(fn) {
+      init = initialiser(fn);
+    },
+    get init() {
+      return init;
+    },
+
     tick: () => {},
     exit: () => {},
   }
@@ -127,6 +149,16 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
       return machine;
     },
     currentState: () => currentStateName,
+    on: (stateName, fn) => {
+      const targetState = states[stateName];
+
+      if (!targetState) {
+        throw new TypeError(`Cannot subscribe to state '${stateName}' because no state with that name exists.`)
+      }
+
+      targetState.subscriptions.push(fn);
+      return machine;
+    },
   };
 
   return machine;
