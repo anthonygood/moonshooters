@@ -1,6 +1,7 @@
 import { Direction, CursorKeyDirection, PointerDirection } from '../state/Direction';
 import PlayerState from '../state/PlayerState';
 import { createFramesForKey, spriteJson } from '../animations';
+import PlayerSound from '../sound/PlayerSounds';
 
 // max speed levels:
 //  LEVEL  | RUN |  JUMP
@@ -34,6 +35,7 @@ class Player {
   public sprite: Phaser.Physics.Arcade.Sprite;
   public container: Phaser.GameObjects.Container;
   public state: PlayerState;
+  public sound: PlayerSound;
   protected near: Near;
   // A 2D array of Layer objects: a layer with multiple keys represents multiple possibilites,
   // where only one will be rendered. Used for rendering different features.
@@ -46,6 +48,7 @@ class Player {
     this.near = {
       climbable: false,
     };
+    this.sound = new PlayerSound(scene);
   }
 
   preload(): void {
@@ -53,6 +56,7 @@ class Player {
       if (this.scene.textures.exists(key)) return;
       this.scene.load.multiatlas(key, json, './assets/sprites');
     });
+    this.sound.preload();
   }
 
   // TODO: more cleanup?
@@ -73,6 +77,7 @@ class Player {
     this.addSprites();
     this.direction = this.getDirection(cursors);
     this.state = this.getStateMachine();
+    this.sound.create();
   }
 
   getStateMachine() {
