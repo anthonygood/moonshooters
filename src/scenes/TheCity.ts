@@ -6,12 +6,15 @@ import NPC, { Modifiers } from '../entities/NPC/NPC';
 import { Morning as Background } from '../entities/Background';
 import * as json from '../../assets/tilemaps/The City.json';
 import { NPCDirection } from '../entities/NPC/Driver';
+import Sound from '../sound/LevelSounds';
+import { asset } from '../util';
 
 export const MAP_SCALE = 1.5;
 const LEVEL_KEY = 'level';
 const VAN_KEY = 'van';
 
-const asset = (path: string) => `./assets/${path}`;
+export const sample = (vals = []) =>
+  vals[Math.floor(Math.random() * vals.length)];
 
 const getModifiersFromProps = (properties) => {
 	const modifier = properties.find(({ name }) => name === 'modifier');
@@ -40,6 +43,7 @@ class TheCity extends Phaser.Scene {
 	public map: Phaser.Tilemaps.Tilemap;
 	public NPCs: NPC[];
 	public background: Background;
+	public levelSound: Sound;
 	private disposeReport: () => void;
 
 	constructor(key = 'The City') {
@@ -47,6 +51,7 @@ class TheCity extends Phaser.Scene {
     this.player = new Player(this);
 		this.background = this.getBackground();
 		this.score = new Score(this);
+		this.levelSound = new Sound(this, this.getMusicName(), this.getMusicVolume());
 		this.NPCs = [];
 	}
 
@@ -62,6 +67,14 @@ class TheCity extends Phaser.Scene {
 		return 'TheCity';
 	}
 
+	getMusicName() {
+		return 'dirge';
+	}
+
+	getMusicVolume() {
+		return .05;
+	}
+
 	preload() {
 		const json = this.getLevelJson();
 		// @ts-ignore
@@ -69,9 +82,9 @@ class TheCity extends Phaser.Scene {
 		// @ts-ignore
 		this.load.tilemapTiledJSON(this.getMapKey(), json);
 		this.load.image(LEVEL_KEY, asset('tilemaps/platforms_extruded.png'));
-
 		this.load.image(VAN_KEY, asset('sprites/white van.png'));
 
+		this.levelSound.preload();
 		this.player.preload();
 		NPC.preload(this);
 	}
@@ -103,8 +116,15 @@ class TheCity extends Phaser.Scene {
 		this.NPCs.forEach(npc => {
 			this.physics.add.overlap(npc.container, this.player.container, (npcContainer, _player) => {
 				if (!npcContainer.getData('touchedByPlayer')) {
+					const wasPass = this.score.pass;
 					this.score.increment();
 					this.score.update();
+					const isPass = this.score.pass;
+					const justPassed = !wasPass && isPass;
+
+					justPassed ? this.levelSound.tension() : this.levelSound.playSting();
+					justPassed && this.player.sound.success();
+					this.player.sound.bark();
 					npcContainer.setData('touchedByPlayer', true);
 				}
 
@@ -113,6 +133,9 @@ class TheCity extends Phaser.Scene {
 				this.score.penalise();
 			});
 		});
+
+		this.input.once('pointerdown', this.levelSound.playMusic);
+		this.input.keyboard.once('keydown', this.levelSound.playMusic);
 
 		// debug
 		// @ts-ignore
@@ -147,6 +170,8 @@ class TheCity extends Phaser.Scene {
 
 	end() {
 		this.score.finish();
+		this.score.pass ? this.levelSound.release() : this.levelSound.crisis();
+		this.score.pass ? this.player.sound.success() : this.player.sound.fail();
 		const ratings = rate(this.score, this.player.state.flightRecorder);
 		this.disposeReport = EndLevelReport(this, this.score, ratings.join('\n'));
 	}
@@ -155,7 +180,7 @@ class TheCity extends Phaser.Scene {
 		this.disposeReport();
 		this.NPCs.forEach(npc => npc.destroy());
 		this.NPCs = [];
-		this.score.pass ? this.nextScene() : this.scene.restart();
+		this.score.pass ? this.continueToNextLevel() : this.scene.restart();
 	}
 
 	spawnNPCs(layer: Phaser.Tilemaps.StaticTilemapLayer) {
@@ -177,7 +202,7 @@ class TheCity extends Phaser.Scene {
 		});
 	}
 
-	debug(worldLayer) {
+	_debug(worldLayer) {
 		const ladderIndices = worldLayer.filterTiles(_ => _.properties.climbable).map(_ => _.index);
 		worldLayer.setTileIndexCallback(ladderIndices, this.player.nearClimbable, this.player)
 		const debugGraphics = this.add.graphics().setAlpha(.75);
@@ -186,6 +211,11 @@ class TheCity extends Phaser.Scene {
 			collidingTileColor: new Phaser.Display.Color(255, 255, 255, 255), // Color of colliding tiles
 			faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
 		});
+	}
+
+	continueToNextLevel() {
+		this.levelSound.stopMusic();
+		return this.nextScene();
 	}
 
 	nextScene() {

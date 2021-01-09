@@ -17,7 +17,11 @@ export default class TheCityIII extends TheCity {
 
   getMapKey() {
 		return 'TheCityIII';
-	}
+  }
+
+	getMusicName() {
+		return 'mellow';
+  }
 
 	nextScene() {
 		return this.scene.start('The CityIV');

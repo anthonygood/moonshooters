@@ -74,5 +74,9 @@ export default class TheCityIV extends TheCity {
 
       this.vans.push(van);
     });
-	}
+  }
+
+  getMusicName() {
+    return 'night';
+  }
 }

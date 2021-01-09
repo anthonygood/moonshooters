@@ -17,7 +17,11 @@ export default class TheCityII extends TheCity {
 
   getMapKey() {
 		return 'TheCityII';
-	}
+  }
+
+	getMusicName() {
+		return 'village theme from every jrpg ever';
+  }
 
 	nextScene() {
 		return this.scene.start('The CityIII');
