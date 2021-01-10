@@ -10,7 +10,7 @@ export const spriteJson = (imageName = 'bojo_frames') => ({
 			"scale": 1,
 			"frames": [
 				{
-					"filename": "jump_2.png",
+					"filename": "jump_2", // filename is used in frame references
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -31,7 +31,7 @@ export const spriteJson = (imageName = 'bojo_frames') => ({
 					}
 				},
 				{
-					"filename": "jump_1.png",
+					"filename": "jump_1",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -52,7 +52,7 @@ export const spriteJson = (imageName = 'bojo_frames') => ({
 					}
 				},
 				{
-					"filename": "walk_2.png",
+					"filename": "walk_2",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -73,7 +73,7 @@ export const spriteJson = (imageName = 'bojo_frames') => ({
 					}
 				},
 				{
-					"filename": "idle_1.png",
+					"filename": "idle_1",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -94,7 +94,7 @@ export const spriteJson = (imageName = 'bojo_frames') => ({
 					}
 				},
 				{
-					"filename": "walk_1.png",
+					"filename": "walk_1",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -115,7 +115,7 @@ export const spriteJson = (imageName = 'bojo_frames') => ({
 					}
 				},
 				{
-					"filename": "idle_2.png",
+					"filename": "idle_2",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -136,7 +136,7 @@ export const spriteJson = (imageName = 'bojo_frames') => ({
 					}
 				},
 				{
-					"filename": "walk_3.png",
+					"filename": "walk_3",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -157,7 +157,7 @@ export const spriteJson = (imageName = 'bojo_frames') => ({
 					}
 				},
 				{
-					"filename": "walk_4.png",
+					"filename": "walk_4",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -187,7 +187,6 @@ const getFrames = (scene: Phaser.Scene, prefix: string, end: number, key: string
     key,
     {
       prefix,
-      suffix: `.png`,
       start: 1,
       end,
     }
@@ -219,10 +218,10 @@ export const createFramesForKey = (scene: Phaser.Scene) => (key: string) => {
     frameRate: 8,
     repeat: 0,
     frames: [
-      { key, frame: 'walk_4.png' },
-      { key, frame: 'walk_2.png' },
-      { key, frame: 'walk_3.png' },
-      { key, frame: 'walk_1.png' },
+      { key, frame: 'walk_4' },
+      { key, frame: 'walk_2' },
+      { key, frame: 'walk_3' },
+      { key, frame: 'walk_1' },
     ],
   });
 };
