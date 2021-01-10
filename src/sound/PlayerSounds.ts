@@ -3,12 +3,8 @@ import { sound } from './util';
 
 const COLLECTED_BARKS = [
   'banned',
-  'grunt',
-  'grunt2',
-  'grunt3',
   'naked buttock',
   'titties',
-  'zoom',
   'bug-headed bigglewimp',
   'disrespect',
   'wibbling weasels 2',
@@ -16,6 +12,14 @@ const COLLECTED_BARKS = [
   'harmless banter',
   'hey everyone',
   'soggy biscuit',
+];
+
+const JUMP_BARKS = [
+  'grunt',
+  'grunt2',
+  'grunt3',
+  'ha ha',
+  'zoom',
 ];
 
 const SUCCESS_BARKS = [
@@ -87,6 +91,7 @@ const BARKS = [
 
 enum Bark {
   COLLECTED = 'COLLECTED',
+  JUMP = 'JUMP',
   SUCCESS = 'SUCCESS',
   FAIL = 'FAIL',
 };
@@ -95,6 +100,7 @@ const Barks = {
   [Bark.COLLECTED]: COLLECTED_BARKS,
   [Bark.SUCCESS]: SUCCESS_BARKS,
   [Bark.FAIL]: FAIL_BARKS,
+  [Bark.JUMP]: JUMP_BARKS,
 };
 
 class PlayerSounds {
@@ -126,10 +132,14 @@ class PlayerSounds {
     this.playing = true;
     const barks = Barks[type];
     const key = sample(barks);
-    // this.scene.sound.play(key, { volume: 1 });
+
     const sound = this.soundBoard[key];
     sound.play();
     sound.once('complete', () => this.playing = false);
+  }
+
+  jump = () => {
+    this.bark(Bark.JUMP);
   }
 
   success() {

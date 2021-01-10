@@ -78,7 +78,7 @@ export type FlightRecorder = {
 
 class PlayerState {
   private direction: PlayerState.Machine;
-  private action: PlayerState.Machine;
+  public action: PlayerState.Machine;
   public flightRecorder?: FlightRecorder;
 
   constructor(config: PlayerState.Config) {

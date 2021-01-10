@@ -3,6 +3,8 @@ import PlayerState from '../state/PlayerState';
 import { createFramesForKey, spriteJson } from '../animations';
 import PlayerSound from '../sound/PlayerSounds';
 
+const SPRITE_SCALE = 3;
+
 // max speed levels:
 //  LEVEL  | RUN |  JUMP
 //  lvl 1  | 400 |  1,000
@@ -52,6 +54,7 @@ class Player {
   }
 
   preload(): void {
+    // TODO: combine all sprites into a single texture atlas
     this.forEachSprite(({ key, json }) => {
       if (this.scene.textures.exists(key)) return;
       this.scene.load.multiatlas(key, json, './assets/sprites');
@@ -71,13 +74,15 @@ class Player {
 
     (container.body as Phaser.Physics.Arcade.Body)
       .setMaxVelocity(VELOCITY.max.x, VELOCITY.max.y)
-      .setSize(32, 96);
+      .setSize(11 * SPRITE_SCALE, 32 * SPRITE_SCALE);
 
     this.createSprites();
     this.addSprites();
     this.direction = this.getDirection(cursors);
-    this.state = this.getStateMachine();
+    const state = this.state = this.getStateMachine();
     this.sound.create();
+
+    state.action.on('jump', this.sound.jump);
   }
 
   getStateMachine() {
@@ -102,8 +107,9 @@ class Player {
   }
 
   createSprites() {
+    const createFrame = createFramesForKey(this.scene);
     this.forEachSprite(({ key }) => {
-      createFramesForKey(this.scene)(key);
+      createFrame(key);
     });
   }
 
@@ -112,9 +118,9 @@ class Player {
   }
 
   addSprite = ({ key }) => {
-    const sprite = this.scene.add.sprite(16, 48, key)
+    const sprite = this.scene.add.sprite(8 * SPRITE_SCALE, 16 * SPRITE_SCALE, key)
       .setName(key)
-      .setScale(3);
+      .setScale(SPRITE_SCALE);
 
     this.container.add(sprite);
   }
