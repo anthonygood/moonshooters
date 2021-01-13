@@ -196,41 +196,6 @@ const getFrames = (scene: Phaser.Scene, prefix: string, end: number, key: string
 	return frames;
 };
 
-export const createFramesForCombinedKey = (scene: Phaser.Scene) => (key: string) => {
-	const combinedKey = getCombinedKey(key);
-	scene.anims.create({
-    key: `${combinedKey}/walk`,
-    frameRate: 6,
-		repeat: -1,
-		// TODO: centralise key names
-    frames: getFrames(scene, `${key}:walk_`, 4, COMBINED_TEXTURE_KEY),
-  });
-  scene.anims.create({
-    key: `${combinedKey}/idle`,
-    frameRate: 2,
-    repeat: -1,
-    frames: getFrames(scene, `${key}:idle_`, 2, COMBINED_TEXTURE_KEY),
-  });
-  scene.anims.create({
-    key: `${combinedKey}/jump`,
-    frameRate: 6,
-    repeat: -1,
-    frames: getFrames(scene, `${key}:jump_`, 2, COMBINED_TEXTURE_KEY),
-  });
-
-  // scene.anims.create({
-  //   key: `${key}/halfspin`,
-  //   frameRate: 8,
-  //   repeat: 0,
-  //   frames: [
-  //     { key, frame: 'walk_4' },
-  //     { key, frame: 'walk_2' },
-  //     { key, frame: 'walk_3' },
-  //     { key, frame: 'walk_1' },
-  //   ],
-  // });
-};
-
 export const ContainerAnimation = {
 	/** @deprecated */
 	__playAnimationWithDedicatedAtlas: (container: Phaser.GameObjects.Container, animName: string) =>
@@ -250,25 +215,54 @@ export const ContainerAnimation = {
 		}),
 };
 
+const FRAME_DATA = [
+	{
+		name: 'walk',
+		frameRate: 6,
+		repeat: -1,
+		end: 4,
+	},
+	{
+		name: 'idle',
+		frameRate: 2,
+		repeat: -1,
+		end: 2,
+	},
+	{
+		name: 'jump',
+		frameRate: 6,
+		repeat: -1,
+		end: 2,
+	},
+];
+
+const createFrames = (
+	getFrameKey = (textureName: string, animName: string) => `${textureName}/${animName}`,
+	getFramePrefix = (_textureName: string, animName: string) => `${animName}_`,
+	getTextureKey = (textureName: string) => textureName,
+) => (scene: Phaser.Scene) => (key: string) => {
+	FRAME_DATA.forEach(({
+		name,
+		frameRate,
+		repeat,
+		end,
+	}) => {
+		const frameKey = getFrameKey(key, name);
+		const prefix = getFramePrefix(key, name);
+		const textureKey = getTextureKey(key);
+
+		const frames = getFrames(scene, prefix, end, textureKey);
+		scene.anims.create({
+			key: frameKey,
+			frameRate,
+			repeat,
+			frames,
+		});
+	});
+};
+
 export const createFramesForKey = (scene: Phaser.Scene) => (key: string) => {
-  scene.anims.create({
-    key: `${key}/walk`,
-    frameRate: 6,
-    repeat: -1,
-    frames: getFrames(scene, 'walk_', 4, key),
-  });
-  scene.anims.create({
-    key: `${key}/idle`,
-    frameRate: 2,
-    repeat: -1,
-    frames: getFrames(scene, 'idle_', 2, key),
-  });
-  scene.anims.create({
-    key: `${key}/jump`,
-    frameRate: 6,
-    repeat: -1,
-    frames: getFrames(scene, 'jump_', 2, key),
-  });
+	createFrames()(scene)(key);
 
   scene.anims.create({
     key: `${key}/halfspin`,
@@ -282,3 +276,9 @@ export const createFramesForKey = (scene: Phaser.Scene) => (key: string) => {
     ],
   });
 };
+
+export const createFramesForCombinedKey = createFrames(
+	(textureName, animName) => `${getCombinedKey(textureName)}/${animName}`,
+	(textureName, animName) => `${textureName}:${animName}_`,
+	() => COMBINED_TEXTURE_KEY,
+);

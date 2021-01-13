@@ -1,6 +1,6 @@
 import { Direction, CursorKeyDirection, PointerDirection } from '../state/Direction';
 import PlayerState from '../state/PlayerState';
-import { createFramesForKey, spriteJson } from '../animations';
+import { createFramesForCombinedKey, spriteJson } from '../animations';
 import PlayerSound from '../sound/PlayerSounds';
 
 const SPRITE_SCALE = 3;
@@ -107,7 +107,7 @@ class Player {
   }
 
   createSprites() {
-    const createFrame = createFramesForKey(this.scene);
+    const createFrame = createFramesForCombinedKey(this.scene);
     this.forEachSprite(({ key }) => {
       createFrame(key);
     });
