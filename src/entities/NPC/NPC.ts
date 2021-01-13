@@ -1,8 +1,9 @@
-import COLOURS from './Colours';
 import Player, { SpriteLayer, VELOCITY } from '../Player';
 import NPCState from '../../state/NPCState';
-import { spriteJson, createFramesForKey } from '../../animations';
+import { createFramesForCombinedKey } from '../../animations';
 import Driver, { NPCDirection, NPCDriver } from './Driver';
+import { getCombinedKey, extractKey } from '../../util/dynamicSpriteAtlas';
+import Layers from './Layers';
 
 const sample = (vals = []) =>
   vals[Math.floor(Math.random() * vals.length)];
@@ -25,49 +26,12 @@ const containerInView = (container: Phaser.GameObjects.Container, camera: Phaser
 class NPC extends Player {
   public spawned = false;
   public state: NPCState;
+  static readonly Layers = Layers;
   readonly driver: NPCDriver;
-  static readonly layers = [
-    // Trousers
-    [
-      { key: 'trousers:dark',  json: spriteJson('trousers:dark'), tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] },
-      { key: 'trousers:light', json: spriteJson('trousers:light'), tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] }
-    ],
-    // Tops
-    [
-      { key: 'top',   json: spriteJson('top:blank'),  tints: [COLOURS.white, ...Object.values(COLOURS.shirt), COLOURS.hair.ginger] },
-      { key: 'shirt', json: spriteJson('shirt:full'), tints: [COLOURS.white, ...Object.values(COLOURS.shirt), COLOURS.hair.ginger] }
-    ],
-    // Ties
-    // TODO: define as sub-layer with shirt?
-    [
-      { key: 'tie',        optional: true, json: spriteJson('tie'),        tints: [COLOURS.grey, COLOURS.green, ...Object.values(COLOURS.tie)] },
-      { key: 'tie:skinny', optional: true, json: spriteJson('tie:skinny'), tints: [COLOURS.grey, COLOURS.green, ...Object.values(COLOURS.tie)] }
-
-    ],
-    [{ key: 'jacket',    optional: true, json: spriteJson('jacket'),    tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] }],
-    [{ key: 'headhands', json: spriteJson('headhands'), tints: Object.values(COLOURS.skin) }],
-    // Mouth
-    [
-      { key: 'mouth:plain', json: spriteJson('mouth:plain'), blendMode: 2 /* MULTIPLY */, tints: [COLOURS.skin.pink] }, // https://stackoverflow.com/questions/22434240/how-to-use-blending-in-phaserjs
-    ],
-    // Eyes
-    [
-      { key: 'eyes:big',    json: spriteJson('eyes:big')    },
-      { key: 'eyes:small',  json: spriteJson('eyes:small')  },
-      { key: 'eyes:shifty', json: spriteJson('eyes:shifty') },
-    ],
-    // Hair
-    [
-      { key: 'hair:helmet',  optional: true, json: spriteJson('hair:helmet'),  tints: Object.values(COLOURS.hair) },
-      { key: 'hair:balding', optional: true, json: spriteJson('hair:balding'), tints: Object.values(COLOURS.hair) },
-    ],
-    [{ key: 'mask', json: spriteJson('mask'), tints: [COLOURS.white, COLOURS.green, ...Object.values(COLOURS.mask)] } ],
-  ];
-
   private modifiers: Modifiers;
 
   static preload(scene) {
-    NPC.layers.forEach(layer => layer.forEach(({ key, json }) => {
+    NPC.Layers.forEach(layer => layer.forEach(({ key, json }) => {
       if (scene.textures.exists(key)) return;
       scene.load.multiatlas(key, json, './assets/sprites');
     }));
@@ -128,7 +92,12 @@ class NPC extends Player {
   tintSprites() {
     this.container.iterate(sprite => {
       // TODO: separate lookup object for tints?
-      const { blendMode, tints } = this.findSprite(sprite);
+      const spriteLayer = this.findSprite(sprite);
+      if (!spriteLayer) {
+        throw new Error(`No sprite layer data found for ${sprite.name}`);
+      }
+
+      const { blendMode, tints } = spriteLayer;
       const tint = sample(tints);
       tint && sprite.setTint(tint);
       blendMode && (sprite.blendMode = blendMode);
@@ -145,9 +114,10 @@ class NPC extends Player {
   }
 
   findSprite({ name }): SpriteLayer {
-    for (const layer of NPC.layers) {
+    for (const layer of NPC.Layers) {
       for (const sprite of layer) {
-        if (sprite.key === name) return sprite;
+        const { key } = sprite;
+        if (key === name || key === extractKey(name)) return sprite;
       }
     }
   }
@@ -156,17 +126,17 @@ class NPC extends Player {
     this.forEachLayer(layer => {
       const sampleSprite = sample(layer);
       const shouldAdd = sample([true, !sampleSprite.optional]);
-      shouldAdd && this.addSprite(sampleSprite);
+      shouldAdd && this.addSprite({ key: getCombinedKey(sampleSprite.key) });
     });
   }
 
   toggleMask() {
-    const mask: any = this.container.getByName('mask');
+    const mask: any = this.container.getByName('mask') || this.container.getByName(getCombinedKey('mask'));
     mask.visible = !mask.visible;
   }
 
   createSprites() {
-    const createFrames = createFramesForKey(this.scene);
+    const createFrames = createFramesForCombinedKey(this.scene);
     this.forEachSprite(({ key }) => {
       createFrames(key);
     });
