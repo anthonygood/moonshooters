@@ -2,13 +2,12 @@ import { Physics } from 'phaser';
 import { StateMachine, TStateMachine } from './StateMachine';
 import { Direction } from './Direction';
 import { NPCDirection } from '../entities/NPC/Driver';
+import { ContainerAnimation } from '../animations';
 
 function Helpers({ container, velocities }: PlayerState.Config) {
-  const setAnimation = (animName: string, index = 0) => {
-    container.iterate((sprite: Phaser.GameObjects.Sprite) => {
-      // TODO: validate animation name?
-      sprite.play(`${sprite.name}/${animName}`, true, index);
-    });
+  // TODO: will be obsolete if composite frames are prerendered.
+  const setAnimation = (animName: string) => {
+    ContainerAnimation.playerAnimationWithCombinedAtlas(container, animName);
   };
 
   const roadkill = () => container.getData('roadkill');

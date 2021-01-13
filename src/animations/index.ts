@@ -231,6 +231,25 @@ export const createFramesForCombinedKey = (scene: Phaser.Scene) => (key: string)
   // });
 };
 
+export const ContainerAnimation = {
+	/** @deprecated */
+	__playAnimationWithDedicatedAtlas: (container: Phaser.GameObjects.Container, animName: string) =>
+		container.iterate((sprite: Phaser.GameObjects.Sprite) => {
+			// TODO: validate animation name?
+			sprite.play(`${sprite.name}/${animName}`, true);
+		}),
+	playerAnimationWithCombinedAtlas: (container: Phaser.GameObjects.Container, animName: string) =>
+		container.iterate((sprite: Phaser.GameObjects.Sprite) => {
+			// TODO: validate animation name?
+			const anim = `${sprite.name}/${animName}`;
+			const key = sprite.name.includes(COMBINED_TEXTURE_KEY) ?
+				anim :
+				getCombinedKey(anim);
+
+			sprite.play(key, true);
+		}),
+};
+
 export const createFramesForKey = (scene: Phaser.Scene) => (key: string) => {
   scene.anims.create({
     key: `${key}/walk`,
