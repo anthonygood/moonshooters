@@ -1,3 +1,5 @@
+import { COMBINED_TEXTURE_KEY, getCombinedKey } from '../util/dynamicSpriteAtlas';
+
 export const spriteJson = (imageName = 'bojo_frames') => ({
 	"textures": [
 		{
@@ -183,14 +185,50 @@ export const spriteJson = (imageName = 'bojo_frames') => ({
 });
 
 const getFrames = (scene: Phaser.Scene, prefix: string, end: number, key: string) => {
-  return scene.anims.generateFrameNames(
+  const frames = scene.anims.generateFrameNames(
     key,
     {
       prefix,
       start: 1,
       end,
     }
-  )
+	);
+	return frames;
+};
+
+export const createFramesForCombinedKey = (scene: Phaser.Scene) => (key: string) => {
+	const combinedKey = getCombinedKey(key);
+	scene.anims.create({
+    key: `${combinedKey}/walk`,
+    frameRate: 6,
+		repeat: -1,
+		// TODO: centralise key names
+    frames: getFrames(scene, `${key}:walk_`, 4, COMBINED_TEXTURE_KEY),
+  });
+  scene.anims.create({
+    key: `${combinedKey}/idle`,
+    frameRate: 2,
+    repeat: -1,
+    frames: getFrames(scene, `${key}:idle_`, 2, COMBINED_TEXTURE_KEY),
+  });
+  scene.anims.create({
+    key: `${combinedKey}/jump`,
+    frameRate: 6,
+    repeat: -1,
+    frames: getFrames(scene, `${key}:jump_`, 2, COMBINED_TEXTURE_KEY),
+  });
+
+  // scene.anims.create({
+  //   key: `${key}/halfspin`,
+  //   frameRate: 8,
+  //   repeat: 0,
+  //   frames: [
+  //     { key, frame: 'walk_4' },
+  //     { key, frame: 'walk_2' },
+  //     { key, frame: 'walk_3' },
+  //     { key, frame: 'walk_1' },
+  //   ],
+  // });
 };
 
 export const createFramesForKey = (scene: Phaser.Scene) => (key: string) => {
