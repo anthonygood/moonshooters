@@ -1,11 +1,16 @@
 import { spriteJson } from '../../animations';
 import COLOURS from './Colours';
 
+const keyJson = (key: string) => ({
+  key,
+  json: spriteJson(key),
+});
+
 const Layers = [
   // Trousers
   [
-    { key: 'trousers:dark',  json: spriteJson('trousers:dark'), tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] },
-    { key: 'trousers:light', json: spriteJson('trousers:light'), tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] }
+    { ...keyJson('trousers:dark'),  tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] },
+    { ...keyJson('trousers:light'), tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] }
   ],
   // Tops
   [
@@ -15,28 +20,28 @@ const Layers = [
   // Ties
   // TODO: define as sub-layer with shirt?
   [
-    { key: 'tie',        optional: true, json: spriteJson('tie'),        tints: [COLOURS.grey, COLOURS.green, ...Object.values(COLOURS.tie)] },
-    { key: 'tie:skinny', optional: true, json: spriteJson('tie:skinny'), tints: [COLOURS.grey, COLOURS.green, ...Object.values(COLOURS.tie)] }
+    { ...keyJson('tie'),        optional: true,  tints: [COLOURS.grey, COLOURS.green, ...Object.values(COLOURS.tie)] },
+    { ...keyJson('tie:skinny'), optional: true,  tints: [COLOURS.grey, COLOURS.green, ...Object.values(COLOURS.tie)] }
 
   ],
-  [{ key: 'jacket',    optional: true, json: spriteJson('jacket'),    tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] }],
-  [{ key: 'headhands', json: spriteJson('headhands'), tints: Object.values(COLOURS.skin) }],
+  [{ ...keyJson('jacket'), optional: true, tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] }],
+  [{ ...keyJson('headhands'), tints: Object.values(COLOURS.skin) }],
   // Mouth
   [
-    { key: 'mouth:plain', json: spriteJson('mouth:plain'), blendMode: 2 /* MULTIPLY */, tints: [COLOURS.skin.pink] }, // https://stackoverflow.com/questions/22434240/how-to-use-blending-in-phaserjs
+    { ...keyJson('mouth:plain'), blendMode: 2 /* MULTIPLY */, tints: [COLOURS.skin.pink] }, // https://stackoverflow.com/questions/22434240/how-to-use-blending-in-phaserjs
   ],
   // Eyes
   [
-    { key: 'eyes:big',    json: spriteJson('eyes:big')    },
-    { key: 'eyes:small',  json: spriteJson('eyes:small')  },
-    { key: 'eyes:shifty', json: spriteJson('eyes:shifty') },
+    keyJson( 'eyes:big'),
+    keyJson( 'eyes:small'),
+    keyJson( 'eyes:shifty'),
   ],
   // Hair
   [
-    { key: 'hair:helmet',  optional: true, json: spriteJson('hair:helmet'),  tints: Object.values(COLOURS.hair) },
-    { key: 'hair:balding', optional: true, json: spriteJson('hair:balding'), tints: Object.values(COLOURS.hair) },
+    { ...keyJson('hair:helmet'),  optional: true, tints: Object.values(COLOURS.hair) },
+    { ...keyJson('hair:balding'), optional: true, tints: Object.values(COLOURS.hair) },
   ],
-  [{ key: 'mask', json: spriteJson('mask'), tints: [COLOURS.white, COLOURS.green, ...Object.values(COLOURS.mask)] } ],
+  [{ ...keyJson('mask'), tints: [COLOURS.white, COLOURS.green, ...Object.values(COLOURS.mask)] } ],
 ];
 
 export default Layers;
