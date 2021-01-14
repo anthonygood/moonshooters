@@ -203,7 +203,7 @@ export const ContainerAnimation = {
 			// TODO: validate animation name?
 			sprite.play(`${sprite.name}/${animName}`, true);
 		}),
-	playerAnimationWithCombinedAtlas: (container: Phaser.GameObjects.Container, animName: string) =>
+	playAnimationWithCombinedAtlas: (container: Phaser.GameObjects.Container, animName: string) =>
 		container.iterate((sprite: Phaser.GameObjects.Sprite) => {
 			// TODO: validate animation name?
 			const anim = `${sprite.name}/${animName}`;
