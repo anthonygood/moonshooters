@@ -1,12 +1,10 @@
+import { sample } from '../../util';
 import Player, { SpriteLayer, VELOCITY } from '../Player';
 import NPCState from '../../state/NPCState';
 import { createFramesForCombinedKey } from '../../animations';
 import Driver, { NPCDirection, NPCDriver } from './Driver';
 import { getCombinedKey, extractKey } from '../../util/dynamicSpriteAtlas';
 import Layers from './Layers';
-
-const sample = (vals = []) =>
-  vals[Math.floor(Math.random() * vals.length)];
 
 export type Modifiers = {
   idle?: boolean;
@@ -44,12 +42,14 @@ class NPC extends Player {
 
   create(cursors, spawn, modifiers?: Modifiers) {
     super.create(cursors, spawn);
+
     this.tintSprites();
     this.toggleMask(); // hide
     this.spawned = true;
     this.modifiers = modifiers;
 
     if (!modifiers || !modifiers.idle) this.move();
+    return this;
   }
 
   getStateMachine() {
