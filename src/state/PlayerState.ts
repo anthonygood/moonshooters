@@ -7,7 +7,7 @@ import { ContainerAnimation } from '../animations';
 function Helpers({ container, velocities }: PlayerState.Config) {
   // TODO: will be obsolete if composite frames are prerendered.
   const setAnimation = (animName: string) => {
-    ContainerAnimation.playerAnimationWithCombinedAtlas(container, animName);
+    ContainerAnimation.playAnimationWithCombinedAtlas(container, animName);
   };
 
   const roadkill = () => container.getData('roadkill');
