@@ -1,4 +1,4 @@
-import { COMBINED_TEXTURE_KEY, getCombinedKey } from '../util/dynamicSpriteAtlas';
+import { COMBINED_TEXTURE_KEY, getCombinedKey } from '../util/TextureKeys';
 
 export const spriteJson = (imageName = 'bojo_frames') => ({
 	"textures": [

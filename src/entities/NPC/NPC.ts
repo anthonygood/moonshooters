@@ -3,7 +3,7 @@ import Player, { SpriteLayer, VELOCITY } from '../Player';
 import NPCState from '../../state/NPCState';
 import { createFramesForCombinedKey } from '../../animations';
 import Driver, { NPCDirection, NPCDriver } from './Driver';
-import { getCombinedKey, extractKey } from '../../util/dynamicSpriteAtlas';
+import { getCombinedKey, extractKey } from '../../util/TextureKeys';
 import Layers from './Layers';
 
 export type Modifiers = {
