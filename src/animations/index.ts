@@ -1,4 +1,6 @@
 import { COMBINED_TEXTURE_KEY, getCombinedKey } from '../util/TextureKeys';
+import * as TextureKeys from '../util/TextureKeys';
+
 
 export const spriteJson = (imageName = 'bojo_frames') => ({
 	"textures": [
@@ -203,11 +205,19 @@ export const ContainerAnimation = {
 			// TODO: validate animation name?
 			sprite.play(`${sprite.name}/${animName}`, true);
 		}),
+	playAnimationWithCharAtlast: (container: Phaser.GameObjects.Container, animName: string, index: number) => {
+		const key = TextureKeys.getCharSpriteKey(index, animName);
+		container.iterate((sprite: Phaser.GameObjects.Sprite) => {
+			// What about mask?
+			if (sprite.name === 'mask') return;
+			sprite.play(key, true);
+		});
+	},
 	playAnimationWithCombinedAtlas: (container: Phaser.GameObjects.Container, animName: string) =>
 		container.iterate((sprite: Phaser.GameObjects.Sprite) => {
 			// TODO: validate animation name?
 			const anim = `${sprite.name}/${animName}`;
-			const key = sprite.name.includes(COMBINED_TEXTURE_KEY) ?
+			const key = sprite.name.includes(TextureKeys.COMBINED_TEXTURE_KEY) ?
 				anim :
 				getCombinedKey(anim);
 
@@ -240,8 +250,9 @@ const createFrames = (
 	getFrameKey = (textureName: string, animName: string) => `${textureName}/${animName}`,
 	getFramePrefix = (_textureName: string, animName: string) => `${animName}_`,
 	getTextureKey = (textureName: string) => textureName,
+	frameData = FRAME_DATA
 ) => (scene: Phaser.Scene) => (key: string) => {
-	FRAME_DATA.forEach(({
+	frameData.forEach(({
 		name,
 		frameRate,
 		repeat,
@@ -252,6 +263,8 @@ const createFrames = (
 		const textureKey = getTextureKey(key);
 
 		const frames = getFrames(scene, prefix, end, textureKey);
+
+		console.log('creating la frame', frameKey, prefix, textureKey);
 		scene.anims.create({
 			key: frameKey,
 			frameRate,
@@ -277,8 +290,17 @@ export const createFramesForKey = (scene: Phaser.Scene) => (key: string) => {
   });
 };
 
+export const createFramesForCharacterAtlas = (scene: Phaser.Scene) => (index: number) => {
+	createFrames(
+		(_textureName, animName) => TextureKeys.getCharSpriteKey(index, animName),
+		(_textureName, animName) => `${TextureKeys.getCharSpriteKey(index, animName)}_`,
+		() => TextureKeys.CHAR_ATLAS_KEY,
+		FRAME_DATA.filter(data => data.name !== 'jump')
+	)(scene)(String(index));
+};
+
 export const createFramesForCombinedKey = createFrames(
 	(textureName, animName) => `${getCombinedKey(textureName)}/${animName}`,
 	(textureName, animName) => `${textureName}:${animName}_`,
-	() => COMBINED_TEXTURE_KEY,
+	() => TextureKeys.COMBINED_TEXTURE_KEY,
 );

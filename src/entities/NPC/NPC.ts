@@ -1,10 +1,11 @@
 import { sample } from '../../util';
 import Player, { SpriteLayer, VELOCITY } from '../Player';
 import NPCState from '../../state/NPCState';
-import { createFramesForCombinedKey } from '../../animations';
+import { createFramesForCharacterAtlas } from '../../animations';
 import Driver, { NPCDirection, NPCDriver } from './Driver';
-import { getCombinedKey, extractKey } from '../../util/TextureKeys';
+import { extractKey, getCharSpriteKey, CHAR_ATLAS_KEY } from '../../util/TextureKeys';
 import Layers from './Layers';
+import { ContainerAnimation } from '../../animations/index';
 
 export type Modifiers = {
   idle?: boolean;
@@ -23,6 +24,7 @@ const containerInView = (container: Phaser.GameObjects.Container, camera: Phaser
 
 class NPC extends Player {
   public spawned = false;
+  public spriteId: number;
   public state: NPCState;
   static readonly Layers = Layers;
   readonly driver: NPCDriver;
@@ -35,15 +37,16 @@ class NPC extends Player {
     }));
   }
 
-  constructor(scene) {
+  constructor(scene, spriteId = 0) {
     super(scene);
+    this.spriteId = spriteId;
     this.driver = Driver();
   }
 
   create(cursors, spawn, modifiers?: Modifiers) {
     super.create(cursors, spawn);
 
-    this.tintSprites();
+    // this.tintSprites();
     this.toggleMask(); // hide
     this.spawned = true;
     this.modifiers = modifiers;
@@ -59,7 +62,8 @@ class NPC extends Player {
       onTouch: () => {
         this.toggleMask();
         this.modifiers.moveOnTouch && this.driver.go(this.modifiers.moveOnTouch);
-      }
+      },
+      setAnimation: name => ContainerAnimation.playAnimationWithCharAtlast(this.container, name, this.spriteId)
     });
   }
 
@@ -123,23 +127,23 @@ class NPC extends Player {
   }
 
   addSprites() {
-    this.forEachLayer(layer => {
-      const sampleSprite = sample(layer);
-      const shouldAdd = sample([true, !sampleSprite.optional]);
-      shouldAdd && this.addSprite({ key: getCombinedKey(sampleSprite.key) });
-    });
+    const key = getCharSpriteKey(this.spriteId, 'idle');
+    this.addSprite({ key: CHAR_ATLAS_KEY }, key);
+    this.addSprite({ key: 'mask' });
   }
 
   toggleMask() {
-    const mask: any = this.container.getByName('mask') || this.container.getByName(getCombinedKey('mask'));
+    const mask: any = this.container.getByName('mask');
     mask.visible = !mask.visible;
   }
 
-  createSprites() {
-    const createFrames = createFramesForCombinedKey(this.scene);
-    this.forEachSprite(({ key }) => {
-      createFrames(key);
-    });
+  createAnimations() {
+    createFramesForCharacterAtlas(this.scene)(this.spriteId);
+    // const createFrames = createFramesForKey(this.scene);
+    // this.forEachSprite(({ key }) => {
+    //   createFrames(key);
+    //   createFramesForCharacterAtlas(this.scene)()
+    // });
   }
 }
 

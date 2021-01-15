@@ -1,7 +1,10 @@
 import { Direction, CursorKeyDirection, PointerDirection } from '../state/Direction';
 import PlayerState from '../state/PlayerState';
-import { createFramesForCombinedKey, spriteJson } from '../animations';
+import { createFramesForKey, spriteJson } from '../animations';
 import PlayerSound from '../sound/PlayerSounds';
+import { ContainerAnimation } from '../animations/index';
+
+Error.stackTraceLimit = 200;
 
 const SPRITE_SCALE = 3;
 
@@ -76,7 +79,7 @@ class Player {
       .setMaxVelocity(VELOCITY.max.x, VELOCITY.max.y)
       .setSize(11 * SPRITE_SCALE, 32 * SPRITE_SCALE);
 
-    this.createSprites();
+    this.createAnimations();
     this.addSprites();
     this.direction = this.getDirection(cursors);
     const state = this.state = this.getStateMachine();
@@ -86,7 +89,11 @@ class Player {
   }
 
   getStateMachine() {
-    return new PlayerState({ container: this.container, velocities: VELOCITY });
+    return new PlayerState({
+      container: this.container,
+      velocities: VELOCITY,
+      setAnimation: name => ContainerAnimation.__playAnimationWithDedicatedAtlas(this.container, name),
+    });
   }
 
   getDirection(cursors): Direction {
@@ -106,8 +113,9 @@ class Player {
     this.near.climbable = false;
   }
 
-  createSprites() {
-    const createFrame = createFramesForCombinedKey(this.scene);
+  // Creates animation frames, rather than sprites...
+  createAnimations() {
+    const createFrame = createFramesForKey(this.scene);
     this.forEachSprite(({ key }) => {
       createFrame(key);
     });
@@ -117,8 +125,8 @@ class Player {
     this.forEachSprite(this.addSprite);
   }
 
-  addSprite = ({ key }) => {
-    const sprite = this.scene.add.sprite(8 * SPRITE_SCALE, 16 * SPRITE_SCALE, key)
+  addSprite = ({ key }, frame?: string) => {
+    const sprite = this.scene.add.sprite(8 * SPRITE_SCALE, 16 * SPRITE_SCALE, key, frame)
       .setName(key)
       .setScale(SPRITE_SCALE);
 

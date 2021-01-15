@@ -4,7 +4,7 @@ import * as TextureKeys from './TextureKeys';
 import Layers from '../entities/NPC/Layers';
 import { SpriteLayer } from '../entities/Player';
 
-const VARIATION_COUNT = 10;
+const VARIATION_COUNT = 40;
 
 // reducer
 type Size = { h: number, w: number };
@@ -88,6 +88,8 @@ export const combineAtlases = (
 // Select a random combination of layers with tint values
 const sampleLayers = (): SpriteLayer[] =>
   Layers.flatMap(layer => {
+    if (layer[0].key === 'mask') return;
+
     const { tints, optional, ...selected } = sample(layer);
     const shouldAdd = sample([true, !optional]);
     const tint = sample(tints);
@@ -128,6 +130,7 @@ const addFrame = (
   renderTexture: Phaser.GameObjects.RenderTexture,
   origin: { x: number, y: number } = nextOrigin(),
   layers: SpriteLayer[],
+  index: number,
 ) => (frameName: string) => {
   let frame;
   // For each layer...
@@ -137,9 +140,10 @@ const addFrame = (
     // Always uses first tint in array
     const [tint] = tints || [];
     renderTexture.draw(frame, origin.x, origin.y, 1, tint);
-    renderTexture.texture.add(`foo_${frameName}`, 0, origin.x, origin.y, frame.width, frame.height);
   });
-
+  const frameKey = TextureKeys.getCharSpriteKey(index, frameName);
+  console.log('adding frame', frameKey);
+  renderTexture.texture.add(frameKey, 0, origin.x, origin.y, frame.width, frame.height);
   origin = nextOrigin(origin, { width: frame.width });
 };
 
@@ -155,7 +159,7 @@ export const renderToTexture = (scene: Phaser.Scene, count = VARIATION_COUNT) =>
   const textureHeight = height * count;
 
   // const texture = scene.make.renderTexture({ width, height }, true);
-  const renderTexture = scene.add.renderTexture(100, 100, width, textureHeight);
+  const renderTexture = scene.add.renderTexture(0, 0, width, textureHeight);
 
   renderTexture.setDepth(9);
   renderTexture.setScale(2);
@@ -168,12 +172,15 @@ export const renderToTexture = (scene: Phaser.Scene, count = VARIATION_COUNT) =>
   for (let i = 0; i < VARIATION_COUNT; i++) {
     const layers = sampleLayers();
     const origin = { x: 0, y: height * i };
-    const add = addFrame(scene, renderTexture, origin, layers);
+    const add = addFrame(scene, renderTexture, origin, layers, i);
     frameNames.forEach(add);
   }
 
-  renderTexture.saveTexture('myTexture');
+  renderTexture.saveTexture(TextureKeys.CHAR_ATLAS_KEY);
 
-  // scene.add.image(200, 400, 'myTexture');
-  // scene.add.image(200, 700, 'myTexture', 'foo_idle_1');
+  scene.add.image(500, 500, TextureKeys.CHAR_ATLAS_KEY);
+
+  [0,1,2,3,4].forEach(i => {
+    scene.add.image(500, 600 + i * 35, TextureKeys.CHAR_ATLAS_KEY, TextureKeys.getCharSpriteKey(i, 'idle_1'));
+  });
 };
