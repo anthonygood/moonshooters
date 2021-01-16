@@ -1,4 +1,4 @@
-import { COMBINED_TEXTURE_KEY, getCombinedKey } from '../util/TextureKeys';
+import { getCombinedKey } from '../util/TextureKeys';
 import * as TextureKeys from '../util/TextureKeys';
 
 
@@ -205,11 +205,15 @@ export const ContainerAnimation = {
 			// TODO: validate animation name?
 			sprite.play(`${sprite.name}/${animName}`, true);
 		}),
-	playAnimationWithCharAtlast: (container: Phaser.GameObjects.Container, animName: string, index: number) => {
-		const key = TextureKeys.getCharSpriteKey(index, animName);
+	playAnimationWithCharAtlas: (container: Phaser.GameObjects.Container, animName: string, index: number) => {
 		container.iterate((sprite: Phaser.GameObjects.Sprite) => {
 			// What about mask?
-			if (sprite.name === 'mask') return;
+			if (sprite.name === 'mask') {
+				const maskKey = TextureKeys.getCharSpriteKey('mask', animName);
+				sprite.play(maskKey);
+				return;
+			}
+			const key = TextureKeys.getCharSpriteKey(index, animName);
 			sprite.play(key, true);
 		});
 	},
@@ -290,7 +294,7 @@ export const createFramesForKey = (scene: Phaser.Scene) => (key: string) => {
   });
 };
 
-export const createFramesForCharacterAtlas = (scene: Phaser.Scene) => (index: number) => {
+export const createFramesForCharacterAtlas = (scene: Phaser.Scene) => (index: number | string) => {
 	createFrames(
 		(_textureName, animName) => TextureKeys.getCharSpriteKey(index, animName),
 		(_textureName, animName) => `${TextureKeys.getCharSpriteKey(index, animName)}_`,

@@ -112,12 +112,10 @@ class NPC extends Player {
     mask.visible = !mask.visible;
   }
 
-  /** @deprecated */
   createAnimations() {
-    console.warn('Deprecated: NPC#createAnimations')
+    // NPC animations are pre-generated (NPC.createAnimations)
+    // because they all share the same mask animation (for now).
     return;
-    const { scene, spriteId } = this;
-    createFramesForCharacterAtlas(scene)(spriteId);
   }
 }
 

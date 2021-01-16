@@ -108,9 +108,9 @@ class Background {
     const { layers: [first, second, third], fog } = theme;
 
 		// TODO: parameterise depth? or at least shallowest depth?
-    const wayBackground = map.createStaticLayer('Right back', first, 0, 0).setDepth(1);
-    const midBackground = map.createStaticLayer('Scrapers', third, 0, 0).setDepth(5);
-    const distantBackground = map.createStaticLayer('Back scrapers', second, 0, 0).setDepth(3);
+    const wayBackground = map.createLayer('Right back', first, 0, 0).setDepth(1);
+    const midBackground = map.createLayer('Scrapers', third, 0, 0).setDepth(5);
+    const distantBackground = map.createLayer('Back scrapers', second, 0, 0).setDepth(3);
 
     fog(this.scene);
 
