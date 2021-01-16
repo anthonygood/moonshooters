@@ -3,10 +3,10 @@ import Score from '../entities/Scoring/Score';
 import { rate } from '../entities/Scoring/Rater';
 import Player from '../entities/Player';
 import NPC from '../entities/NPC/NPC';
-import { Day as Background } from '../entities/Background';
+import { Morning as Background } from '../entities/Background';
 import * as json from '../../assets/tilemaps/The City.json';
 import Sound from '../sound/LevelSounds';
-import { DynamicAtlas, TileData, asset, sample } from '../util';
+import { DynamicAtlas, TileData, asset } from '../util';
 
 export const MAP_SCALE = 1.5;
 const LEVEL_KEY = 'level';
@@ -134,12 +134,6 @@ class TheCity extends Phaser.Scene {
 
 		// Don't keep updating player out of level bounds
 		if (!fallenBelowBounds) this.player.update(time, delta);
-
-		// if (this.playerRect) this.playerRect.destroy();
-		// if (this.pointerRect) this.pointerRect.destroy();
-
-		// this.playerRect = this.add.rectangle(this.player.container.x, 0, 6, 2000, COLOURS.blue).setDepth(10);
-		// this.pointerRect = this.add.rectangle(this.player.direction.positionX(), 0, 6, 2000, COLOURS.green).setDepth(10);
 
 		// TODO: only update NPCs nearby?
 		this.NPCs

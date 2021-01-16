@@ -31,7 +31,7 @@ export type SpriteLayer = {
   key: string,
   json: object,
   tints?: number[], // representing possible colours
-  blendMode?: number,
+  alpha?: number,
 };
 
 class Player {
@@ -129,6 +129,7 @@ class Player {
     name = typeof name === 'string' ? name : null;
     const sprite = this.scene.add.sprite(8 * SPRITE_SCALE, 16 * SPRITE_SCALE, key, frame)
       .setName(name || key)
+      // .setTint(COLOURS.red)
       .setScale(SPRITE_SCALE);
 
     this.container.add(sprite);

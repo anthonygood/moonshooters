@@ -28,7 +28,7 @@ const Layers = [
   [{ ...keyJson('headhands'), tints: Object.values(COLOURS.skin) }],
   // Mouth
   [
-    { ...keyJson('mouth:plain'), blendMode: 2 /* MULTIPLY */, tints: [COLOURS.skin.pink] }, // https://stackoverflow.com/questions/22434240/how-to-use-blending-in-phaserjs
+    { ...keyJson('mouth:plain'), alpha: .2 /* MULTIPLY */, tints: [COLOURS.red] }, // https://stackoverflow.com/questions/22434240/how-to-use-blending-in-phaserjs
   ],
   // Eyes
   [

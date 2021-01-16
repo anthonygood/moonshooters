@@ -130,27 +130,28 @@ const addFrame = (
   scene: Phaser.Scene,
   renderTexture: Phaser.GameObjects.RenderTexture,
   origin: { x: number, y: number } = nextOrigin(),
+  padding: number = 0,
   layers: SpriteLayer[],
   index: number | string,
   textureHeight: number,
 ) => (frameName: string) => {
   let frame;
   // For each layer...
-  layers.forEach(({ key, tints, blendMode }, i) => {
+  layers.forEach(({ key, tints, alpha = 1 }, i) => {
     frame = scene.textures.getFrame(key, frameName);
 
     // Always uses first tint in array
     const [tint] = tints || [];
     const channelSwappedTint = tint && invertRB(tint);
 
-    renderTexture.draw(frame, origin.x, origin.y, 1, channelSwappedTint);
+    renderTexture.draw(frame, origin.x, origin.y, alpha, channelSwappedTint);
   });
   const frameKey = TextureKeys.getCharSpriteKey(index, frameName);
   const frameOriginY = textureHeight - origin.y - frame.height;
 
   // // May need offset to support different sized base frames, or ensure always justify bottom
   renderTexture.texture.add(frameKey, 0, origin.x, frameOriginY, frame.width, frame.height);
-  origin = nextOrigin(origin, { width: frame.width });
+  origin = nextOrigin(origin, { width: frame.width + padding });
 };
 
 export const renderToTexture = (
@@ -165,11 +166,13 @@ export const renderToTexture = (
     .filter((frame: Phaser.Textures.Frame) => frame.name !== '__BASE');
 
   const { height, width } = stackHorizontal(specimenFrames);
-  const textureHeight = height * (count + 1);
+  const padding = 1;
+  const textureWidth = width + (padding * count);
+  const textureHeight = (height + padding) * (count + 1);
 
   const renderTexture = debug ?
-    scene.add.renderTexture(50, 50, width, textureHeight).setScale(2).setDepth(9) :
-    scene.make.renderTexture({ width, height: textureHeight }, false);
+    scene.add.renderTexture(50, 50, textureWidth, textureHeight).setScale(2).setDepth(9) :
+    scene.make.renderTexture({ width: textureWidth, height: textureHeight }, false);
 
   const frameNames = specimenFrames
     .map((frame: Phaser.Textures.Frame) => frame.name)
@@ -181,15 +184,31 @@ export const renderToTexture = (
   // NPC variations
   for (let i = 0; i < count; i++) {
     const layers = sampleLayers();
-    origin = { x: 0, y: height * i };
-    const add = addFrame(scene, renderTexture, origin, layers, i, textureHeight);
+    origin = { x: 0, y: (height + padding) * i };
+    const add = addFrame(
+      scene,
+      renderTexture,
+      origin,
+      padding,
+      layers,
+      i,
+      textureHeight
+    );
     frameNames.forEach(add);
   }
 
   // Mask
   const [mask] = Layers.find(([{ key }]) => key === 'mask');
-  const maskOrigin = { x: 0, y: height * count };
-  const addMask = addFrame(scene, renderTexture, maskOrigin, [mask], 'mask', textureHeight);
+  const maskOrigin = { x: 0, y: (height + padding) * count };
+  const addMask = addFrame(
+    scene,
+    renderTexture,
+    maskOrigin,
+    padding,
+    [mask],
+    'mask',
+    textureHeight
+  );
   frameNames.forEach(addMask);
 
   renderTexture.saveTexture(TextureKeys.CHAR_ATLAS_KEY);
