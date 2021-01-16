@@ -2,47 +2,22 @@ import EndLevelReport from '../entities/Scoring/EndLevelReport';
 import Score from '../entities/Scoring/Score';
 import { rate } from '../entities/Scoring/Rater';
 import Player from '../entities/Player';
-import NPC, { Modifiers } from '../entities/NPC/NPC';
-import { Morning as Background } from '../entities/Background';
+import NPC from '../entities/NPC/NPC';
+import { Day as Background } from '../entities/Background';
 import * as json from '../../assets/tilemaps/The City.json';
-import { NPCDirection } from '../entities/NPC/Driver';
 import Sound from '../sound/LevelSounds';
-import { asset } from '../util';
+import { DynamicAtlas, TileData, asset, sample } from '../util';
 
 export const MAP_SCALE = 1.5;
 const LEVEL_KEY = 'level';
 const VAN_KEY = 'van';
-
-export const sample = (vals = []) =>
-  vals[Math.floor(Math.random() * vals.length)];
-
-const getModifiersFromProps = (properties) => {
-	const modifier = properties.find(({ name }) => name === 'modifier');
-	if (!modifier) return {};
-
-	const moveOnTouch = modifier.value.includes('moveLeftOnTouch') ? NPCDirection.Left :
-		modifier.value.includes('moveRightOnTouch') ? NPCDirection.Right :
-			null;
-
-	return <Modifiers>{
-		idle: modifier.value.includes('idle'),
-		moveOnTouch
-	};
-};
-
-export interface SpawnPoint extends Phaser.GameObjects.GameObject {
-	properties: any[],
-	x: number,
-	y: number,
-};
-
 class TheCity extends Phaser.Scene {
 	private score: Score;
 	public player: Player;
 	public cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 	public map: Phaser.Tilemaps.Tilemap;
 	public NPCs: NPC[];
-	public background: Background;
+	public background: Background; // FIXME
 	public levelSound: Sound;
 	private disposeReport: () => void;
 
@@ -90,18 +65,19 @@ class TheCity extends Phaser.Scene {
 	}
 
 	create() {
+		window.game = this;
+
 		const map = this.map = this.make.tilemap({ key: this.getMapKey() });
 		const tileset = map.addTilesetImage('Platforms', LEVEL_KEY);
 		this.background.create(map, MAP_SCALE);
 
-		const layer = map.createStaticLayer('World', tileset).setDepth(6);
+		const layer = map.createLayer('World', tileset).setDepth(6);
 		layer.setCollisionByProperty({ collides: true });
 
 		layer.scale = MAP_SCALE;
-
 		this.cursors = this.input.keyboard.createCursorKeys();
 
-		const playerSpawn = map.findObject('Objects', obj => obj.name === 'PlayerSpawn') as SpawnPoint;
+		const playerSpawn = TileData.getPlayerSpawn(map);
 		this.player.create(this.cursors, [playerSpawn.x * MAP_SCALE, playerSpawn.y * MAP_SCALE]);
 		this.player.container.setDepth(7);
 		this.physics.add.collider(this.player.container, layer);
@@ -109,6 +85,9 @@ class TheCity extends Phaser.Scene {
 		this.cameras.main.setBounds(0, 0, map.widthInPixels * MAP_SCALE, map.heightInPixels * MAP_SCALE);
 		this.cameras.main.startFollow(this.player.container, false);
 
+		const spawnCount = TileData.getNPCSpawns(map).length;
+		DynamicAtlas.renderToTexture(this, spawnCount);
+		NPC.createAnimations(this, spawnCount);
 		this.spawnNPCs(layer);
 		this.score.create();
 
@@ -161,7 +140,6 @@ class TheCity extends Phaser.Scene {
 		// this.playerRect = this.add.rectangle(this.player.container.x, 0, 6, 2000, COLOURS.blue).setDepth(10);
 		// this.pointerRect = this.add.rectangle(this.player.direction.positionX(), 0, 6, 2000, COLOURS.green).setDepth(10);
 
-
 		// TODO: only update NPCs nearby?
 		this.NPCs
 			.filter(npc => npc.spawned)
@@ -183,22 +161,25 @@ class TheCity extends Phaser.Scene {
 		this.score.pass ? this.continueToNextLevel() : this.scene.restart();
 	}
 
-	spawnNPCs(layer: Phaser.Tilemaps.StaticTilemapLayer) {
-		const { NPCs, cursors, map, physics, score } = this;
+	spawnNPCs(layer: Phaser.Tilemaps.TilemapLayer) {
+		const {
+			NPCs,
+			cursors,
+			map,
+			physics,
+			score
+		} = this;
 
-		const spawnPoints = map.filterObjects('Objects', obj => obj.name === 'NPCSpawn');
-		const npcCount = spawnPoints.length;
-
+		const npcCount = TileData.getNPCSpawns(map).length;
 		score.setTotal(npcCount);
 
-		spawnPoints
-			.forEach(({ properties = [], x, y }: SpawnPoint) => {
-				const npc = new NPC(this);
-				const modifiers = getModifiersFromProps(properties);
-				npc.create(cursors, [x * MAP_SCALE, y * MAP_SCALE], modifiers);
-				npc.container.setDepth((npcCount % 2) + 6);
-				physics.add.collider(npc.container, layer);
-				NPCs.push(npc);
+		TileData.forEachSpawn(map, (spawn, modifiers, index) => {
+			const npc = new NPC(this, index)
+				.create(cursors, [spawn.x * MAP_SCALE, spawn.y * MAP_SCALE], modifiers);
+
+			npc.container.setDepth((npcCount % 2) + 6);
+			physics.add.collider(npc.container, layer);
+			NPCs.push(npc);
 		});
 	}
 

@@ -38,11 +38,11 @@ export const getModifiersFromProps = (properties: Property[] = []) => {
 	};
 };
 
-type CallbackFn = (spawn: SpawnPointPartial, modifiers: Modifiers) => void;
+type CallbackFn = (spawn: SpawnPointPartial, modifiers: Modifiers, index: number) => void;
 
 export const forEachSpawn = (map: Phaser.Tilemaps.Tilemap, callback: CallbackFn) => {
-  getNPCSpawns(map).forEach((spawn: SpawnPointPartial) => {
+  getNPCSpawns(map).forEach((spawn: SpawnPointPartial, index) => {
     const modifiers = getModifiersFromProps(spawn.properties);
-    callback(spawn, modifiers);
+    callback(spawn, modifiers, index);
   });
 };
