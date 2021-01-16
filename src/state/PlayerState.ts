@@ -2,14 +2,8 @@ import { Physics } from 'phaser';
 import { StateMachine, TStateMachine } from './StateMachine';
 import { Direction } from './Direction';
 import { NPCDirection } from '../entities/NPC/Driver';
-import { ContainerAnimation } from '../animations';
 
-function Helpers({ container, velocities }: PlayerState.Config) {
-  // TODO: will be obsolete if composite frames are prerendered.
-  const setAnimation = (animName: string) => {
-    ContainerAnimation.playAnimationWithCombinedAtlas(container, animName);
-  };
-
+function Helpers({ container, velocities, setAnimation }: PlayerState.Config) {
   const roadkill = () => container.getData('roadkill');
   const body = (): Physics.Arcade.Body => container.body as Physics.Arcade.Body; // TODO: better?
   const isOnGround = () => body().touching.down || body().blocked.down;
@@ -227,7 +221,8 @@ namespace PlayerState {
     velocities: {
       run: number;
       jump: number;
-    }
+    };
+    setAnimation: (name) => void;
   }
 
   export interface Helpers {

@@ -65,9 +65,13 @@ class TheCity extends Phaser.Scene {
 	}
 
 	create() {
-		window.game = this;
-
 		const map = this.map = this.make.tilemap({ key: this.getMapKey() });
+		const spawnCount = TileData.getNPCSpawns(map).length;
+
+		// Generate NPC sprite atlas
+		DynamicAtlas.renderToTexture(this, spawnCount);
+		NPC.createAnimations(this, spawnCount);
+
 		const tileset = map.addTilesetImage('Platforms', LEVEL_KEY);
 		this.background.create(map, MAP_SCALE);
 
@@ -85,9 +89,6 @@ class TheCity extends Phaser.Scene {
 		this.cameras.main.setBounds(0, 0, map.widthInPixels * MAP_SCALE, map.heightInPixels * MAP_SCALE);
 		this.cameras.main.startFollow(this.player.container, false);
 
-		const spawnCount = TileData.getNPCSpawns(map).length;
-		DynamicAtlas.renderToTexture(this, spawnCount);
-		NPC.createAnimations(this, spawnCount);
 		this.spawnNPCs(layer);
 		this.score.create();
 

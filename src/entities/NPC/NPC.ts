@@ -1,11 +1,13 @@
 import { sample } from '../../util';
-import Player, { SpriteLayer, VELOCITY } from '../Player';
+import Player, { VELOCITY } from '../Player';
 import NPCState from '../../state/NPCState';
 import { createFramesForCharacterAtlas } from '../../animations';
 import Driver, { NPCDirection, NPCDriver } from './Driver';
-import { extractKey, getCharSpriteKey, CHAR_ATLAS_KEY } from '../../util/TextureKeys';
+import { getCharSpriteKey, CHAR_ATLAS_KEY } from '../../util/TextureKeys';
 import Layers from './Layers';
 import { ContainerAnimation } from '../../animations/index';
+
+const MASK_KEY = 'mask';
 
 export type Modifiers = {
   idle?: boolean;
@@ -37,6 +39,14 @@ class NPC extends Player {
     }));
   }
 
+  static createAnimations(scene, count) {
+    createFramesForCharacterAtlas(scene)(MASK_KEY);
+
+    for (let spriteId = 0; spriteId < count; spriteId++) {
+      createFramesForCharacterAtlas(scene)(spriteId);
+    }
+  }
+
   constructor(scene, spriteId = 0) {
     super(scene);
     this.spriteId = spriteId;
@@ -45,8 +55,6 @@ class NPC extends Player {
 
   create(cursors, spawn, modifiers?: Modifiers) {
     super.create(cursors, spawn);
-
-    // this.tintSprites();
     this.toggleMask(); // hide
     this.spawned = true;
     this.modifiers = modifiers;
@@ -63,7 +71,7 @@ class NPC extends Player {
         this.toggleMask();
         this.modifiers.moveOnTouch && this.driver.go(this.modifiers.moveOnTouch);
       },
-      setAnimation: name => ContainerAnimation.playAnimationWithCharAtlast(this.container, name, this.spriteId)
+      setAnimation: name => ContainerAnimation.playAnimationWithCharAtlas(this.container, name, this.spriteId)
     });
   }
 
@@ -93,57 +101,23 @@ class NPC extends Player {
     this.state.process({ delta, direction, near: this.near, time, containerData }); // input data
   }
 
-  tintSprites() {
-    this.container.iterate(sprite => {
-      // TODO: separate lookup object for tints?
-      const spriteLayer = this.findSprite(sprite);
-      if (!spriteLayer) {
-        throw new Error(`No sprite layer data found for ${sprite.name}`);
-      }
-
-      const { blendMode, tints } = spriteLayer;
-      const tint = sample(tints);
-      tint && sprite.setTint(tint);
-      blendMode && (sprite.blendMode = blendMode);
-    });
-  }
-
-  loopSprites() {
-    setTimeout(() => {
-      this.container.removeAll()
-      this.addSprites();
-      this.tintSprites();
-      this.loopSprites();
-    }, 1000);
-  }
-
-  findSprite({ name }): SpriteLayer {
-    for (const layer of NPC.Layers) {
-      for (const sprite of layer) {
-        const { key } = sprite;
-        if (key === name || key === extractKey(name)) return sprite;
-      }
-    }
-  }
-
   addSprites() {
-    const key = getCharSpriteKey(this.spriteId, 'idle');
+    const key = getCharSpriteKey(this.spriteId, 'idle_1');
     this.addSprite({ key: CHAR_ATLAS_KEY }, key);
-    this.addSprite({ key: 'mask' });
+    this.addSprite({ key: CHAR_ATLAS_KEY }, `${MASK_KEY}_idle_1`, 'mask');
   }
 
   toggleMask() {
-    const mask: any = this.container.getByName('mask');
+    const mask: any = this.container.getByName(MASK_KEY);
     mask.visible = !mask.visible;
   }
 
+  /** @deprecated */
   createAnimations() {
-    createFramesForCharacterAtlas(this.scene)(this.spriteId);
-    // const createFrames = createFramesForKey(this.scene);
-    // this.forEachSprite(({ key }) => {
-    //   createFrames(key);
-    //   createFramesForCharacterAtlas(this.scene)()
-    // });
+    console.warn('Deprecated: NPC#createAnimations')
+    return;
+    const { scene, spriteId } = this;
+    createFramesForCharacterAtlas(scene)(spriteId);
   }
 }
 

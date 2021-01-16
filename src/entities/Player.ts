@@ -125,9 +125,10 @@ class Player {
     this.forEachSprite(this.addSprite);
   }
 
-  addSprite = ({ key }, frame?: string) => {
+  addSprite = ({ key }, frame?: string, name?: string | object) => {
+    name = typeof name === 'string' ? name : null;
     const sprite = this.scene.add.sprite(8 * SPRITE_SCALE, 16 * SPRITE_SCALE, key, frame)
-      .setName(key)
+      .setName(name || key)
       .setScale(SPRITE_SCALE);
 
     this.container.add(sprite);

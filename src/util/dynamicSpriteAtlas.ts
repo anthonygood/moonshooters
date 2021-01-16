@@ -3,6 +3,7 @@ import { sample } from './';
 import * as TextureKeys from './TextureKeys';
 import Layers from '../entities/NPC/Layers';
 import { SpriteLayer } from '../entities/Player';
+import COLOURS from '../entities/NPC/Colours';
 
 const VARIATION_COUNT = 40;
 
@@ -111,7 +112,7 @@ const sumWidth = sum('width');
 const sumHeight = sum('height');
 
 interface IReducer {
-  (sum: number, item: any): number
+  (sum: number, item: any): number;
 }
 
 const stack = (widthReducer: IReducer, heightReducer: IReducer) => (collection: any[]) => {
@@ -130,7 +131,8 @@ const addFrame = (
   renderTexture: Phaser.GameObjects.RenderTexture,
   origin: { x: number, y: number } = nextOrigin(),
   layers: SpriteLayer[],
-  index: number,
+  index: number | string,
+  textureHeight: number,
 ) => (frameName: string) => {
   let frame;
   // For each layer...
@@ -142,12 +144,18 @@ const addFrame = (
     renderTexture.draw(frame, origin.x, origin.y, 1, tint);
   });
   const frameKey = TextureKeys.getCharSpriteKey(index, frameName);
-  console.log('adding frame', frameKey);
-  renderTexture.texture.add(frameKey, 0, origin.x, origin.y, frame.width, frame.height);
+  const frameOriginY = textureHeight - origin.y - frame.height;
+
+  // // May need offset to support different sized base frames, or ensure always justify bottom
+  renderTexture.texture.add(frameKey, 0, origin.x, frameOriginY, frame.width, frame.height);
   origin = nextOrigin(origin, { width: frame.width });
 };
 
-export const renderToTexture = (scene: Phaser.Scene, count = VARIATION_COUNT) => {
+export const renderToTexture = (
+  scene: Phaser.Scene,
+  count = VARIATION_COUNT,
+  debug = false
+) => {
   // Get dimensions of target frames: assume all same size!
   const [[specimen]] = Layers;
   const specimenFrames = Object
@@ -155,32 +163,41 @@ export const renderToTexture = (scene: Phaser.Scene, count = VARIATION_COUNT) =>
     .filter((frame: Phaser.Textures.Frame) => frame.name !== '__BASE');
 
   const { height, width } = stackHorizontal(specimenFrames);
+  const textureHeight = height * (count + 1);
 
-  const textureHeight = height * count;
-
-  // const texture = scene.make.renderTexture({ width, height }, true);
-  const renderTexture = scene.add.renderTexture(0, 0, width, textureHeight);
-
-  renderTexture.setDepth(9);
-  renderTexture.setScale(2);
+  const renderTexture = debug ?
+    scene.add.renderTexture(50, 150, width, textureHeight).setScale(2).setDepth(9) :
+    scene.make.renderTexture({ width, height: textureHeight }, false);
 
   const frameNames = specimenFrames
     .map((frame: Phaser.Textures.Frame) => frame.name)
     .filter(name => !name.includes('jump'))
     .sort();
 
-  for (let i = 0; i < VARIATION_COUNT; i++) {
+  let origin;
+
+  // NPC variations
+  for (let i = 0; i < count; i++) {
     const layers = sampleLayers();
-    const origin = { x: 0, y: height * i };
-    const add = addFrame(scene, renderTexture, origin, layers, i);
+    origin = { x: 0, y: height * i };
+    const add = addFrame(scene, renderTexture, origin, layers, i, textureHeight);
     frameNames.forEach(add);
   }
 
+  // Mask
+  const [mask] = Layers.find(([{ key }]) => key === 'mask');
+  const maskOrigin = { x: 0, y: height * count };
+  const addMask = addFrame(scene, renderTexture, maskOrigin, [mask], 'mask', textureHeight);
+  frameNames.forEach(addMask);
+
   renderTexture.saveTexture(TextureKeys.CHAR_ATLAS_KEY);
 
-  scene.add.image(500, 500, TextureKeys.CHAR_ATLAS_KEY);
+  if (debug) {
+    renderTexture.fill(COLOURS.green, 0.25, 0, 0, width, textureHeight);
+    scene.add.image(500, 500, TextureKeys.CHAR_ATLAS_KEY);
 
-  [0,1,2,3,4].forEach(i => {
-    scene.add.image(500, 600 + i * 35, TextureKeys.CHAR_ATLAS_KEY, TextureKeys.getCharSpriteKey(i, 'idle_1'));
-  });
+    [0,1,2,3,4].forEach(i => {
+      scene[`sprite_${i}`] = scene.add.sprite(600, 200 + i * 70, TextureKeys.CHAR_ATLAS_KEY, TextureKeys.getCharSpriteKey(i, 'idle_1')).setScale(3.5).setDepth(7);
+    });
+  }
 };
