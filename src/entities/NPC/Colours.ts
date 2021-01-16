@@ -1,5 +1,6 @@
 
 const COLOURS = {
+  red: 0xff0000,
   white: 0xF7F7F7,
   grey: 0x646464,
   black: 0x000000,
@@ -32,5 +33,11 @@ const COLOURS = {
     blue: 0x02578A,
   },
 };
+
+// Seems that when drawing to render texture, red and blue channels are swapped...
+export const invertRB = (colour: number) => {
+  const [r,g,b] = colour.toString(16).padStart(6, '0').match(/[\w]{2}/g);
+  return parseInt([b,g,r].join(''), 16);
+}
 
 export default COLOURS;

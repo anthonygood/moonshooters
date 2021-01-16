@@ -45,7 +45,7 @@ class Player {
   // A 2D array of Layer objects: a layer with multiple keys represents multiple possibilites,
   // where only one will be rendered. Used for rendering different features.
   static readonly Layers: SpriteLayer[][] = [
-    [{ key: 'boris', json: spriteJson('bojo_debug') }],
+    [{ key: 'boris', json: spriteJson('bojo_frames') }],
   ];
 
   constructor(scene) {

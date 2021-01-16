@@ -3,7 +3,7 @@ import { sample } from './';
 import * as TextureKeys from './TextureKeys';
 import Layers from '../entities/NPC/Layers';
 import { SpriteLayer } from '../entities/Player';
-import COLOURS from '../entities/NPC/Colours';
+import { invertRB } from '../entities/NPC/Colours';
 
 const VARIATION_COUNT = 40;
 
@@ -136,12 +136,14 @@ const addFrame = (
 ) => (frameName: string) => {
   let frame;
   // For each layer...
-  layers.forEach(({ key, tints, blendMode }) => {
+  layers.forEach(({ key, tints, blendMode }, i) => {
     frame = scene.textures.getFrame(key, frameName);
 
     // Always uses first tint in array
     const [tint] = tints || [];
-    renderTexture.draw(frame, origin.x, origin.y, 1, tint);
+    const channelSwappedTint = tint && invertRB(tint);
+
+    renderTexture.draw(frame, origin.x, origin.y, 1, channelSwappedTint);
   });
   const frameKey = TextureKeys.getCharSpriteKey(index, frameName);
   const frameOriginY = textureHeight - origin.y - frame.height;
@@ -166,7 +168,7 @@ export const renderToTexture = (
   const textureHeight = height * (count + 1);
 
   const renderTexture = debug ?
-    scene.add.renderTexture(50, 150, width, textureHeight).setScale(2).setDepth(9) :
+    scene.add.renderTexture(50, 50, width, textureHeight).setScale(2).setDepth(9) :
     scene.make.renderTexture({ width, height: textureHeight }, false);
 
   const frameNames = specimenFrames
@@ -193,7 +195,7 @@ export const renderToTexture = (
   renderTexture.saveTexture(TextureKeys.CHAR_ATLAS_KEY);
 
   if (debug) {
-    renderTexture.fill(COLOURS.green, 0.25, 0, 0, width, textureHeight);
+    // renderTexture.fill(COLOURS.green, 0.25, 0, 0, width, textureHeight);
     scene.add.image(500, 500, TextureKeys.CHAR_ATLAS_KEY);
 
     [0,1,2,3,4].forEach(i => {
