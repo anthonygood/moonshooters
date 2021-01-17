@@ -35,15 +35,17 @@ export type TStateMachine<TData> = {
   currentState: () => string;
   process: (data: TData) => TStateMachine<TData>;
   init: () => TStateMachine<TData>;
+
+  states: StateDict<TData>;
 };
 
 const State = <TData>(name: string, minTicks = 0): State<TData> => {
   // event subscriptions
   const subscriptions = [];
 
-  const initialiser = (fn = () => {}) => () => {
-    fn();
-    subscriptions.forEach(fn => fn());
+  const initialiser = (fn = (data) => {}) => data => {
+    fn(data);
+    subscriptions.forEach(subscription => subscription(data));
   };
 
   let init = initialiser();
@@ -71,6 +73,9 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
   const states: StateDict<TData> = {
     [initialState]: State(initialState),
   };
+
+  // subscriptions
+  const onTicks = [];
 
   // states used by the monad when building state graph
   let homeState = states[initialState];
@@ -144,12 +149,18 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
         currentStateName = nextState.name;
       } else {
         currentState.tick(data);
+        onTicks.forEach(fn => fn(data));
         currentState.tickCount++;
       }
       return machine;
     },
     currentState: () => currentStateName,
     on: (stateName, fn) => {
+      if (stateName === 'tick') {
+        onTicks.push(fn);
+        return machine;
+      }
+
       const targetState = states[stateName];
 
       if (!targetState) {
@@ -159,6 +170,7 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
       targetState.subscriptions.push(fn);
       return machine;
     },
+    states,
   };
 
   return machine;
