@@ -19,20 +19,30 @@ const FlightRecorder = (machine: TStateMachine<any>) => {
   const states = Object.keys(machine.states);
 
   let currentStateName = '';
+  let currentDuration = 0;
 
   states.forEach(state => {
     records[state] = Recording();
 
     machine.on(state, () => {
+      const prev = records[currentStateName];
+      if (prev && prev.longest < currentDuration) {
+        prev.longest = currentDuration;
+      }
+
+      const next = records[state];
+      next.count++;
       currentStateName = state;
-      const record = records[state];
-      record.count++;
+      currentDuration = 0;
     });
   });
 
-  machine.on('tick', (data) => {
+  machine.on('tick', ({ delta }) => {
     const record = records[currentStateName];
-    record && (record.time += data.delta);
+    if (record) {
+      record.time += delta;
+      currentDuration += delta;
+    }
   });
 
   return records;
