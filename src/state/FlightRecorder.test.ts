@@ -1,18 +1,5 @@
-import { StateMachine, TStateMachine } from './StateMachine';
-
-type Recording = {
-  count: number;
-  time: number;
-  current?: number;
-  longest?: number;
-};
-
-const Recording = () => ({
-  time: 0,
-  count: 0,
-  current: 0,
-  longest: 0,
-});
+import { StateMachine } from './StateMachine';
+import FlightRecorder from './FlightRecorder';
 
 const machine = StateMachine<any>('idle')
   .transitionTo('walking').when(data => data.walk)
@@ -22,30 +9,6 @@ const machine = StateMachine<any>('idle')
   // Can only transition to idle from jumping
   .state('jumping')
   .transitionTo('idle').when(data => data.idle);
-
-const FlightRecorder = (machine: TStateMachine<any>) => {
-  const records: { [key: string]: Recording } = {};
-  const states = Object.keys(machine.states);
-
-  let currentStateName = '';
-
-  states.forEach(state => {
-    records[state] = Recording();
-
-    machine.on(state, () => {
-      currentStateName = state;
-      const record = records[state];
-      record.count++;
-    });
-  });
-
-  machine.on('tick', (data) => {
-    const record = records[currentStateName];
-    record && (record.time += data.delta);
-  });
-
-  return records;
-};
 
 describe('FlightRecorder', () => {
   const recorder = FlightRecorder(machine);
