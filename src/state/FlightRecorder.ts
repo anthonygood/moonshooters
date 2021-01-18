@@ -14,35 +14,43 @@ const Recording = () => ({
   longest: 0,
 });
 
-const FlightRecorder = (machine: TStateMachine<any>) => {
-  const records: { [key: string]: Recording } = {};
-  const states = Object.keys(machine.states);
+export type Records = { [key: string]: Recording };
 
-  let currentStateName = '';
-  let currentDuration = 0;
+const FlightRecorder = (...machines: TStateMachine<any>[]) => {
+  const records: Records = {};
 
-  states.forEach(state => {
-    records[state] = Recording();
+  machines.forEach(machine => {
+    const states = Object.keys(machine.states);
 
-    machine.on(state, () => {
-      const prev = records[currentStateName];
-      if (prev && prev.longest < currentDuration) {
-        prev.longest = currentDuration;
+    let currentStateName = '';
+    let currentDuration = 0;
+
+    states.forEach(state => {
+      if (records[state]) {
+        throw new Error(`Naming collision: state '${state}' exists in multiple state machines.`)
       }
 
-      const next = records[state];
-      next.count++;
-      currentStateName = state;
-      currentDuration = 0;
-    });
-  });
+      records[state] = Recording();
 
-  machine.on('tick', ({ delta }) => {
-    const record = records[currentStateName];
-    if (record) {
-      record.time += delta;
-      currentDuration += delta;
-    }
+      machine.on(state, () => {
+        const next = records[state];
+        next.count++;
+        currentStateName = state;
+        currentDuration = 0;
+      });
+    });
+
+    machine.on('tick', ({ delta }) => {
+      const record = records[currentStateName];
+      if (record) {
+        record.time += delta;
+        currentDuration += delta;
+
+        if (record.longest < currentDuration) {
+          record.longest = currentDuration;
+        }
+      }
+    });
   });
 
   return records;
