@@ -67,18 +67,14 @@ class TheCity extends Phaser.Scene {
 	create() {
 		const map = this.map = this.make.tilemap({ key: this.getMapKey() });
 		const spawnCount = TileData.getNPCSpawns(map).length;
+		this.background.create(map, MAP_SCALE);
 
 		// Generate NPC sprite atlas
 		DynamicAtlas.renderToTexture(this, spawnCount);
 		NPC.createAnimations(this, spawnCount);
 
-		const tileset = map.addTilesetImage('Platforms', LEVEL_KEY);
-		this.background.create(map, MAP_SCALE);
+		const layer = this.createMapLayer();
 
-		const layer = map.createLayer('World', tileset).setDepth(6);
-		layer.setCollisionByProperty({ collides: true });
-
-		layer.scale = MAP_SCALE;
 		this.cursors = this.input.keyboard.createCursorKeys();
 
 		const playerSpawn = TileData.getPlayerSpawn(map);
@@ -120,6 +116,15 @@ class TheCity extends Phaser.Scene {
 		// debug
 		// @ts-ignore
 		window.game = this;
+	}
+
+	createMapLayer() {
+		const { map } = this;
+		const tileset = map.addTilesetImage('Platforms', LEVEL_KEY);
+		return map.createLayer('World', tileset)
+			.setDepth(6)
+			.setCollisionByProperty({ collides: true })
+			.setScale(MAP_SCALE);
 	}
 
 	update(time: number, delta: number) {
