@@ -59,7 +59,7 @@ export default class TheCityIV extends TheCity {
   }
 
 	spawnVans() {
-    const { map } = this;
+    const { map, physics } = this;
 
     const vanSpawns = map.filterObjects('Objects', obj => obj.name === 'VanSpawn');
     vanSpawns.forEach((vanSpawn: SpawnPointPartial) => {
@@ -67,9 +67,10 @@ export default class TheCityIV extends TheCity {
       const van = new Van(this);
       van.create(mapScale(vanSpawn.x), mapScale(vanSpawn.y - 10), mapScale(boundary.x));
 
-      this.physics.add.overlap(van.container, this.player.container, (_van, player) => {
+      physics.add.overlap(van.container, this.player.container, (_van, player) => {
         if (player.getData('roadkill')) return;
         player.setData('roadkill', van.direction);
+        this.playerCollider.active = false;
         this.end();
       });
 

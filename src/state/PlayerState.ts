@@ -121,15 +121,19 @@ class PlayerState {
         const direction = helpers.roadkill();
         const rotation = direction === NPCDirection.Left ? -1.5 : 1.5;
         const velocityX = direction === NPCDirection.Left ? -1000 : 1000;
-        container.iterate((sprite: Phaser.GameObjects.Sprite) => {
-          sprite.anims.stop();
-          sprite.setFrame('idle_1.png');
-        });
+
+        helpers.setAnimation('jump');
         container.setRotation(rotation);
         helpers.body().setSize(helpers.body().height, 20)
           .stop()
           .setVelocityX(velocityX)
           .setVelocityY(-1000);
+      })
+      .tick(() => {
+        container.each(_ => {
+          _.angle += 10;
+          _.scale += 0.1;
+        });
       })
 
     // Climb state
@@ -156,6 +160,7 @@ class PlayerState {
   init() {
     this.direction.init();
     this.action.init();
+    return this;
   }
 
   process(data: PlayerState.ProcessParams) {
