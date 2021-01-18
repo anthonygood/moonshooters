@@ -66,21 +66,21 @@ describe('FlightRecorder', () => {
     const bTicks = [
     /*|  state  |    change     |
       |=========================| */
-        'none', //   right +11 |
-        'none', //   right +11 |
-        'left', // left 1      |
-        'right',// right 2     |
-        'none', //   right +11 |
-        'none', //   right +11 |
-        'left', // left 2      |
-        'right',// right 3     |
-        'none', //   right +11 |
-        'left', // left 3      |
-        'none', //   left +11  |
-        'right', // right 4    |
-        'none', //   right +11 |
-        'none', //   right +11 |
-        'none', //   right +11 |
+        'none', //   right +11  |
+        'none', //   right +11  |
+        'left', // left 1       |
+        'right',// right 2      |
+        'none', //   right +11  |
+        'none', //   right +11  |
+        'left', // left 2       |
+        'right',// right 3      |
+        'none', //   right +11  |
+        'left', // left 3       |
+        'none', //   left +11   |
+        'right', // right 4     |
+        'none', //   right +11  |
+        'none', //   right +11  |
+        'none', //   right +11  |
       ];
 
       const recorder = FlightRecorder(a, b);
