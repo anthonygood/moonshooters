@@ -1,9 +1,9 @@
 export interface Direction {
-  right: boolean;
-  left: boolean;
-  up: boolean;
-  down: boolean;
-  timeDown: (string) => number;
+  right?: boolean;
+  left?: boolean;
+  up?: boolean;
+  down?: boolean;
+  timeDown?: (string) => number;
 }
 
 // Thin wrapper over cursor keys, Direction interface helps for driving NPCs
