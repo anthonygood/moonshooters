@@ -8,7 +8,7 @@ import * as json from '../../assets/tilemaps/The City.json';
 import Sound from '../sound/LevelSounds';
 import { DynamicAtlas, TileData, asset } from '../util';
 
-export const MAP_SCALE = 1.5;
+export const MAP_SCALE = 1;
 const LEVEL_KEY = 'level';
 const VAN_KEY = 'van';
 class TheCity extends Phaser.Scene {
@@ -43,7 +43,7 @@ class TheCity extends Phaser.Scene {
 	}
 
 	getMusicName() {
-		return 'dirge';
+		return 'lazy intro';
 	}
 
 	getMusicVolume() {
@@ -142,11 +142,12 @@ class TheCity extends Phaser.Scene {
 	}
 
 	end() {
-		this.score.finish();
-		this.score.pass ? this.levelSound.release() : this.levelSound.crisis();
-		this.score.pass ? this.player.sound.success() : this.player.sound.fail();
-		const ratings = rate(this.score, this.player.state.flightRecorder);
-		this.disposeReport = EndLevelReport(this, this.score, ratings.join('\n'));
+		const { levelSound, player, score } = this;
+		score.finish();
+		score.pass ? levelSound.release() : levelSound.crisis();
+		score.pass ? player.sound.success() : player.sound.fail();
+		const ratings = rate(score, player.flightRecorder);
+		this.disposeReport = EndLevelReport(this, score, ratings.join('\n'));
 	}
 
 	restart() {
