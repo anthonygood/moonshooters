@@ -1,4 +1,5 @@
-import TheCity, { MAP_SCALE, SpawnPoint } from './TheCity';
+import TheCity, { MAP_SCALE } from './TheCity';
+import { SpawnPoint, SpawnPointPartial } from '../util/TileData';
 import { Dusk as Background } from '../entities/Background';
 import * as json from '../../assets/tilemaps/The CityIV.json';
 import Van from '../entities/Van';
@@ -61,8 +62,8 @@ export default class TheCityIV extends TheCity {
     const { map } = this;
 
     const vanSpawns = map.filterObjects('Objects', obj => obj.name === 'VanSpawn');
-    vanSpawns.forEach((vanSpawn: SpawnPoint) => {
-      const boundary = getBoundaryForVan(map, vanSpawn) as SpawnPoint;
+    vanSpawns.forEach((vanSpawn: SpawnPointPartial) => {
+      const boundary = getBoundaryForVan(map, vanSpawn) as SpawnPointPartial;
       const van = new Van(this);
       van.create(mapScale(vanSpawn.x), mapScale(vanSpawn.y - 10), mapScale(boundary.x));
 
@@ -77,6 +78,6 @@ export default class TheCityIV extends TheCity {
   }
 
   getMusicName() {
-    return 'night';
+    return 'peaky';
   }
 }
