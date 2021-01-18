@@ -1,4 +1,5 @@
 import { NPCDirection } from './NPC/Driver';
+import { SPRITE_SCALE } from './Player';
 
 const VAN_KEY = 'van';
 const VELOCITY = 750;
@@ -30,7 +31,7 @@ class Van {
 
 		const sprite = scene.add.sprite(96, 48, VAN_KEY)
 			.setName(VAN_KEY)
-      .setScale(3);
+      .setScale(SPRITE_SCALE);
 
     let velocity = VELOCITY
 

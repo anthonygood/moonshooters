@@ -1,12 +1,13 @@
 import { Direction, CursorKeyDirection, PointerDirection } from '../state/Direction';
 import PlayerState from '../state/PlayerState';
+import FlightRecorder, { Records } from '../state/FlightRecorder';
 import { createFramesForKey, spriteJson } from '../animations';
 import PlayerSound from '../sound/PlayerSounds';
 import { ContainerAnimation } from '../animations/index';
 
 Error.stackTraceLimit = 200;
 
-const SPRITE_SCALE = 3;
+export const SPRITE_SCALE = 2;
 
 // max speed levels:
 //  LEVEL  | RUN |  JUMP
@@ -16,7 +17,8 @@ const SPRITE_SCALE = 3;
 
 export const VELOCITY = {
   run: 1600,
-  jump: 1400,
+  jump: 1000,
+  airControl: 400,
   max: {
     x: 600,
     y: 1000,
@@ -36,12 +38,13 @@ export type SpriteLayer = {
 
 class Player {
   protected direction: Direction;
+  protected near: Near;
+  public container: Phaser.GameObjects.Container;
+  public flightRecorder: Records;
   public scene: Phaser.Scene;
   public sprite: Phaser.Physics.Arcade.Sprite;
-  public container: Phaser.GameObjects.Container;
   public state: PlayerState;
   public sound: PlayerSound;
-  protected near: Near;
   // A 2D array of Layer objects: a layer with multiple keys represents multiple possibilites,
   // where only one will be rendered. Used for rendering different features.
   static readonly Layers: SpriteLayer[][] = [
@@ -89,11 +92,18 @@ class Player {
   }
 
   getStateMachine() {
-    return new PlayerState({
+    const state = new PlayerState({
+      debug: true,
       container: this.container,
       velocities: VELOCITY,
       setAnimation: name => ContainerAnimation.__playAnimationWithDedicatedAtlas(this.container, name),
     });
+
+    this.flightRecorder = FlightRecorder(state.action, state.direction);
+
+    state.init();
+
+    return state;
   }
 
   getDirection(cursors): Direction {
