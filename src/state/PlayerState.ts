@@ -27,12 +27,26 @@ function Helpers({ container, velocities, setAnimation }: PlayerState.Config) {
     },
     leftOrRightJustPressed: (data: PlayerState.ProcessParams) => justPressed('right', data) || justPressed('left', data),
     onGroundAnd: (fn: (any) => boolean) => (data: PlayerState.ProcessParams) => isOnGround() && fn(data),
-    moveLeftRight: (data: PlayerState.ProcessParams) => {
-      const change = isOnGround() ? velocities.run : velocities.jump / 2;
-      let velocity = 0;
-      if (data.direction.right) velocity += change;
-      if (data.direction.left) velocity -= change;
-      body().setAccelerationX(velocity);
+    moveLeftRight: (data: PlayerState.ProcessParams, velocity = velocities.run) => {
+      const { left, right } = data.direction;
+      if ((left && right) || (!left && !right)) return;
+
+      const currentVelocity = body().velocity.x;
+      const currentDirection: Direction = body().velocity.x > 0 ? { right: true } : { left: true };
+
+      const changedDirection =
+        (currentVelocity && left && currentDirection.right) ||
+        (currentVelocity && right && currentDirection.left);
+
+      changedDirection && body().setVelocityX(0);
+      body().setAccelerationX(right ? velocity : -velocity);
+    },
+    airControl: (data: PlayerState.ProcessParams) => {
+      const velocity = velocities.airControl;
+      let acceleration = 0;
+      if (data.direction.right) acceleration += velocity;
+      if (data.direction.left) acceleration -= velocity;
+      body().setAccelerationX(acceleration);
     },
     canClimb,
     shouldClimb: (data: PlayerState.ProcessParams) => {
@@ -47,40 +61,11 @@ function Helpers({ container, velocities, setAnimation }: PlayerState.Config) {
     },
   };
 };
-
-type Recording = {
-  count: number;
-  time: number;
-  current?: number;
-  longest?: number;
-};
-
-const Recording = () => ({
-  time: 0,
-  count: 0,
-  current: 0,
-  longest: 0,
-});
-
-export type FlightRecorder = {
-  idle: Recording;
-  jump: Recording;
-  left: Recording;
-  right: Recording;
-};
-
 class PlayerState {
-  private direction: PlayerState.Machine;
+  public direction: PlayerState.Machine;
   public action: PlayerState.Machine;
-  public flightRecorder?: FlightRecorder;
 
   constructor(config: PlayerState.Config) {
-    this.flightRecorder = {
-      jump: Recording(),
-      idle: Recording(),
-      left: Recording(),
-      right: Recording(),
-    };
     const helpers = Helpers(config);
     const { container, velocities } = config;
 
@@ -93,39 +78,20 @@ class PlayerState {
 
     const direction = this.direction = <PlayerState.Machine>StateMachine('right')
       .transitionTo('left').when(helpers.onGroundAnd(onlyLeft))
-      .andThen(() => {
-        flipX(true)();
-        this.flightRecorder.left.count++;
-      })
-      .tick((data: PlayerState.ProcessParams) => {
-        this.flightRecorder.left.time += data.delta;
-      })
-      .transitionTo('roadkill').when(helpers.roadkill)
+      .andThen(flipX(true))
+      .transitionTo('direction:roadkill').when(helpers.roadkill)
       .state('left').transitionTo('right').when(helpers.onGroundAnd(onlyRight))
-      .andThen(() => {
-        flipX(false)();
-        this.flightRecorder.right.count++;
-      })
-      .tick((data: PlayerState.ProcessParams) => {
-        this.flightRecorder.right.time += data.delta;
-      })
-      .transitionTo('roadkill').when(helpers.roadkill);
+      .andThen(flipX(false))
+      .transitionTo('direction:roadkill').when(helpers.roadkill);
 
     // Idle state
-    this.action = <PlayerState.Machine>StateMachine('idle')
+    const action = this.action = <PlayerState.Machine>StateMachine('idle')
       .andThen(() => {
         helpers.setAnimation('idle');
         helpers.body().setAccelerationX(0);
-        this.flightRecorder.idle.count++;
       })
       .tick((data: PlayerState.ProcessParams) => {
         helpers.body().setVelocityX(0);
-        this.flightRecorder.idle.time += data.delta;
-        this.flightRecorder.idle.current += data.delta;
-      })
-      .exit(() => {
-        this.flightRecorder.idle.longest = Math.max(this.flightRecorder.idle.longest, this.flightRecorder.idle.current);
-        this.flightRecorder.idle.current = 0;
       })
       .transitionTo('roadkill').when(helpers.roadkill)
       .transitionTo('jump').when(helpers.shouldJump)
@@ -144,17 +110,8 @@ class PlayerState {
       .state('jump').andThen(() => {
         helpers.body().setVelocityY(-velocities.jump);
         helpers.setAnimation('jump');
-        this.flightRecorder.jump.count++;
       })
-      .tick((data: PlayerState.ProcessParams) => {
-        helpers.moveLeftRight(data);
-        this.flightRecorder.jump.time += data.delta;
-        this.flightRecorder.jump.current += data.delta;
-      })
-      .exit(() => {
-        this.flightRecorder.jump.longest = Math.max(this.flightRecorder.jump.longest, this.flightRecorder.jump.current);
-        this.flightRecorder.jump.current = 0;
-      })
+      .tick(helpers.airControl)
       .transitionTo('roadkill').when(helpers.roadkill)
       .transitionTo('walk').when(helpers.onGroundAnd(data => onlyLeft(data) || onlyRight(data)))
       .transitionTo('idle').when(helpers.isOnGround)
@@ -193,8 +150,12 @@ class PlayerState {
           console.log('!helpers.canClimb(data) || helpers.isOnGround()', !helpers.canClimb(data), helpers.isOnGround());
         }
         return !helpers.canClimb(data) || helpers.isOnGround()
-      })
-      .init();
+      });
+  }
+
+  init() {
+    this.direction.init();
+    this.action.init();
   }
 
   process(data: PlayerState.ProcessParams) {
@@ -221,6 +182,7 @@ namespace PlayerState {
     velocities: {
       run: number;
       jump: number;
+      airControl: number;
     };
     setAnimation: (name) => void;
   }
