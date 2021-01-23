@@ -1,7 +1,6 @@
 import { getCombinedKey } from '../util/TextureKeys';
 import * as TextureKeys from '../util/TextureKeys';
 
-
 export const spriteJson = (imageName = 'bojo_frames') => ({
 	"textures": [
 		{
@@ -250,6 +249,25 @@ const FRAME_DATA = [
 	},
 ];
 
+// Return a whole number between 1 and val, inclusive
+export const upto = (val: number) => 1 + Math.floor(Math.random() * val);
+
+// Return a random value between val-bound and val+bound
+const plusMinus = (bound: number) => (val: number) => {
+	const range = bound * 2;
+	const subtract = bound - upto(range);
+	return val - subtract;
+};
+
+const plusMinusOne = plusMinus(1);
+
+export const getNpcFrameData = () => FRAME_DATA
+	.filter(data => data.name !== 'jump')
+	.map(({ frameRate, ...rest }) => ({
+	...rest,
+	frameRate: plusMinusOne(frameRate),
+}));
+
 const createFrames = (
 	getFrameKey = (textureName: string, animName: string) => `${textureName}/${animName}`,
 	getFramePrefix = (_textureName: string, animName: string) => `${animName}_`,
@@ -298,7 +316,9 @@ export const createFramesForCharacterAtlas = (scene: Phaser.Scene) => (index: nu
 		(_textureName, animName) => TextureKeys.getCharSpriteKey(index, animName),
 		(_textureName, animName) => `${TextureKeys.getCharSpriteKey(index, animName)}_`,
 		() => TextureKeys.CHAR_ATLAS_KEY,
+		// TODO: create mask animations for different frame rates
 		FRAME_DATA.filter(data => data.name !== 'jump')
+		// getNpcFrameData()
 	)(scene)(String(index));
 };
 
