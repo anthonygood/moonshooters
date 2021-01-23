@@ -10,7 +10,7 @@ import { ContainerAnimation } from '../../animations/index';
 const MASK_KEY = 'mask';
 
 const getMaskKeyForSprite = (textures: Phaser.Textures.TextureManager, frameKey) => {
-  const { dependencies = [] } = textures.getFrame('@@charSprites', '0_idle_4').customData;
+  const { dependencies = [] } = textures.getFrame('@@charSprites', frameKey).customData;
   const maskDep = dependencies.find(key => key.includes('mask'));
   return `${maskDep || MASK_KEY}_idle_1`;
 };
@@ -67,7 +67,7 @@ class NPC extends Player {
     this.spawned = true;
     this.modifiers = modifiers;
 
-    if (!modifiers || !modifiers.idle) this.move();
+    (!modifiers || !modifiers.idle) ? this.move() : this.playAnim('idle');
     return this;
   }
 
@@ -79,8 +79,12 @@ class NPC extends Player {
         this.toggleMask();
         this.modifiers.moveOnTouch && this.driver.go(this.modifiers.moveOnTouch);
       },
-      setAnimation: name => ContainerAnimation.playAnimationWithCharAtlas(this.container, name, this.spriteId)
+      setAnimation: this.playAnim,
     });
+  }
+
+  playAnim = (name: string) => {
+    ContainerAnimation.playAnimationWithCharAtlas(this.container, name, this.spriteId)
   }
 
   getDirection() {
@@ -112,7 +116,7 @@ class NPC extends Player {
   addSprites() {
     const { scene, spriteId } = this;
     const key = getCharSpriteKey(spriteId, 'idle_1');
-    const maskKey = getMaskKeyForSprite(scene.textures, 'idle_1');
+    const maskKey = getMaskKeyForSprite(scene.textures, key);
 
     this.addSprite({ key: CHAR_ATLAS_KEY }, key, null);
     this.addSprite({ key: CHAR_ATLAS_KEY }, maskKey, 'mask');
