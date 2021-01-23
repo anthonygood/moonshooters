@@ -86,22 +86,38 @@ export const combineAtlases = (
   return texture;
 };
 
-// Select a random combination of layers with tint values
-const sampleLayers = (): SpriteLayer[] =>
-  Layers.flatMap(layer => {
-    if (layer[0].key === 'mask') return;
+const dependsOn = (deps: string[], layer: SpriteLayer) => {
+  const [layerPrefix] = layer.key.split(':');
+  return deps.find(dependency => dependency.includes(layerPrefix));
+};
 
-    const { tints, optional, ...selected } = sample(layer);
+// Select a random combination of layers with tint values
+const sampleLayers = (): [SpriteLayer[], string[]] => {
+  // Some layers are incompatible with others
+  const dependencies = [];
+
+  const sampledLayers = Layers.flatMap(layer => {
+    const layerDependency = dependsOn(dependencies, layer[0]);
+
+    const sampled = layerDependency ? layer.find(spriteLayer => spriteLayer.key === layerDependency) : sample(layer);
+    const { tints, key, optional, requires = [] } = sampled;
+    if (key.includes('mask')) return;
+
+    requires.forEach(dep => dependencies.push(dep));
+
     const shouldAdd = sample([true, !optional]);
     const tint = sample(tints);
 
     const layerData = {
-      ...selected,
+      ...sampled,
       tints: [tint],
     };
 
     return shouldAdd && layerData;
   }).filter(Boolean);
+
+  return [sampledLayers, dependencies];
+};
 
 const max = (key: string) => (acc: number, item: any) => Math.max(acc, item[key]);
 const sum = (key: string) => (acc: number, item: any) => acc + item[key];
@@ -133,11 +149,11 @@ const addFrame = (
   padding: number = 0,
   layers: SpriteLayer[],
   index: number | string,
-  textureHeight: number,
+  textureHeight: number
 ) => (frameName: string) => {
   let frame;
   // For each layer...
-  layers.forEach(({ key, tints, alpha = 1 }, i) => {
+  layers.forEach(({ key, tints, alpha = 1, ...rest }, i) => {
     frame = scene.textures.getFrame(key, frameName);
 
     // Always uses first tint in array
@@ -149,9 +165,12 @@ const addFrame = (
   const frameKey = TextureKeys.getCharSpriteKey(index, frameName);
   const frameOriginY = textureHeight - origin.y - frame.height;
 
-  // // May need offset to support different sized base frames, or ensure always justify bottom
-  renderTexture.texture.add(frameKey, 0, origin.x, frameOriginY, frame.width, frame.height);
+  const newFrame = renderTexture.texture.add(frameKey, 0, origin.x, frameOriginY, frame.width, frame.height);
+
   origin = nextOrigin(origin, { width: frame.width + padding });
+
+  // May need offset to support different sized base frames, or ensure always justify bottom
+  return newFrame;
 };
 
 export const renderToTexture = (
@@ -167,8 +186,9 @@ export const renderToTexture = (
 
   const { height, width } = stackHorizontal(specimenFrames);
   const padding = 1;
+  const maskCount = 2;
   const textureWidth = width + (padding * count);
-  const textureHeight = (height + padding) * (count + 1);
+  const textureHeight = (height + padding) * (count + maskCount);
 
   const renderTexture = debug ?
     scene.add.renderTexture(50, 50, textureWidth, textureHeight).setScale(2).setDepth(9) :
@@ -183,7 +203,7 @@ export const renderToTexture = (
 
   // NPC variations
   for (let i = 0; i < count; i++) {
-    const layers = sampleLayers();
+    const [layers, dependencies] = sampleLayers();
     origin = { x: 0, y: (height + padding) * i };
     const add = addFrame(
       scene,
@@ -194,22 +214,28 @@ export const renderToTexture = (
       i,
       textureHeight
     );
-    frameNames.forEach(add);
+    frameNames.forEach(frame => {
+      const newFrame = add(frame);
+      newFrame.customData = { dependencies };
+    });
   }
 
-  // Mask
-  const [mask] = Layers.find(([{ key }]) => key === 'mask');
-  const maskOrigin = { x: 0, y: (height + padding) * count };
-  const addMask = addFrame(
-    scene,
-    renderTexture,
-    maskOrigin,
-    padding,
-    [mask],
-    'mask',
-    textureHeight
-  );
-  frameNames.forEach(addMask);
+  // Masks
+  const frameHeight = specimenFrames[0].height;
+  const maskY = (height + padding) * count;
+  Layers.find(([{ key }]) => key.includes('mask')).forEach((mask, i) => {
+    const maskOrigin = { x: 0, y: maskY + (frameHeight * i) };
+    const addMask = addFrame(
+      scene,
+      renderTexture,
+      maskOrigin,
+      padding,
+      [mask],
+      mask.key,
+      textureHeight
+    );
+    frameNames.forEach(addMask);
+  });
 
   renderTexture.saveTexture(TextureKeys.CHAR_ATLAS_KEY);
 
@@ -217,8 +243,12 @@ export const renderToTexture = (
     // renderTexture.fill(COLOURS.green, 0.25, 0, 0, width, textureHeight);
     scene.add.image(500, 500, TextureKeys.CHAR_ATLAS_KEY);
 
-    [0,1,2,3,4].forEach(i => {
-      scene[`sprite_${i}`] = scene.add.sprite(600, 200 + i * 70, TextureKeys.CHAR_ATLAS_KEY, TextureKeys.getCharSpriteKey(i, 'idle_1')).setScale(3.5).setDepth(7);
+    ['idle','idle','walk','walk','walk'].forEach((anim, i) => {
+      console.log('play the',`${i}_${anim}`);
+      scene[`sprite_${i}`] = scene.add.sprite(600, 200 + i * 120, TextureKeys.CHAR_ATLAS_KEY, TextureKeys.getCharSpriteKey(i, 'idle_1'))
+        .setScale(3.5)
+        .setDepth(7)
+        .play(`${i}_${anim}`);
     });
   }
 };

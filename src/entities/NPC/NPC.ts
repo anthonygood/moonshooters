@@ -1,5 +1,5 @@
 import { sample } from '../../util';
-import Player, { VELOCITY } from '../Player';
+import Player, { SPRITE_SCALE, VELOCITY } from '../Player';
 import NPCState from '../../state/NPCState';
 import { createFramesForCharacterAtlas } from '../../animations';
 import Driver, { NPCDirection, NPCDriver } from './Driver';
@@ -8,6 +8,12 @@ import Layers from './Layers';
 import { ContainerAnimation } from '../../animations/index';
 
 const MASK_KEY = 'mask';
+
+const getMaskKeyForSprite = (textures: Phaser.Textures.TextureManager, frameKey) => {
+  const { dependencies = [] } = textures.getFrame('@@charSprites', '0_idle_4').customData;
+  const maskDep = dependencies.find(key => key.includes('mask'));
+  return `${maskDep || MASK_KEY}_idle_1`;
+};
 
 export type Modifiers = {
   idle?: boolean;
@@ -31,6 +37,7 @@ class NPC extends Player {
   static readonly Layers = Layers;
   readonly driver: NPCDriver;
   private modifiers: Modifiers;
+  private scale: number;
 
   static preload(scene) {
     NPC.Layers.forEach(layer => layer.forEach(({ key, json }) => {
@@ -51,6 +58,7 @@ class NPC extends Player {
     super(scene);
     this.spriteId = spriteId;
     this.driver = Driver();
+    this.scale = SPRITE_SCALE * sample([1.1, 1.05, 1, .95, .9]);
   }
 
   create(cursors, spawn, modifiers?: Modifiers) {
@@ -102,9 +110,12 @@ class NPC extends Player {
   }
 
   addSprites() {
-    const key = getCharSpriteKey(this.spriteId, 'idle_1');
-    this.addSprite({ key: CHAR_ATLAS_KEY }, key);
-    this.addSprite({ key: CHAR_ATLAS_KEY }, `${MASK_KEY}_idle_1`, 'mask');
+    const { scene, spriteId } = this;
+    const key = getCharSpriteKey(spriteId, 'idle_1');
+    const maskKey = getMaskKeyForSprite(scene.textures, 'idle_1');
+
+    this.addSprite({ key: CHAR_ATLAS_KEY }, key, null);
+    this.addSprite({ key: CHAR_ATLAS_KEY }, maskKey, 'mask');
   }
 
   toggleMask() {

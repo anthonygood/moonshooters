@@ -268,7 +268,6 @@ const createFrames = (
 
 		const frames = getFrames(scene, prefix, end, textureKey);
 
-		console.log('creating la frame', frameKey, prefix, textureKey);
 		scene.anims.create({
 			key: frameKey,
 			frameRate,

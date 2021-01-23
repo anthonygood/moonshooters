@@ -25,23 +25,31 @@ const Layers = [
 
   ],
   [{ ...keyJson('jacket'), optional: true, tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] }],
-  [{ ...keyJson('headhands'), tints: Object.values(COLOURS.skin) }],
+  [
+    { ...keyJson('headhands'), tints: Object.values(COLOURS.skin) },
+    { ...keyJson('headhands:nose'), tints: Object.values(COLOURS.skin), requires: ['mouth:low', 'mask:nose'] },
+  ],
   // Mouth
   [
-    { ...keyJson('mouth:plain'), alpha: .2 /* MULTIPLY */, tints: [COLOURS.red] }, // https://stackoverflow.com/questions/22434240/how-to-use-blending-in-phaserjs
+    { ...keyJson('mouth:plain'), alpha: .2, tints: [COLOURS.red] },
+    { ...keyJson('mouth:low'), alpha: .2, tints: [COLOURS.red] },
   ],
   // Eyes
   [
-    keyJson( 'eyes:big'),
-    keyJson( 'eyes:small'),
-    keyJson( 'eyes:shifty'),
+    keyJson('eyes:big'),
+    keyJson('eyes:small'),
+    keyJson('eyes:shifty'),
   ],
   // Hair
   [
     { ...keyJson('hair:helmet'),  optional: true, tints: Object.values(COLOURS.hair) },
     { ...keyJson('hair:balding'), optional: true, tints: Object.values(COLOURS.hair) },
+    { ...keyJson('hair:mussed'), optional: true, tints: Object.values(COLOURS.hair) },
   ],
-  [{ ...keyJson('mask'), tints: [COLOURS.white, COLOURS.green, ...Object.values(COLOURS.mask)] } ],
+  [
+    { ...keyJson('mask'), tints: [COLOURS.mask.blue, COLOURS.white, COLOURS.green, ...Object.values(COLOURS.mask)] },
+    { ...keyJson('mask:nose'), tints: [COLOURS.mask.blue, COLOURS.white, COLOURS.green, ...Object.values(COLOURS.mask)] },
+  ],
 ];
 
 export default Layers;
