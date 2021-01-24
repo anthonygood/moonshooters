@@ -3,7 +3,7 @@ import { sample } from './';
 import * as TextureKeys from './TextureKeys';
 import Layers from '../entities/NPC/Layers';
 import { SpriteLayer } from '../entities/Player';
-import { invertRB } from '../entities/NPC/Colours';
+import { invertRB } from '../util/Colours';
 
 const VARIATION_COUNT = 40;
 
@@ -15,7 +15,6 @@ type Size = { h: number, w: number };
 // No 'packing' happens, so lots of empty space...
 const boundaryRect = (acc: Size, texture: Phaser.Textures.Frame) => {
   const { height, width } = texture;
-  // const { size } = texture.customData as { size: Size };
   return {
     h: acc.h >= height ? acc.h : height,
     w: acc.w + width,

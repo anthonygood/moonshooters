@@ -1,5 +1,5 @@
 import { spriteJson } from '../../animations';
-import COLOURS from './Colours';
+import { COLOURS } from '../../util/Colours';
 
 const keyJson = (key: string) => ({
   key,
