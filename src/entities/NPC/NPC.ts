@@ -47,10 +47,11 @@ class NPC extends Player {
   }
 
   static createAnimations(scene, count) {
-    createFramesForCharacterAtlas(scene)(MASK_KEY);
+    const createFrames = createFramesForCharacterAtlas(scene);
+    createFrames(MASK_KEY);
 
     for (let spriteId = 0; spriteId < count; spriteId++) {
-      createFramesForCharacterAtlas(scene)(spriteId);
+      createFrames(spriteId);
     }
   }
 
@@ -58,7 +59,7 @@ class NPC extends Player {
     super(scene);
     this.spriteId = spriteId;
     this.driver = Driver();
-    this.scale = SPRITE_SCALE * sample([1.1, 1.05, 1, .95, .9]);
+    this.scale = SPRITE_SCALE * sample([1.075, 1.05, 1, .95, .9]);
   }
 
   create(cursors, spawn, modifiers?: Modifiers) {
@@ -67,7 +68,10 @@ class NPC extends Player {
     this.spawned = true;
     this.modifiers = modifiers;
 
-    (!modifiers || !modifiers.idle) ? this.move() : this.playAnim('idle');
+    (!modifiers || !modifiers.idle) ? this.move() : setTimeout(
+      () => this.playAnim('idle'),
+      sample([100,200,300,400,500])
+    );
     return this;
   }
 
