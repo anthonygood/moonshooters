@@ -1,16 +1,15 @@
-const BLACK = 'black';
-export const WHITE = '#FFFFFF';
-export const DAY = '#74F0FB';
-export const WARM = '#FF7300';
-export const PINK = '#FF007b';
-const PURPLE = '#c70074';
-export const DARKBLUE = '#080185';
-const DARKDARKBLUE = '#0a0654';
-const MIDNIGHTBLUE = '#05032e';
-const MORNINGYELLOW = '#fbfcca';
+import { COLOUR_STRINGS } from '../util/Colours';
 
-const DEFAULT_COLOUR = DAY;
-const DEFAULT_OPACITY = 0.2;
+const WHITE = COLOUR_STRINGS.white as string;
+const BLACK = COLOUR_STRINGS.black as string;
+
+const Colour = COLOUR_STRINGS.light as { [k: string]: string };
+const DAY = Colour.day;
+const WARM = Colour.warm;
+const PINK = Colour.pink;
+const PURPLE = Colour.purple;
+const DARKBLUE = Colour.darkblue;
+const MIDNIGHTBLUE = Colour.midnightblue;
 
 const getGradient = (a: string, b: string, stops = [0, 1]) => (
   ctx: CanvasRenderingContext2D,
@@ -30,6 +29,8 @@ export const GRADIENTS = {
   dusk: getGradient(DARKBLUE, DAY),
   night: getGradient(MIDNIGHTBLUE, DARKBLUE, [0.7, 1]),
   nightNeon: getGradient(DARKBLUE, PINK),
+  yellowish: getGradient(Colour.morningorange, Colour.morningyellow),
+  smog: getGradient(Colour.warm, Colour.morningyellow),
 };
 
 type GradientFn = (ctx: CanvasRenderingContext2D, height: number, width: number) => CanvasGradient;
@@ -98,6 +99,30 @@ const nightFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
     opacity: 0.3,
     depth: 6,
     blendMode: 2,
+  }),
+];
+
+const smog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
+  addFog({
+    scene,
+    fill: GRADIENTS.yellowish,
+    opacity: 1,
+    depth: 0,
+    blendMode: 0,
+  }),
+  addFog({
+    scene,
+    fill: GRADIENTS.smog,
+    opacity: 0.6,
+    depth: 3,
+    blendMode: 0,
+  }),
+  addFog({
+    scene,
+    fill: GRADIENTS.smog,
+    opacity: 0.6,
+    depth: 5,
+    blendMode: 0,
   }),
 ];
 
@@ -230,8 +255,8 @@ const ATMOSPHERE = {
   sunset: sunsetFog,
   dusk: duskFog,
   night: nightFog,
-  // nightNeon: nightNeon
   endLevel: endLevelFog,
+  smog,
 };
 
 export default ATMOSPHERE;
