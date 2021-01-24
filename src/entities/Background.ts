@@ -63,16 +63,16 @@ class Background {
 		const blue = map.addTilesetImage('Skyscrapers', DEFAULT_BKG_KEY);
 
 		// Variant skyscraper colours
-		const green = map.addTilesetImage('Skyscrapers_alt_1', GREEN_BKG_KEY);
-		const yellow = map.addTilesetImage('Skyscrapers_alt_2', YELLOW_BKG_KEY);
+		const green     = map.addTilesetImage('Skyscrapers_alt_1', GREEN_BKG_KEY);
+		const yellow    = map.addTilesetImage('Skyscrapers_alt_2', YELLOW_BKG_KEY);
 		const turqouise = map.addTilesetImage('Skyscrapers_alt_3', TURQUOISE_BKG_KEY);
-		const pink = map.addTilesetImage('Skyscrapers_alt_4', PINK_BKG_KEY);
-    const grey = map.addTilesetImage('Skyscrapers_alt_5', GREY_BKG_KEY);
-    const orange =  map.addTilesetImage('Skyscrapers_alt_6', ORANGE);
-    const red =  map.addTilesetImage('Skyscrapers_alt_7', RED);
+		const pink      = map.addTilesetImage('Skyscrapers_alt_4', PINK_BKG_KEY);
+    const grey      = map.addTilesetImage('Skyscrapers_alt_5', GREY_BKG_KEY);
+    const orange    = map.addTilesetImage('Skyscrapers_alt_6', ORANGE);
+    const red       = map.addTilesetImage('Skyscrapers_alt_7', RED);
 
     this.variants = {
-      blue, // blue
+      blue,
       green,
       yellow,
       turqouise,
@@ -154,6 +154,17 @@ export class Night extends Background {
   getTheme() {
     const { blue, yellow, orange } = this.variants;
     return { layers: [blue, orange, yellow], fog: Fog.night };
+  }
+}
+
+export class Smog extends Background {
+  getTheme() {
+    const {
+      yellow,
+      grey,
+      orange,
+    } = this.variants;
+    return { layers: [yellow, orange, grey], fog: Fog.smog };
   }
 }
 
