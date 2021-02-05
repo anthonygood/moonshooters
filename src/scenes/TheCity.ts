@@ -8,7 +8,7 @@ import * as json from '../../assets/tilemaps/The City.json';
 import Sound from '../sound/LevelSounds';
 import { DynamicAtlas, TileData, asset } from '../util';
 
-export const MAP_SCALE = 1;
+export const MAP_SCALE = 1.2;
 const LEVEL_KEY = 'level';
 const VAN_KEY = 'van';
 class TheCity extends Phaser.Scene {
@@ -19,35 +19,17 @@ class TheCity extends Phaser.Scene {
 	public NPCs: NPC[];
 	public background: Background; // FIXME
 	public levelSound: Sound;
+	protected playerCollider: Phaser.Physics.Arcade.Collider;
 	private disposeReport: () => void;
 
 	constructor(key = 'The City') {
 		super({ key });
-    this.player = new Player(this);
-		this.background = this.getBackground();
-		this.score = new Score(this);
-		this.levelSound = new Sound(this, this.getMusicName(), this.getMusicVolume());
 		this.NPCs = [];
-	}
+    this.player = new Player(this);
+		this.score = new Score(this);
 
-  getBackground() {
-    return new Background(this);
-  }
-
-  getLevelJson() {
-    return json;
-	}
-
-	getMapKey() {
-		return 'TheCity';
-	}
-
-	getMusicName() {
-		return 'lazy intro';
-	}
-
-	getMusicVolume() {
-		return .05;
+		this.levelSound = new Sound(this, this.getMusicName(), this.getMusicVolume());
+		this.background = this.getBackground();
 	}
 
 	preload() {
@@ -72,15 +54,18 @@ class TheCity extends Phaser.Scene {
 		// Generate NPC sprite atlas
 		DynamicAtlas.renderToTexture(this, spawnCount);
 		NPC.createAnimations(this, spawnCount);
+		window.game = this;
+		window.json = this.getLevelJson();
 
 		const layer = this.createMapLayer();
 
 		this.cursors = this.input.keyboard.createCursorKeys();
 
 		const playerSpawn = TileData.getPlayerSpawn(map);
-		this.player.create(this.cursors, [playerSpawn.x * MAP_SCALE, playerSpawn.y * MAP_SCALE]);
-		this.player.container.setDepth(7);
-		this.physics.add.collider(this.player.container, layer);
+		this.player
+			.create(this.cursors, [playerSpawn.x * MAP_SCALE, playerSpawn.y * MAP_SCALE])
+			.container.setDepth(7);
+		this.playerCollider = this.physics.add.collider(this.player.container, layer);
 
 		this.cameras.main.setBounds(0, 0, map.widthInPixels * MAP_SCALE, map.heightInPixels * MAP_SCALE);
 		this.cameras.main.startFollow(this.player.container, false);
@@ -139,6 +124,8 @@ class TheCity extends Phaser.Scene {
 
 		// Don't keep updating player out of level bounds
 		if (!fallenBelowBounds) this.player.update(time, delta);
+
+		this.background.update(delta);
 
 		// TODO: only update NPCs nearby?
 		this.NPCs
@@ -202,6 +189,26 @@ class TheCity extends Phaser.Scene {
 
 	nextScene() {
 		return this.scene.start('The CityII');
+	}
+
+  getBackground() {
+    return new Background(this);
+  }
+
+  getLevelJson() {
+    return json;
+	}
+
+	getMapKey() {
+		return 'TheCity';
+	}
+
+	getMusicName() {
+		return 'lazy intro';
+	}
+
+	getMusicVolume() {
+		return .05;
 	}
 }
 
