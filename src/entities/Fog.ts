@@ -25,6 +25,7 @@ const getGradient = (a: string, b: string, stops = [0, 1]) => (
 
 export const GRADIENTS = {
   day: getGradient(WHITE, DAY),
+  morning: getGradient(Colour.palepink, Colour.pink, [0.6, 0.9]),
   sunset: getGradient(PURPLE, WARM),
   dusk: getGradient(DARKBLUE, DAY),
   night: getGradient(MIDNIGHTBLUE, DARKBLUE, [0.7, 1]),
@@ -201,7 +202,7 @@ const dayFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
 const morningFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
   addFog({
     scene,
-    fill: WHITE,
+    fill: GRADIENTS.morning,
     opacity: 0.7,
     depth: 2,
     blendMode: 0,
@@ -209,16 +210,16 @@ const morningFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
   addFog({
     scene,
     fill: WHITE,
-    opacity: 0.6,
+    opacity: 0.3,
     depth: 4,
     blendMode: 0,
   }),
   addFog({
     scene,
     fill: WHITE,
-    opacity: 0.3,
+    opacity: 0.4,
     depth: 6,
-    blendMode: 2,
+    blendMode: 0,
   }),
 ];
 
