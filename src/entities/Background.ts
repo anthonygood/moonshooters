@@ -137,14 +137,20 @@ class Background {
 		midBackground.scrollFactorX = 0.3;
     midBackground.scrollFactorY = 0.9;
 
-    clouds.front.scrollFactorX = 0.3;
-    clouds.front.scrollFactorY = 1;
+    if (clouds.front) {
+      clouds.front.scrollFactorX = 0.3;
+      clouds.front.scrollFactorY = 1;
+      clouds.front.scale = scale;
+    }
 
 		distantBackground.scrollFactorX = 0.2;
     distantBackground.scrollFactorY = 0.8;
 
-    clouds.back.scrollFactorX = 0.1;
-    clouds.back.scrollFactorY = 1;
+    if (clouds.back) {
+      clouds.back.scrollFactorX = 0.1;
+      clouds.back.scrollFactorY = 1;
+      clouds.back.scale = scale;
+    }
 
 		wayBackground.scrollFactorX = 0.1;
     wayBackground.scrollFactorY = 0.9;
@@ -152,8 +158,6 @@ class Background {
 		midBackground.scale =
 		distantBackground.scale =
     wayBackground.scale =
-    clouds.front.scale =
-    clouds.back.scale =
       scale;
 
     // clouds.front.setScale(2, 2);
@@ -183,10 +187,10 @@ class Background {
   createClouds(map: Phaser.Tilemaps.Tilemap) {
     const { ADD, ERASE, SCREEN, MULTIPLY } = Phaser.BlendModes;
     const { grey, pink, turqouise, red, white } = this.cloudVariants;
-    const back = map.createLayer('Clouds Back', white, 0, 0)
-      .setDepth(3)//.setBlendMode(ADD);
-    const front = map.createLayer('Clouds Front', white, 0, 0)//-(map.heightInPixels / 2))
-      .setDepth(5)//.setBlendMode(SCREEN);
+    const back = map.createLayer('Clouds Back', white, 0, 0);
+    back && back.setDepth(3)//.setBlendMode(ADD);
+    const front = map.createLayer('Clouds Front', white, 0, 0);
+    front && front.setDepth(5)//.setBlendMode(SCREEN);
 
     return { front, back };
   }
@@ -194,11 +198,15 @@ class Background {
   update(delta: number) {
     const { clouds } = this;
 
-    const frontSpeed = 0.005;
-    const backSpeed = 0.002;
+    if (clouds.front) {
+      const frontSpeed = 0.005;
+      clouds.front.setX(clouds.front.x + (frontSpeed * delta));
+    }
 
-    clouds.front.setX(clouds.front.x + (frontSpeed * delta));
-    clouds.back.setX(clouds.back.x - (backSpeed * delta));
+    if (clouds.back) {
+      const backSpeed = 0.002;
+      clouds.back.setX(clouds.back.x - (backSpeed * delta));
+    }
   }
 
   getTheme() {
