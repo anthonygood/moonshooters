@@ -165,14 +165,17 @@ class Background {
   }
 
   applyTheme(map: Phaser.Tilemaps.Tilemap, theme) {
-    const { layers: [first, second, third], fog } = theme;
+    const {
+      layers: [first, second, third],
+      fog,
+    } = theme;
 
 		// TODO: parameterise depth? or at least shallowest depth?
     const wayBackground = map.createLayer('Right back', first, 0, 0).setDepth(1);
     const distantBackground = map.createLayer('Back scrapers', second, 0, 0).setDepth(3);
     const midBackground = map.createLayer('Scrapers', third, 0, 0).setDepth(5);
 
-    const clouds = this.clouds = this.createClouds(map);
+    const clouds = this.clouds = this.createClouds(map, theme.clouds);
 
     fog(this.scene);
 
@@ -184,13 +187,12 @@ class Background {
     };
   }
 
-  createClouds(map: Phaser.Tilemaps.Tilemap) {
-    const { ADD, ERASE, SCREEN, MULTIPLY } = Phaser.BlendModes;
-    const { grey, pink, turqouise, red, white } = this.cloudVariants;
-    const back = map.createLayer('Clouds Back', white, 0, 0);
-    back && back.setDepth(3)//.setBlendMode(ADD);
-    const front = map.createLayer('Clouds Front', white, 0, 0);
-    front && front.setDepth(5)//.setBlendMode(SCREEN);
+  createClouds(map: Phaser.Tilemaps.Tilemap, cloudVariants: Phaser.Tilemaps.Tileset[] = []) {
+    const [backVariant, frontVariant] = cloudVariants;
+    const back = map.createLayer('Clouds Back', backVariant, 0, 0);
+    back && back.setDepth(2);
+    const front = map.createLayer('Clouds Front', frontVariant, 0, 0);
+    front && front.setDepth(5);
 
     return { front, back };
   }
@@ -217,8 +219,13 @@ class Background {
 
 export class Morning extends Background {
   getTheme() {
-    const { blue, red } = this.variants;
-    return { layers: [red, blue, blue], fog: Fog.morning };
+    const { cloudVariants, variants } = this;
+    const { blue, red } = variants;
+    return {
+      layers: [red, blue, blue],
+      fog: Fog.morning,
+      clouds: [cloudVariants.red, cloudVariants.white],
+    };
   }
 }
 
