@@ -34,9 +34,11 @@ export type SpriteLayer = {
   json: object,
   tints?: number[], // representing possible colours
   alpha?: number,
+  requires?: string[],
 };
 
 class Player {
+  private scale: number;
   protected direction: Direction;
   protected near: Near;
   public container: Phaser.GameObjects.Container;
@@ -57,6 +59,7 @@ class Player {
       climbable: false,
     };
     this.sound = new PlayerSound(scene);
+    this.scale = SPRITE_SCALE;
   }
 
   preload(): void {
@@ -73,14 +76,14 @@ class Player {
     this.container.destroy();
   }
 
-  create(cursors, spawn: number[]): void {
+  create(cursors, spawn: number[]): Player {
     const [x, y] = spawn;
     const container = this.container = this.scene.add.container(x, y);
     this.scene.physics.world.enable(container);
 
     (container.body as Phaser.Physics.Arcade.Body)
       .setMaxVelocity(VELOCITY.max.x, VELOCITY.max.y)
-      .setSize(11 * SPRITE_SCALE, 32 * SPRITE_SCALE);
+      .setSize(11 * this.scale, 32 * this.scale);
 
     this.createAnimations();
     this.addSprites();
@@ -89,11 +92,12 @@ class Player {
     this.sound.create();
 
     state.action.on('jump', this.sound.jump);
+
+    return this;
   }
 
   getStateMachine() {
     const state = new PlayerState({
-      debug: true,
       container: this.container,
       velocities: VELOCITY,
       setAnimation: name => ContainerAnimation.__playAnimationWithDedicatedAtlas(this.container, name),
@@ -136,11 +140,11 @@ class Player {
   }
 
   addSprite = ({ key }, frame?: string, name?: string | object) => {
+    const { scale } = this;
     name = typeof name === 'string' ? name : null;
-    const sprite = this.scene.add.sprite(8 * SPRITE_SCALE, 16 * SPRITE_SCALE, key, frame)
+    const sprite = this.scene.add.sprite(8 * scale, 16 * scale, key, frame)
       .setName(name || key)
-      // .setTint(COLOURS.red)
-      .setScale(SPRITE_SCALE);
+      .setScale(scale);
 
     this.container.add(sprite);
   }
