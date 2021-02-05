@@ -39,6 +39,7 @@ export const COLOURS: ColourDict<number> = {
     day: 0x74F0FB,
     warm: 0xFF7300,
     pink: 0xFF007b,
+    palepink: 0xfce8f2,
     purple: 0xc70074,
     darkblue: 0x080185,
     darkdarkblue: 0x0a0654,
