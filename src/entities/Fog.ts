@@ -216,7 +216,7 @@ const morningFog = (scene: Phaser.Scene): Phaser.GameObjects.Image[] => [
   }),
   addFog({
     scene,
-    fill: WHITE,
+    fill: Colour.palepink,
     opacity: 0.4,
     depth: 6,
     blendMode: 0,
