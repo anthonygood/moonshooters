@@ -76,7 +76,7 @@ class Player {
     this.container.destroy();
   }
 
-  create(cursors, spawn: number[]): Player {
+  create(cursors, spawn: number[], _modifiers?: any): Player {
     const [x, y] = spawn;
     const container = this.container = this.scene.add.container(x, y);
     this.scene.physics.world.enable(container);

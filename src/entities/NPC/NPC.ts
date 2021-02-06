@@ -6,8 +6,10 @@ import Driver, { NPCDirection, NPCDriver } from './Driver';
 import { getCharSpriteKey, CHAR_ATLAS_KEY } from '../../util/TextureKeys';
 import Layers from './Layers';
 import { ContainerAnimation } from '../../animations/index';
+import { GREYSCALE_PIPELINE_KEY } from '../../rendering/GreyscalePipeline';
 
 const MASK_KEY = 'mask';
+const SPRITE_KEY = 'main';
 
 const getMaskKeyForSprite = (textures: Phaser.Textures.TextureManager, frameKey) => {
   const { dependencies = [] } = textures.getFrame('@@charSprites', frameKey).customData;
@@ -31,13 +33,14 @@ const containerInView = (container: Phaser.GameObjects.Container, camera: Phaser
 }
 
 class NPC extends Player {
+  static readonly Layers = Layers;
   public spawned = false;
   public spriteId: number;
   public state: NPCState;
-  static readonly Layers = Layers;
   readonly driver: NPCDriver;
   private modifiers: Modifiers;
   private scale: number;
+  private frozen: boolean;
 
   static preload(scene) {
     NPC.Layers.forEach(layer => layer.forEach(({ key, json }) => {
@@ -60,6 +63,7 @@ class NPC extends Player {
     this.spriteId = spriteId;
     this.driver = Driver();
     this.scale = SPRITE_SCALE * sample([1.075, 1.05, 1, .95, .9]);
+    this.frozen = false;
   }
 
   create(cursors, spawn, modifiers?: Modifiers) {
@@ -81,14 +85,20 @@ class NPC extends Player {
       velocities: VELOCITY,
       onTouch: () => {
         this.toggleMask();
+        this.freeze();
         this.modifiers.moveOnTouch && this.driver.go(this.modifiers.moveOnTouch);
       },
       setAnimation: this.playAnim,
+      stopAnimation: this.stopAnim,
     });
   }
 
   playAnim = (name: string) => {
     ContainerAnimation.playAnimationWithCharAtlas(this.container, name, this.spriteId)
+  }
+
+  stopAnim = () => {
+    ContainerAnimation.stop(this.container);
   }
 
   getDirection() {
@@ -98,6 +108,7 @@ class NPC extends Player {
   move() {
     // TODO: manage in state machine?
     setTimeout(() => {
+      if (this.frozen) return;
       this.driver.change();
       this.move();
     }, sample([800, 1000, 1500]));
@@ -122,13 +133,19 @@ class NPC extends Player {
     const key = getCharSpriteKey(spriteId, 'idle_1');
     const maskKey = getMaskKeyForSprite(scene.textures, key);
 
-    this.addSprite({ key: CHAR_ATLAS_KEY }, key, null);
-    this.addSprite({ key: CHAR_ATLAS_KEY }, maskKey, 'mask');
+    this.addSprite({ key: CHAR_ATLAS_KEY }, key, SPRITE_KEY);
+    this.addSprite({ key: CHAR_ATLAS_KEY }, maskKey, MASK_KEY);
   }
 
   toggleMask() {
     const mask: any = this.container.getByName(MASK_KEY);
     mask.visible = !mask.visible;
+  }
+
+  freeze() {
+    const sprite = this.container.getByName(SPRITE_KEY) as Phaser.GameObjects.Sprite;
+    sprite.setPipeline(GREYSCALE_PIPELINE_KEY);
+    this.frozen = true;
   }
 
   createAnimations() {

@@ -204,7 +204,11 @@ export const ContainerAnimation = {
 			// TODO: validate animation name?
 			sprite.play(`${sprite.name}/${animName}`, true);
 		}),
-	playAnimationWithCharAtlas: (container: Phaser.GameObjects.Container, animName: string, index: number) => {
+	playAnimationWithCharAtlas: (
+		container: Phaser.GameObjects.Container,
+		animName: string,
+		index: number
+	) => {
 		container.iterate((sprite: Phaser.GameObjects.Sprite) => {
 			// What about mask?
 			if (sprite.name === 'mask') {
@@ -214,6 +218,11 @@ export const ContainerAnimation = {
 			}
 			const key = TextureKeys.getCharSpriteKey(index, animName);
 			sprite.play(key, true);
+		});
+	},
+	stop: (container: Phaser.GameObjects.Container) => {
+		container.iterate((sprite: Phaser.GameObjects.Sprite) => {
+			sprite.stop();
 		});
 	},
 	playAnimationWithCombinedAtlas: (container: Phaser.GameObjects.Container, animName: string) =>

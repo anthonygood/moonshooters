@@ -153,7 +153,7 @@ class PlayerState {
         if (!helpers.canClimb(data) || helpers.isOnGround()) {
           console.log('!helpers.canClimb(data) || helpers.isOnGround()', !helpers.canClimb(data), helpers.isOnGround());
         }
-        return !helpers.canClimb(data) || helpers.isOnGround()
+        return !helpers.canClimb(data) || helpers.isOnGround();
       });
   }
 
