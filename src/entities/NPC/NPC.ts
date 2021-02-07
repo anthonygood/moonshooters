@@ -2,7 +2,7 @@ import { sample } from '../../util';
 import Player, { SPRITE_SCALE, VELOCITY } from '../Player';
 import NPCState from '../../state/NPCState';
 import { createFramesForCharacterAtlas } from '../../animations';
-import Driver, { NPCDirection, NPCDriver } from './Driver';
+import Driver, { NPCDriver } from './Driver';
 import { getCharSpriteKey, CHAR_ATLAS_KEY } from '../../util/TextureKeys';
 import Layers from './Layers';
 import { ContainerAnimation } from '../../animations/index';
@@ -15,11 +15,6 @@ const getMaskKeyForSprite = (textures: Phaser.Textures.TextureManager, frameKey)
   const { dependencies = [] } = textures.getFrame('@@charSprites', frameKey).customData;
   const maskDep = dependencies.find(key => key.includes('mask'));
   return `${maskDep || MASK_KEY}_idle_1`;
-};
-
-export type Modifiers = {
-  idle?: boolean;
-  moveOnTouch?: NPCDirection;
 };
 
 const VERTICAL_MARGIN = 64;
@@ -38,9 +33,8 @@ class NPC extends Player {
   public spriteId: number;
   public state: NPCState;
   readonly driver: NPCDriver;
-  private modifiers: Modifiers;
-  private scale: number;
   private frozen: boolean;
+  private modifiers: NPCState.Modifiers;
 
   static preload(scene) {
     NPC.Layers.forEach(layer => layer.forEach(({ key, json }) => {
@@ -62,21 +56,21 @@ class NPC extends Player {
     super(scene);
     this.spriteId = spriteId;
     this.driver = Driver();
-    this.scale = SPRITE_SCALE * sample([1.075, 1.05, 1, .95, .9]);
+    this.scale = SPRITE_SCALE * sample([1.075, 1.05, 1, .95, .925]);
     this.frozen = false;
   }
 
-  create(cursors, spawn, modifiers?: Modifiers) {
+  create(cursors, spawn, modifiers?: NPCState.Modifiers) {
+    this.modifiers = modifiers;
     super.create(cursors, spawn);
     this.toggleMask(); // hide
     this.spawned = true;
-    this.modifiers = modifiers;
 
-    this.state.action.on('touched', () => {
+    this.state.touch.on('touched', () => {
       this.toggleMask();
       this.greyscale();
-      if (this.modifiers.moveOnTouch) {
-        this.driver.go(this.modifiers.moveOnTouch);
+      if (modifiers.moveOnTouch) {
+        this.driver.go(modifiers.moveOnTouch);
       } else {
         this.frozen = true;
       }
@@ -90,8 +84,10 @@ class NPC extends Player {
   }
 
   getStateMachine() {
+    const { container, modifiers } = this;
     return new NPCState({
-      container: this.container,
+      container,
+      modifiers,
       velocities: VELOCITY,
       setAnimation: this.playAnim,
       stopAnimation: this.stopAnim,
@@ -125,12 +121,20 @@ class NPC extends Player {
   ) {
     // Check container visibility
     this.container.visible = containerInView(this.container, this.scene.cameras.main);
+
     // TODO: state machine for NPC driver
     // 'AI' lol
     const direction = this.driver.getDirection();
 
     const containerData = this.container.data && this.container.data.values;
-    this.state.process({ delta, direction, near: this.near, time, containerData }); // input data
+
+    this.state.process({
+      containerData,
+      delta,
+      direction,
+      time,
+      near: this.near,
+    });
   }
 
   addSprites() {

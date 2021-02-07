@@ -70,7 +70,7 @@ class PlayerState {
     const { container, velocities } = config;
 
     const flipX = (bool = false) => () => {
-      container.iterate(sprite => sprite.flipX = bool)
+      container.iterate(sprite => sprite.flipX = bool);
     };
 
     const onlyLeft = data => data.direction.left && !data.direction.right;

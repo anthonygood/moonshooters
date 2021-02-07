@@ -38,7 +38,7 @@ export type SpriteLayer = {
 };
 
 class Player {
-  private scale: number;
+  protected scale: number;
   protected direction: Direction;
   protected near: Near;
   public container: Phaser.GameObjects.Container;

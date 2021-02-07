@@ -1,12 +1,13 @@
 
-import { TStateMachine } from './StateMachine';
+import { StateMachine, TStateMachine } from './StateMachine';
 import PlayerState from './PlayerState';
+import { NPCDirection } from '../entities/NPC/Driver';
 
 function Helpers({ container, stopAnimation }: NPCState.Config) {
   const touched = (data: NPCState.ProcessParams) =>
     data.containerData && data.containerData.touchedByPlayer;
 
-  const onTouch = () => {
+  const onFreeze = () => {
     const body = container.body as Phaser.Physics.Arcade.Body;
     stopAnimation();
     body.setVelocityX(0);
@@ -15,23 +16,28 @@ function Helpers({ container, stopAnimation }: NPCState.Config) {
 
   return {
     touched,
-    onTouch,
+    onFreeze,
   };
 }
 class NPCState extends PlayerState {
-  public touch: PlayerState.Machine;
+  public touch: NPCState.Machine;
   constructor(config: NPCState.Config) {
     super(config);
 
-    const { touched, onTouch } = Helpers(config);
+    const { touched, onFreeze } = Helpers(config);
 
-    this.action
-      .state('walk').transitionTo('touched').when(touched).andThen(onTouch)
-      .state('idle').transitionTo('touched').when(touched).andThen(onTouch)
+    if (!config.modifiers || !config.modifiers.moveOnTouch) {
+      this.action
+        .state('walk').transitionTo('frozen').when(touched).andThen(onFreeze)
+        .state('idle').transitionTo('frozen').when(touched).andThen(onFreeze);
+    }
+
+    this.touch = StateMachine<NPCState.ProcessParams>('untouched').transitionTo('touched').when(touched)
   }
 
   process(data: NPCState.ProcessParams) {
     super.process(data);
+    this.touch.process(data);
   }
 }
 
@@ -42,8 +48,13 @@ namespace NPCState {
     }
   }
 
+  export type Modifiers = {
+    idle?: boolean;
+    moveOnTouch?: NPCDirection;
+  };
   export interface Config extends PlayerState.Config {
     stopAnimation: () => void;
+    modifiers?: Modifiers;
   }
 
   export type Machine = TStateMachine<ProcessParams>;
