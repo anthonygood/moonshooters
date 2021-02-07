@@ -46,26 +46,45 @@ const State = <TData>(name: string, getMinTicks: number | (() => number) = 0): S
   const subscriptions = [];
 
   let minTicks = toMinTicks(getMinTicks);
+  let tickCount = 0;
 
   const initialiser = (fn = (_data) => {}) => data => {
     fn(data);
     subscriptions.forEach(subscription => subscription(data));
     minTicks = toMinTicks(getMinTicks);
+    tickCount = 0;
   };
 
   let init = initialiser();
+
+  const ticker = (fn = (_data) => {}) => data => {
+    tickCount++;
+    fn(data);
+  };
+
+  let tick = ticker();
 
   return {
     name,
     transitions: [],
     subscriptions,
-    tickCount: 0,
+
+    get tickCount() {
+      return tickCount;
+    },
 
     set init(fn) {
       init = initialiser(fn);
     },
     get init() {
       return init;
+    },
+
+    set tick(fn) {
+      tick = ticker(fn);
+    },
+    get tick() {
+      return tick;
     },
 
     set minTicks(countOrFn) {
@@ -75,7 +94,6 @@ const State = <TData>(name: string, getMinTicks: number | (() => number) = 0): S
       return minTicks;
     },
 
-    tick: () => {},
     exit: () => {},
   }
 };
@@ -154,14 +172,14 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
 
       if (transition && tickCount >= minTicks) {
         currentState.exit(data);
+
         const nextState = states[transition.state];
-        nextState.tickCount = 0; // re-initialise
         nextState.init && nextState.init(data);
+
         currentStateName = nextState.name;
       } else {
         currentState.tick(data);
         onTicks.forEach(fn => fn(data));
-        currentState.tickCount++;
       }
       return machine;
     },

@@ -274,7 +274,7 @@ describe('StateMachine', () => {
         expect(walkTick).toHaveBeenCalledTimes(4);
       });
 
-      it.only('forAtLeast accepts function to define minTicks for transition state', () => {
+      it('forAtLeast accepts function to define minTicks for transition state', () => {
         const idleInit = jest.fn();
         const idleTick = jest.fn();
         const walkInit = jest.fn();
