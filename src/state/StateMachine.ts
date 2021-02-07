@@ -4,7 +4,7 @@ type State<TData> = {
   init: Function;
   tick: Function;
   exit: Function;
-  minTicks: number;
+  minTicks: number | (() => number);
   tickCount: number;
   subscriptions: Function[];
 }
@@ -25,7 +25,7 @@ export type TStateMachine<TData> = {
   andThen: (init: Function) => TStateMachine<TData>;
   tick: (tick: Function) => TStateMachine<TData>;
   exit: (exit: Function) => TStateMachine<TData>;
-  forAtLeast: (count: number) => TStateMachine<TData>;
+  forAtLeast: (countOrFn: number | (() => number)) => TStateMachine<TData>;
   state: (stateName: string) => TStateMachine<TData>;
 
   // Event subscription
@@ -39,13 +39,18 @@ export type TStateMachine<TData> = {
   states: StateDict<TData>;
 };
 
-const State = <TData>(name: string, minTicks = 0): State<TData> => {
+const toMinTicks = (val: number | (() => number)) => typeof val === 'number' ? val : val();
+
+const State = <TData>(name: string, getMinTicks: number | (() => number) = 0): State<TData> => {
   // event subscriptions
   const subscriptions = [];
 
-  const initialiser = (fn = (data) => {}) => data => {
+  let minTicks = toMinTicks(getMinTicks);
+
+  const initialiser = (fn = (_data) => {}) => data => {
     fn(data);
     subscriptions.forEach(subscription => subscription(data));
+    minTicks = toMinTicks(getMinTicks);
   };
 
   let init = initialiser();
@@ -54,7 +59,6 @@ const State = <TData>(name: string, minTicks = 0): State<TData> => {
     name,
     transitions: [],
     subscriptions,
-    minTicks,
     tickCount: 0,
 
     set init(fn) {
@@ -62,6 +66,13 @@ const State = <TData>(name: string, minTicks = 0): State<TData> => {
     },
     get init() {
       return init;
+    },
+
+    set minTicks(countOrFn) {
+      getMinTicks = countOrFn;
+    },
+    get minTicks() {
+      return minTicks;
     },
 
     tick: () => {},
@@ -118,8 +129,8 @@ export const StateMachine = <TData>(initialState: string): TStateMachine<TData> 
       destState.exit = fn;
       return machine;
     },
-    forAtLeast: count => {
-      destState.minTicks = count;
+    forAtLeast: countOrFn => {
+      destState.minTicks = countOrFn;
       return machine;
     },
     state: stateName => {

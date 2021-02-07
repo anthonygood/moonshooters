@@ -181,97 +181,177 @@ describe('StateMachine', () => {
       }).toThrow("Cannot transition to same state: 'walk'");
     });
 
-    it('can declare minTicks for transition state', () => {
-      const idleInit = jest.fn();
-      const walkInit = jest.fn();
-      const walkTick = jest.fn();
+    describe('forAtLeast', () => {
+      it('forAtLeast can declare minTicks for transition state', () => {
+        const idleInit = jest.fn();
+        const walkInit = jest.fn();
+        const walkTick = jest.fn();
 
-      // No idle tick callback, so should no-op for two ticks
-      const machine = StateMachine<any>('idle').andThen(idleInit).forAtLeast(2)
-        .transitionTo('walk').when(data => data.walk).or(data => data.run)
-        // Expect walkTick to be called for 4 ticks
-        .andThen(walkInit).tick(walkTick).forAtLeast(4)
-        .state('walk').transitionTo('idle').when(data => !data.walk)
-        .init();
+        // No idle tick callback, so should no-op for two ticks
+        const machine = StateMachine<any>('idle').andThen(idleInit).forAtLeast(2)
+          .transitionTo('walk').when(data => data.walk).or(data => data.run)
+          // Expect walkTick to be called for 4 ticks
+          .andThen(walkInit).tick(walkTick).forAtLeast(4)
+          .state('walk').transitionTo('idle').when(data => !data.walk)
+          .init();
 
-      expect(idleInit).toHaveBeenCalledTimes(1);
-      expect(machine.currentState()).toBe('idle');
+        expect(idleInit).toHaveBeenCalledTimes(1);
+        expect(machine.currentState()).toBe('idle');
 
-      // First tick
-      machine.process({ walk: true })
-      expect(machine.currentState()).toBe('idle');
-      expect(idleInit).toHaveBeenCalledTimes(1);
-      expect(walkInit).toHaveBeenCalledTimes(0);
+        // First tick
+        machine.process({ walk: true })
+        expect(machine.currentState()).toBe('idle');
+        expect(idleInit).toHaveBeenCalledTimes(1);
+        expect(walkInit).toHaveBeenCalledTimes(0);
 
-      // Second tick
-      machine.process({ walk: true })
-      expect(machine.currentState()).toBe('idle');
-      expect(idleInit).toHaveBeenCalledTimes(1);
-      expect(walkInit).toHaveBeenCalledTimes(0);
+        // Second tick
+        machine.process({ walk: true })
+        expect(machine.currentState()).toBe('idle');
+        expect(idleInit).toHaveBeenCalledTimes(1);
+        expect(walkInit).toHaveBeenCalledTimes(0);
 
-      // Third tick
-      machine.process({ walk: true })
-      expect(machine.currentState()).toBe('walk');
-      expect(idleInit).toHaveBeenCalledTimes(1);
-      expect(walkInit).toHaveBeenCalledTimes(1);
-      expect(walkTick).toHaveBeenCalledTimes(0);
+        // Third tick
+        machine.process({ walk: true })
+        expect(machine.currentState()).toBe('walk');
+        expect(idleInit).toHaveBeenCalledTimes(1);
+        expect(walkInit).toHaveBeenCalledTimes(1);
+        expect(walkTick).toHaveBeenCalledTimes(0);
 
+        // Fourth tick - conditions met to return to idle, but should tick at least 4 times
+        machine.process({ walk: false })
+        expect(machine.currentState()).toBe('walk');
+        expect(idleInit).toHaveBeenCalledTimes(1);
+        expect(walkInit).toHaveBeenCalledTimes(1);
+        expect(walkTick).toHaveBeenCalledTimes(1);
 
-      // Fourth tick - conditions met to return to idle, but should tick at least 4 times
-      machine.process({ walk: false })
-      expect(machine.currentState()).toBe('walk');
-      expect(idleInit).toHaveBeenCalledTimes(1);
-      expect(walkInit).toHaveBeenCalledTimes(1);
-      expect(walkTick).toHaveBeenCalledTimes(1);
+        // Fifth tick
+        machine.process({ walk: false })
+        expect(machine.currentState()).toBe('walk');
+        expect(idleInit).toHaveBeenCalledTimes(1);
+        expect(walkInit).toHaveBeenCalledTimes(1);
+        expect(walkTick).toHaveBeenCalledTimes(2);
 
-      // Fifth tick
-      machine.process({ walk: false })
-      expect(machine.currentState()).toBe('walk');
-      expect(idleInit).toHaveBeenCalledTimes(1);
-      expect(walkInit).toHaveBeenCalledTimes(1);
-      expect(walkTick).toHaveBeenCalledTimes(2);
+        // Sixth tick
+        machine.process({ walk: false })
+        expect(machine.currentState()).toBe('walk');
+        expect(idleInit).toHaveBeenCalledTimes(1);
+        expect(walkInit).toHaveBeenCalledTimes(1);
+        expect(walkTick).toHaveBeenCalledTimes(3);
 
-      // Sixth tick
-      machine.process({ walk: false })
-      expect(machine.currentState()).toBe('walk');
-      expect(idleInit).toHaveBeenCalledTimes(1);
-      expect(walkInit).toHaveBeenCalledTimes(1);
-      expect(walkTick).toHaveBeenCalledTimes(3);
+        // Seventh tick
+        machine.process({ walk: false })
+        expect(machine.currentState()).toBe('walk');
+        expect(idleInit).toHaveBeenCalledTimes(1);
+        expect(walkInit).toHaveBeenCalledTimes(1);
+        expect(walkTick).toHaveBeenCalledTimes(4);
 
-      // Seventh tick
-      machine.process({ walk: false })
-      expect(machine.currentState()).toBe('walk');
-      expect(idleInit).toHaveBeenCalledTimes(1);
-      expect(walkInit).toHaveBeenCalledTimes(1);
-      expect(walkTick).toHaveBeenCalledTimes(4);
+        // Seventh tick
+        machine.process({ walk: false })
+        expect(machine.currentState()).toBe('idle');
+        expect(idleInit).toHaveBeenCalledTimes(2);
+        expect(walkInit).toHaveBeenCalledTimes(1);
+        expect(walkTick).toHaveBeenCalledTimes(4);
 
-      // Seventh tick
-      machine.process({ walk: false })
-      expect(machine.currentState()).toBe('idle');
-      expect(idleInit).toHaveBeenCalledTimes(2);
-      expect(walkInit).toHaveBeenCalledTimes(1);
-      expect(walkTick).toHaveBeenCalledTimes(4);
+        // Eighth tick - and checking minTicks for transition back again...
+        machine.process({ walk: true })
+        expect(machine.currentState()).toBe('idle');
+        expect(idleInit).toHaveBeenCalledTimes(2);
+        expect(walkInit).toHaveBeenCalledTimes(1);
+        expect(walkTick).toHaveBeenCalledTimes(4);
 
-      // Eighth tick - and checking minTicks for transition back again...
-      machine.process({ walk: true })
-      expect(machine.currentState()).toBe('idle');
-      expect(idleInit).toHaveBeenCalledTimes(2);
-      expect(walkInit).toHaveBeenCalledTimes(1);
-      expect(walkTick).toHaveBeenCalledTimes(4);
+        // Ninth tick
+        machine.process({ walk: true })
+        expect(machine.currentState()).toBe('idle');
+        expect(idleInit).toHaveBeenCalledTimes(2);
+        expect(walkInit).toHaveBeenCalledTimes(1);
+        expect(walkTick).toHaveBeenCalledTimes(4);
 
-      // Ninth tick
-      machine.process({ walk: true })
-      expect(machine.currentState()).toBe('idle');
-      expect(idleInit).toHaveBeenCalledTimes(2);
-      expect(walkInit).toHaveBeenCalledTimes(1);
-      expect(walkTick).toHaveBeenCalledTimes(4);
+        // Ninth tick
+        machine.process({ walk: true })
+        expect(machine.currentState()).toBe('walk');
+        expect(idleInit).toHaveBeenCalledTimes(2);
+        expect(walkInit).toHaveBeenCalledTimes(2);
+        expect(walkTick).toHaveBeenCalledTimes(4);
+      });
 
-      // Ninth tick
-      machine.process({ walk: true })
-      expect(machine.currentState()).toBe('walk');
-      expect(idleInit).toHaveBeenCalledTimes(2);
-      expect(walkInit).toHaveBeenCalledTimes(2);
-      expect(walkTick).toHaveBeenCalledTimes(4);
+      it.only('forAtLeast accepts function to define minTicks for transition state', () => {
+        const idleInit = jest.fn();
+        const idleTick = jest.fn();
+        const walkInit = jest.fn();
+        const walkTick = jest.fn();
+
+        // forAtLeast value increases with each call
+        let calls = 0;
+        const forAtLeastFn = () => ++calls;
+
+        // Should call idleTick once
+        const machine = StateMachine<any>('idle').andThen(idleInit).tick(idleTick).forAtLeast(forAtLeastFn)
+          .transitionTo('walk').when(data => data.walk)
+          // Should call walkTick twice
+          .andThen(walkInit).tick(walkTick).forAtLeast(forAtLeastFn)
+          .state('walk').transitionTo('idle').when(data => !data.walk)
+          .init();
+
+        expect(idleInit).toHaveBeenCalledTimes(1);
+        expect(idleTick).toHaveBeenCalledTimes(0);
+
+        expect(walkInit).toHaveBeenCalledTimes(0);
+        expect(walkTick).toHaveBeenCalledTimes(0);
+
+        // Doesn't walk yet, because must tick forAtLeast 1
+        machine.process({ walk: true });
+        expect(idleInit).toHaveBeenCalledTimes(1);
+        expect(idleTick).toHaveBeenCalledTimes(1);
+
+        expect(walkInit).toHaveBeenCalledTimes(0);
+        expect(walkTick).toHaveBeenCalledTimes(0);
+
+        // Now walks, because idle ticked once
+        machine.process({ walk: true });
+        expect(idleInit).toHaveBeenCalledTimes(1);
+        expect(idleTick).toHaveBeenCalledTimes(1);
+
+        expect(walkInit).toHaveBeenCalledTimes(1);
+        expect(walkTick).toHaveBeenCalledTimes(0);
+
+        // Doesn't idle yet, because must tick forAtLeast 2
+        machine.process({ walk: false });
+        expect(idleInit).toHaveBeenCalledTimes(1);
+        expect(idleTick).toHaveBeenCalledTimes(1);
+
+        expect(walkInit).toHaveBeenCalledTimes(1);
+        expect(walkTick).toHaveBeenCalledTimes(1);
+
+        // Doesn't idle yet, because must tick forAtLeast 2
+        machine.process({ walk: false });
+        expect(idleInit).toHaveBeenCalledTimes(1);
+        expect(idleTick).toHaveBeenCalledTimes(1);
+
+        expect(walkInit).toHaveBeenCalledTimes(1);
+        expect(walkTick).toHaveBeenCalledTimes(2);
+
+        // Idles again
+        machine.process({ walk: false });
+        expect(idleInit).toHaveBeenCalledTimes(2);
+        expect(idleTick).toHaveBeenCalledTimes(1);
+
+        expect(walkInit).toHaveBeenCalledTimes(1);
+        expect(walkTick).toHaveBeenCalledTimes(2);
+
+        // Should idle for 3 ticks...
+        machine.process({ walk: true });
+        machine.process({ walk: true });
+        machine.process({ walk: true });
+
+        // ...and then walk
+        machine.process({ walk: true });
+
+        expect(idleInit).toHaveBeenCalledTimes(2);
+        expect(idleTick).toHaveBeenCalledTimes(4);
+
+        expect(walkInit).toHaveBeenCalledTimes(2);
+        expect(walkTick).toHaveBeenCalledTimes(2);
+      })
     });
   });
 
