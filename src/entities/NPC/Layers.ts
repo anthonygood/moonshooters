@@ -9,30 +9,30 @@ const keyJson = (key: string) => ({
 const Layers = [
   // Trousers
   [
-    { ...keyJson('trousers:dark'),  tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] },
-    { ...keyJson('trousers:light'), tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] }
+    { ...keyJson('trousers:dark'),  tints: [COLOURS.basic.grey, COLOURS.basic.white, COLOURS.basic.green, COLOURS.basic.blue] },
+    { ...keyJson('trousers:light'), tints: [COLOURS.basic.grey, COLOURS.basic.white, COLOURS.basic.green, COLOURS.basic.blue] }
   ],
   // Tops
   [
-    { key: 'top',   json: spriteJson('top:blank'),  tints: [COLOURS.white, ...Object.values(COLOURS.shirt), COLOURS.hair.ginger] },
-    { key: 'shirt', json: spriteJson('shirt:full'), tints: [COLOURS.white, ...Object.values(COLOURS.shirt), COLOURS.hair.ginger] }
+    { key: 'top',   json: spriteJson('top:blank'),  tints: [COLOURS.basic.white, ...Object.values(COLOURS.shirt), COLOURS.hair.ginger] },
+    { key: 'shirt', json: spriteJson('shirt:full'), tints: [COLOURS.basic.white, ...Object.values(COLOURS.shirt), COLOURS.hair.ginger] }
   ],
   // Ties
   // TODO: define as sub-layer with shirt?
   [
-    { ...keyJson('tie'),        optional: true,  tints: [COLOURS.grey, COLOURS.green, ...Object.values(COLOURS.tie)] },
-    { ...keyJson('tie:skinny'), optional: true,  tints: [COLOURS.grey, COLOURS.green, ...Object.values(COLOURS.tie)] }
+    { ...keyJson('tie'),        optional: true,  tints: [COLOURS.basic.grey, COLOURS.basic.green, ...Object.values(COLOURS.tie)] },
+    { ...keyJson('tie:skinny'), optional: true,  tints: [COLOURS.basic.grey, COLOURS.basic.green, ...Object.values(COLOURS.tie)] }
 
   ],
-  [{ ...keyJson('jacket'), optional: true, tints: [COLOURS.grey, COLOURS.white, COLOURS.green, COLOURS.blue] }],
+  [{ ...keyJson('jacket'), optional: true, tints: [COLOURS.basic.grey, COLOURS.basic.white, COLOURS.basic.green, COLOURS.basic.blue] }],
   [
     { ...keyJson('headhands'), tints: Object.values(COLOURS.skin) },
     { ...keyJson('headhands:nose'), tints: Object.values(COLOURS.skin), requires: ['mouth:low', 'mask:nose'] },
   ],
   // Mouth
   [
-    { ...keyJson('mouth:plain'), alpha: .2, tints: [COLOURS.red] },
-    { ...keyJson('mouth:low'), alpha: .2, tints: [COLOURS.red] },
+    { ...keyJson('mouth:plain'), alpha: .2, tints: [COLOURS.basic.red] },
+    { ...keyJson('mouth:low'), alpha: .2, tints: [COLOURS.basic.red] },
   ],
   // Eyes
   [
@@ -47,8 +47,8 @@ const Layers = [
     { ...keyJson('hair:mussed'), optional: true, tints: Object.values(COLOURS.hair) },
   ],
   [
-    { ...keyJson('mask'), tints: [COLOURS.mask.blue, COLOURS.white, COLOURS.green, ...Object.values(COLOURS.mask)] },
-    { ...keyJson('mask:nose'), tints: [COLOURS.mask.blue, COLOURS.white, COLOURS.green, ...Object.values(COLOURS.mask)] },
+    { ...keyJson('mask'), tints: [COLOURS.mask.blue, COLOURS.basic.white, COLOURS.basic.green, ...Object.values(COLOURS.mask)] },
+    { ...keyJson('mask:nose'), tints: [COLOURS.mask.blue, COLOURS.basic.white, COLOURS.basic.green, ...Object.values(COLOURS.mask)] },
   ],
 ];
 

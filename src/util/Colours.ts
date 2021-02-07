@@ -1,14 +1,18 @@
 export type ColourDict<T> = {
-  [key: string]: T | ColourDict<T>;
+  [key: string]: {
+    [key: string]: T;
+  };
 };
 
 export const COLOURS: ColourDict<number> = {
-  red: 0xff0000,
-  white: 0xF7F7F7,
-  grey: 0x646464,
-  black: 0x000000,
-  green: 0x89F94F,
-  blue: 0x0376BB,
+  basic: {
+    red: 0xff0000,
+    white: 0xF7F7F7,
+    grey: 0x646464,
+    black: 0x000000,
+    green: 0x89F94F,
+    blue: 0x0376BB,
+  },
   shirt: {
     blue: 0x74FBEA,
     yellow: 0xFFFC67,
@@ -52,11 +56,11 @@ export const COLOURS: ColourDict<number> = {
 
 const toColourString = (num: number) => '#' + (num).toString(16)
 
-const decorate = (
+const decorate = <T>(
   fn: Function,
   obj: object,
-  copy: { [key: string]: string } = {},
-) => {
+  copy: ColourDict<T> = {},
+): ColourDict<T> => {
   Object.entries(obj).forEach(([key, val]) => {
     const newVal = typeof val === 'object' ? decorate(fn, val) : fn(val);
     copy[key] = newVal;

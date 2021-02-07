@@ -1,9 +1,9 @@
 import { COLOUR_STRINGS } from '../util/Colours';
 
-const WHITE = COLOUR_STRINGS.white as string;
-const BLACK = COLOUR_STRINGS.black as string;
+const WHITE = COLOUR_STRINGS.basic.white;
+const BLACK = COLOUR_STRINGS.basic.black;
 
-const Colour = COLOUR_STRINGS.light as { [k: string]: string };
+const Colour = COLOUR_STRINGS.light;
 const DAY = Colour.day;
 const WARM = Colour.warm;
 const PINK = Colour.pink;
