@@ -72,6 +72,16 @@ class NPC extends Player {
     this.spawned = true;
     this.modifiers = modifiers;
 
+    this.state.action.on('touched', () => {
+      this.toggleMask();
+      this.greyscale();
+      if (this.modifiers.moveOnTouch) {
+        this.driver.go(this.modifiers.moveOnTouch);
+      } else {
+        this.frozen = true;
+      }
+    });
+
     (!modifiers || !modifiers.idle) ? this.move() : setTimeout(
       () => this.playAnim('idle'),
       sample([100,200,300,400,500])
@@ -83,11 +93,6 @@ class NPC extends Player {
     return new NPCState({
       container: this.container,
       velocities: VELOCITY,
-      onTouch: () => {
-        this.toggleMask();
-        this.freeze();
-        this.modifiers.moveOnTouch && this.driver.go(this.modifiers.moveOnTouch);
-      },
       setAnimation: this.playAnim,
       stopAnimation: this.stopAnim,
     });
@@ -142,10 +147,9 @@ class NPC extends Player {
     mask.visible = !mask.visible;
   }
 
-  freeze() {
+  greyscale() {
     const sprite = this.container.getByName(SPRITE_KEY) as Phaser.GameObjects.Sprite;
     sprite.setPipeline(GREYSCALE_PIPELINE_KEY);
-    this.frozen = true;
   }
 
   createAnimations() {

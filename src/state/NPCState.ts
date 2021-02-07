@@ -1,5 +1,5 @@
 
-import { StateMachine, TStateMachine } from './StateMachine';
+import { TStateMachine } from './StateMachine';
 import PlayerState from './PlayerState';
 
 function Helpers({ container, stopAnimation }: NPCState.Config) {
@@ -28,9 +28,6 @@ class NPCState extends PlayerState {
     this.action
       .state('walk').transitionTo('touched').when(touched).andThen(onTouch)
       .state('idle').transitionTo('touched').when(touched).andThen(onTouch)
-
-    // TODO: set event listener from NPC instead
-    this.action.on('touched', config.onTouch);
   }
 
   process(data: NPCState.ProcessParams) {
@@ -46,7 +43,6 @@ namespace NPCState {
   }
 
   export interface Config extends PlayerState.Config {
-    onTouch: () => void;
     stopAnimation: () => void;
   }
 
