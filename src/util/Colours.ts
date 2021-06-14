@@ -54,7 +54,7 @@ export const COLOURS: ColourDict<number> = {
   },
 };
 
-const toColourString = (num: number) => '#' + (num).toString(16)
+const toColourString = (num: number) => '#' + (num).toString(16).padStart(6, '0');
 
 const decorate = <T>(
   fn: Function,
