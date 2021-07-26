@@ -7,7 +7,7 @@ import { Morning as Background } from '../entities/Background';
 import * as json from '../../assets/tilemaps/The City.json';
 import Sound from '../sound/LevelSounds';
 import { DynamicAtlas, TileData, asset } from '../util';
-import addGreyscalePipeline from '../rendering/GreyscalePipeline';
+import { addPipelines } from '../rendering/pipelines';
 
 export const MAP_SCALE = 1.2;
 const LEVEL_KEY = 'level';
@@ -34,8 +34,7 @@ class TheCity extends Phaser.Scene {
 	}
 
 	preload() {
-		addGreyscalePipeline(this.game);
-
+		addPipelines(this.game);
 		const json = this.getLevelJson();
 		// @ts-ignore
 		this.background.preload(json);

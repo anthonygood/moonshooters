@@ -1,5 +1,7 @@
 import Fog from './Fog/Fog';
 import { MAP_SCALE } from '../scenes/TheCity';
+import { GradientPipeline } from '../rendering/GradientPipeline';
+import pipelines from '../rendering/pipelines';
 
 const DEFAULT_BKG_KEY = 'default-background-scrapers';
 const GREY_BKG_KEY = 'grey-background-scrapers';
@@ -144,6 +146,14 @@ class Background {
       distantBackground,
       midBackground,
     } = this.applyTheme(map, theme);
+
+    midBackground.setPipeline(GradientPipeline.key);
+
+    const { Gradient } = pipelines;
+    console.log({ Gradient });
+    Gradient.currentShader.set2f('resolution', Gradient.width, Gradient.height);
+    Gradient.currentShader.set3f('colourOne',  0.78, 0.0, 0.45);
+    Gradient.currentShader.set3f('colourTwo',  0.08, 0.01, 0.44);
 
 		midBackground.scrollFactorX = 0.3;
     // midBackground.scrollFactorY = 0.3;

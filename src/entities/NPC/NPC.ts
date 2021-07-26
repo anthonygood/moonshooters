@@ -6,7 +6,7 @@ import Driver, { NPCDriver } from './Driver';
 import { getCharSpriteKey, CHAR_ATLAS_KEY } from '../../util/TextureKeys';
 import Layers from './Layers';
 import { ContainerAnimation } from '../../animations/index';
-import { GREYSCALE_PIPELINE_KEY } from '../../rendering/GreyscalePipeline';
+import { GreyscalePipeline } from '../../rendering/GreyscalePipeline';
 
 const MASK_KEY = 'mask';
 const SPRITE_KEY = 'main';
@@ -153,7 +153,7 @@ class NPC extends Player {
 
   greyscale() {
     const sprite = this.container.getByName(SPRITE_KEY) as Phaser.GameObjects.Sprite;
-    sprite.setPipeline(GREYSCALE_PIPELINE_KEY);
+    sprite.setPipeline(GreyscalePipeline.key);
   }
 
   createAnimations() {
