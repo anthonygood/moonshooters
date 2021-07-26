@@ -15,7 +15,7 @@ const fragShader = glsl`
 `;
 
 // Copied from https://www.stephengarside.co.uk/blog/phaser-3-black-and-white-or-greyscale-sprites/
-const GreyscalePipeline = new Phaser.Class({
+export const GreyscalePipeline = new Phaser.Class({
   Extends: Phaser.Renderer.WebGL.Pipelines.SinglePipeline,
   initialize: function GrayscalePipeline(game) {
     Phaser.Renderer.WebGL.Pipelines.SinglePipeline.call(this, {
@@ -26,14 +26,4 @@ const GreyscalePipeline = new Phaser.Class({
   },
 });
 
-
-export const GREYSCALE_PIPELINE_KEY = 'Greyscale';
-
-let added = false;
-const addGreyscalePipeline = game => {
-  if (added) return;
-  game.renderer.pipelines.add(GREYSCALE_PIPELINE_KEY, new GreyscalePipeline(game));
-  added = true;
-};
-
-export default addGreyscalePipeline;
+GreyscalePipeline.key = 'Greyscale';

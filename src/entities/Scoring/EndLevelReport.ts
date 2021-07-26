@@ -1,5 +1,5 @@
 import Score from './Score';
-import ATMOSPHERE from '../Fog';
+import ATMOSPHERE from '../Fog/Fog';
 
 const failText = ({ heading, score, ratings }) => `
 ${heading}
