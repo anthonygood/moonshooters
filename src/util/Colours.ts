@@ -73,10 +73,21 @@ export const COLOUR_STRINGS: ColourDict<string> = decorate(
   COLOURS
 );
 
+const getRgb = (colour: number | string) =>
+  colour.toString(16).padStart(6, '0').match(/[\w]{2}/g)
+
 // Seems that when drawing to render texture, red and blue channels are swapped...
 export const invertRB = (colour: number) => {
-  const [r,g,b] = colour.toString(16).padStart(6, '0').match(/[\w]{2}/g);
+  const [r,g,b] = getRgb(colour);
   return parseInt([b,g,r].join(''), 16);
 }
+
+const precisionTwo = val => Math.floor(val * 100) / 100;
+
+export const toRgb = (colour: number | string) =>
+  getRgb(colour)
+    .map(val => parseInt(val, 16))
+    .map(val => val / 255)
+    .map(precisionTwo);
 
 export default COLOURS;
