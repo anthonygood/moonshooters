@@ -3,34 +3,66 @@ import Phaser from 'phaser';
 // workaround for using glsl tagged templates
 const glsl = strings => strings[0];
 
-const fragShader = glsl`
+const vertShader = glsl`
   precision mediump float;
+
+  uniform mat4 uProjectionMatrix;
   uniform vec2 resolution;
-
-  uniform sampler2D uMainSampler;
-  varying vec2 outTexCoord;
-
   uniform vec3 colourOne;
   uniform vec3 colourTwo;
 
-  vec4 get_gradient(vec2 resolution, vec3 colour_a, vec3 colour_b) {
-    vec2 st = gl_FragCoord.xy / resolution;
+  attribute vec2 inPosition;
+  attribute vec2 inTexCoord;
+  attribute float inTexId;
+  attribute float inTintEffect;
+  attribute vec4 inTint;
+
+  varying vec2 outTexCoord;
+  varying float outTintEffect;
+  varying vec4 outTint;
+  varying vec4 gradient;
+
+  vec4 get_gradient(vec4 coord) {
+    vec2 st = inPosition.xy / resolution;
     vec3 pct = vec3(st.y);
 
     vec3 gradient = mix(
-      colour_a,
-      colour_b,
+      colourOne,
+      colourTwo,
       pct
     );
 
     return vec4(gradient.x, gradient.y, gradient.z, 1);
   }
 
-  void main() {
-    // TODO: mix color with gradient according to some uniform value...
-    vec4 color = texture2D(uMainSampler, outTexCoord);
+  void main () {
+    gl_Position = uProjectionMatrix * vec4(inPosition, 1.0, 1.0);
 
-    gl_FragColor = get_gradient(resolution, colourOne, colourTwo);
+    outTexCoord = inTexCoord;
+    outTint = inTint;
+    outTintEffect = inTintEffect;
+    gradient = get_gradient(gl_Position);
+  }
+`;
+
+const fragShader = glsl`
+  precision mediump float;
+  uniform sampler2D uMainSampler;
+  varying vec2 outTexCoord;
+  varying vec4 gradient;
+
+  uniform vec3 colourOne;
+  uniform vec3 colourTwo;
+
+  void main() {
+    vec4 colour = texture2D(uMainSampler, outTexCoord);
+    vec4 mixControl = vec4(0.5, 0.5, 0.5, colour.a);
+
+    if (colour.a > 0.0) {
+      gl_FragColor = mix(gradient, colour, vec4(0.5));
+    } else {
+      gl_FragColor = colour;
+    }
   }
 `;
 
@@ -39,7 +71,15 @@ export class GradientPipeline extends Phaser.Renderer.WebGL.Pipelines.SinglePipe
   constructor(game) {
     super({
       game,
-      renderer: game.renderer, // don't listen to typescript
+      renderer: game.renderer, // Don't listen to typescript
+      uniforms: [
+        'resolution',
+        'uMainSampler',
+        'outTexCoord',
+        'colourOne',
+        'colourTwo'
+      ],
+      vertShader,
       fragShader,
     });
   }
