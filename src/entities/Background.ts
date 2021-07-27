@@ -1,7 +1,7 @@
 import Fog from './Fog/Fog';
 import { MAP_SCALE } from '../scenes/TheCity';
-import { GradientPipeline } from '../rendering/GradientPipeline';
-import pipelines from '../rendering/pipelines';
+import pipelines, { PIPELINE_KEYS } from '../rendering/pipelines';
+import COLOURS from '../util/Colours';
 
 const DEFAULT_BKG_KEY = 'default-background-scrapers';
 const GREY_BKG_KEY = 'grey-background-scrapers';
@@ -147,13 +147,43 @@ class Background {
       midBackground,
     } = this.applyTheme(map, theme);
 
-    midBackground.setPipeline(GradientPipeline.key);
+    // clouds.front.setPipeline(GradientPipeline.key);
+    // clouds.back.setPipeline(GradientPipeline.key);
 
-    const { Gradient } = pipelines;
-    console.log({ Gradient });
-    Gradient.currentShader.set2f('resolution', Gradient.width, Gradient.height);
-    Gradient.currentShader.set3f('colourOne',  0.78, 0.0, 0.45);
-    Gradient.currentShader.set3f('colourTwo',  0.08, 0.01, 0.44);
+    // TODO: use BackgroundOne.KEY, etc.
+    midBackground.setPipeline(PIPELINE_KEYS.BACKGROUND_1);
+    distantBackground.setPipeline(PIPELINE_KEYS.BACKGROUND_2);
+    wayBackground.setPipeline(PIPELINE_KEYS.BACKGROUND_3);
+
+    console.log({ pipelines });
+
+    const { BackgroundOne, BackgroundTwo, BackgroundThree } = pipelines;
+    const gfx = this.scene.add.graphics({ fillStyle: { color: 0xffffff } });
+    gfx.fillRect(0, 0, 1, 1);
+    const renderTexture = this.scene.make.renderTexture({ width: 1, height: 1 }, false);
+    renderTexture.draw(gfx, 0, 0);
+    renderTexture.saveTexture('piz');
+    gfx.destroy();
+
+    this.scene.add.image(BackgroundOne.width / 2, BackgroundOne.height / 2, 'piz')
+      .setScrollFactor(0)
+      .setScale(BackgroundOne.width, BackgroundOne.height)
+      .setPipeline(PIPELINE_KEYS.BACKGROUND_3);
+
+    BackgroundOne.currentShader.set2f('resolution', BackgroundOne.width, BackgroundOne.height);
+    BackgroundOne.currentShader.set3f('colourOne',  0.78, 0.0, 0.45);
+    BackgroundOne.currentShader.set3f('colourTwo',  0.08, 0.01, 0.44);
+    BackgroundOne.currentShader.set1f('blendFactor',  0.5);
+
+    BackgroundTwo.currentShader.set2f('resolution', BackgroundTwo.width, BackgroundTwo.height);
+    BackgroundTwo.currentShader.set3f('colourOne',  0.78, 0.0, 0.45);
+    BackgroundTwo.currentShader.set3f('colourTwo',  0.08, 0.01, 0.44);
+    BackgroundTwo.currentShader.set1f('blendFactor',  0.75);
+
+    BackgroundThree.currentShader.set2f('resolution', BackgroundThree.width, BackgroundThree.height);
+    BackgroundThree.currentShader.set3f('colourOne',  0.78, 0.0, 0.45);
+    BackgroundThree.currentShader.set3f('colourTwo',  0.08, 0.01, 0.44);
+    BackgroundThree.currentShader.set1f('blendFactor', 1);
 
 		midBackground.scrollFactorX = 0.3;
     // midBackground.scrollFactorY = 0.3;
