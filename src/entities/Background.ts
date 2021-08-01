@@ -21,8 +21,8 @@ const CLOUD_GREY_KEY = 'clouds-grey';
 
 const FOG_KEY = 'fog';
 
-// TODO: For some reason the background tilesets are not aligned with the bottom of the foreground
-const Y_OFFSET = 150;
+// TODO: Should be adjusted according to MAP_SCALE?
+const Y_OFFSET = 0;
 
 const asset = (path: string) => `./assets/${path}`;
 
@@ -51,13 +51,22 @@ const addAlternativeCityTilesets = (
 
 interface Theme {
   layers: Phaser.Tilemaps.Tileset[],
-  fog: (scene: Phaser.Scene, mapHeight?: number) => Phaser.GameObjects.Image[],
+  fog: (scene: Phaser.Scene, mapHeight?: number) => void,
   clouds?: Phaser.Tilemaps.Tileset[],
 }
 
 class Background {
   private scene: Phaser.Scene;
   private optimised: boolean;
+  private layers: {
+    wayBackground: Phaser.Tilemaps.TilemapLayer;
+    distantBackground: Phaser.Tilemaps.TilemapLayer;
+    midBackground: Phaser.Tilemaps.TilemapLayer;
+    clouds: {
+      front: Phaser.Tilemaps.TilemapLayer;
+      back: Phaser.Tilemaps.TilemapLayer;
+    };
+  }
   private clouds: {
     front: Phaser.Tilemaps.TilemapLayer;
     back: Phaser.Tilemaps.TilemapLayer;
@@ -100,7 +109,7 @@ class Background {
     this.optimised = !this.scene.game.device.os.desktop;
 
     // Blue default
-    const blue = map.addTilesetImage('Skyscrapers', DEFAULT_BKG_KEY);
+    const defaultGrey = map.addTilesetImage('Skyscrapers', GREY_BKG_KEY);
 
 		// Variant skyscraper colours
 		const green     = map.addTilesetImage('Skyscrapers_alt_1', GREEN_BKG_KEY);
@@ -112,7 +121,7 @@ class Background {
     const red       = map.addTilesetImage('Skyscrapers_alt_7', RED);
 
     this.variants = {
-      blue,
+      defaultGrey,
       green,
       yellow,
       turqouise,
@@ -137,53 +146,15 @@ class Background {
       white: whiteClouds,
     };
 
-    // The entry point for extending this class
-    const theme = this.getTheme();
-
     const {
       clouds,
       wayBackground,
       distantBackground,
       midBackground,
-    } = this.applyTheme(map, theme);
+    } = this.layers = this.createLayers(map);
 
-    // clouds.front.setPipeline(GradientPipeline.key);
-    // clouds.back.setPipeline(GradientPipeline.key);
-
-    // TODO: use BackgroundOne.KEY, etc.
-    midBackground.setPipeline(PIPELINE_KEYS.BACKGROUND_1);
-    distantBackground.setPipeline(PIPELINE_KEYS.BACKGROUND_2);
-    wayBackground.setPipeline(PIPELINE_KEYS.BACKGROUND_3);
-
-    console.log({ pipelines });
-
-    const { BackgroundOne, BackgroundTwo, BackgroundThree } = pipelines;
-    const gfx = this.scene.add.graphics({ fillStyle: { color: 0xffffff } });
-    gfx.fillRect(0, 0, 1, 1);
-    const renderTexture = this.scene.make.renderTexture({ width: 1, height: 1 }, false);
-    renderTexture.draw(gfx, 0, 0);
-    renderTexture.saveTexture('piz');
-    gfx.destroy();
-
-    this.scene.add.image(BackgroundOne.width / 2, BackgroundOne.height / 2, 'piz')
-      .setScrollFactor(0)
-      .setScale(BackgroundOne.width, BackgroundOne.height)
-      .setPipeline(PIPELINE_KEYS.BACKGROUND_3);
-
-    BackgroundOne.currentShader.set2f('resolution', BackgroundOne.width, BackgroundOne.height);
-    BackgroundOne.currentShader.set3f('colourOne',  0.78, 0.0, 0.45);
-    BackgroundOne.currentShader.set3f('colourTwo',  0.08, 0.01, 0.44);
-    BackgroundOne.currentShader.set1f('blendFactor',  0.5);
-
-    BackgroundTwo.currentShader.set2f('resolution', BackgroundTwo.width, BackgroundTwo.height);
-    BackgroundTwo.currentShader.set3f('colourOne',  0.78, 0.0, 0.45);
-    BackgroundTwo.currentShader.set3f('colourTwo',  0.08, 0.01, 0.44);
-    BackgroundTwo.currentShader.set1f('blendFactor',  0.75);
-
-    BackgroundThree.currentShader.set2f('resolution', BackgroundThree.width, BackgroundThree.height);
-    BackgroundThree.currentShader.set3f('colourOne',  0.78, 0.0, 0.45);
-    BackgroundThree.currentShader.set3f('colourTwo',  0.08, 0.01, 0.44);
-    BackgroundThree.currentShader.set1f('blendFactor', 1);
+    this.setRenderPipelines();
+    this.applyFog(map);
 
 		midBackground.scrollFactorX = 0.3;
     // midBackground.scrollFactorY = 0.3;
@@ -215,41 +186,48 @@ class Background {
     // clouds.back.setScale(2, 1);
   }
 
-  applyTheme(map: Phaser.Tilemaps.Tilemap, theme: Theme) {
+  applyFog(map: Phaser.Tilemaps.Tilemap) {
+    const { scene } = this;
+    const { fog } = this.getTheme();
+    fog(scene, map.heightInPixels + Y_OFFSET);
+  }
+
+  setRenderPipelines() {
     const {
-      layers: [first, second, third],
-      fog,
-    } = theme;
-
-		// TODO: parameterise depth? or at least shallowest depth?
-    const wayBackground     = map.createLayer('Right back', first, 0, Y_OFFSET).setDepth(1);
-    const distantBackground = map.createLayer('Back scrapers', second, 0, Y_OFFSET).setDepth(3);
-    const midBackground     = map.createLayer('Scrapers', third, 0, Y_OFFSET).setDepth(5);
-
-    const clouds = this.clouds = this.createClouds(map, theme.clouds);
-
-    fog(this.scene, map.heightInPixels + Y_OFFSET);
-
-    return {
       clouds,
       wayBackground,
       distantBackground,
       midBackground,
-    };
+    } = this.layers;
+    midBackground.setPipeline(PIPELINE_KEYS.BACKGROUND_3);
+    distantBackground.setPipeline(PIPELINE_KEYS.BACKGROUND_2);
+    wayBackground.setPipeline(PIPELINE_KEYS.BACKGROUND_1);
+    clouds.front && clouds.front.setPipeline(PIPELINE_KEYS.BACKGROUND_3);
+    clouds.back && clouds.back.setPipeline(PIPELINE_KEYS.BACKGROUND_2);
   }
 
-  createClouds(map: Phaser.Tilemaps.Tilemap, cloudVariants: Phaser.Tilemaps.Tileset[] = []) {
-    const [backVariant, frontVariant] = cloudVariants;
-    const back = map.createLayer('Clouds Back', backVariant, 0, 0);
-    back && back.setDepth(2);
-    const front = map.createLayer('Clouds Front', frontVariant, 0, 0);
-    front && front.setDepth(5);
+  createLayers(
+    map: Phaser.Tilemaps.Tilemap,
+  ) {
+    const { defaultGrey } = this.variants;
+    const { grey: greyClouds } = this.cloudVariants;
 
-    return { front, back };
+		// TODO: parameterise depth? or at least shallowest depth?
+    const wayBackground     = map.createLayer('Right back', defaultGrey, 0, Y_OFFSET).setDepth(1);
+    const distantBackground = map.createLayer('Back scrapers', defaultGrey, 0, Y_OFFSET).setDepth(3);
+    const midBackground     = map.createLayer('Scrapers', defaultGrey, 0, Y_OFFSET).setDepth(5);
+
+    // Optional
+    const back = map.createLayer('Clouds Back', greyClouds, 0, 0)?.setDepth(2);
+    const front = map.createLayer('Clouds Front', greyClouds, 0, 0)?.setDepth(5);
+
+    const clouds = { back, front };
+
+    return { wayBackground, distantBackground, midBackground, clouds };
   }
 
   update(delta: number) {
-    const { clouds } = this;
+    const { clouds } = this.layers;
 
     if (clouds.front) {
       const frontSpeed = 0.005;
@@ -262,11 +240,12 @@ class Background {
     }
   }
 
+  // The entry point for extending this class
   getTheme(): Theme {
     const { cloudVariants, variants } = this;
-    const { blue, grey } = variants;
+    const { defaultGrey } = variants;
     return {
-      layers: [blue, grey, blue],
+      layers: [defaultGrey, defaultGrey, defaultGrey],
       fog: Fog.day,
       clouds: [cloudVariants.grey, cloudVariants.grey],
     };
@@ -276,11 +255,11 @@ class Background {
 export class Morning extends Background {
   getTheme() {
     const { cloudVariants, variants } = this;
-    const { blue, red } = variants;
+    const { defaultGrey } = variants;
     return {
-      clouds: [cloudVariants.red, cloudVariants.white],
+      clouds: [cloudVariants.white, cloudVariants.white],
       fog: Fog.morning,
-      layers: [red, blue, blue],
+      layers: [defaultGrey, defaultGrey, defaultGrey],
     };
   }
 }
@@ -294,28 +273,34 @@ export class Sunset extends Background {
   }
 }
 
+export class Pink extends Background {
+  getTheme() {
+    const { defaultGrey } = this.variants;
+    return {
+      fog: Fog.pastel,
+      layers: [defaultGrey, defaultGrey, defaultGrey],
+    };
+  }
+}
+
 export class Dusk extends Background {
   getTheme() {
-    const { blue, grey } = this.variants;
-    return { layers: [grey, blue, blue], fog: Fog.dusk };
+    const { defaultGrey } = this.variants;
+    return { layers: [defaultGrey, defaultGrey, defaultGrey], fog: Fog.dusk };
   }
 }
 
 export class Night extends Background {
   getTheme() {
-    const { blue, yellow, orange } = this.variants;
-    return { layers: [blue, orange, yellow], fog: Fog.night };
+    const { defaultGrey } = this.variants;
+    return { layers: [defaultGrey, defaultGrey, defaultGrey], fog: Fog.night };
   }
 }
 
 export class Smog extends Background {
   getTheme() {
-    const {
-      yellow,
-      grey,
-      orange,
-    } = this.variants;
-    return { layers: [yellow, orange, grey], fog: Fog.smog };
+    const { defaultGrey } = this.variants;
+    return { layers: [defaultGrey, defaultGrey, defaultGrey], fog: Fog.smog };
   }
 }
 

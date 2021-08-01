@@ -15,6 +15,18 @@ export type GradientFn = (
   width: number
 ) => CanvasGradient;
 
+// TODO: DRY
+export const GRADIENT_COLOUR_PAIRS = {
+  day: [WHITE, DAY],
+  morning: [Colour.palepink, Colour.pink],
+  sunset: [PURPLE, WARM],
+  dusk: [DARKBLUE, DAY],
+  night: [MIDNIGHTBLUE, DARKBLUE],
+  nightNeon: [DARKBLUE, PINK],
+  yellowish: [Colour.morningorange, Colour.morningyellow],
+  smog: [Colour.warm, Colour.morningyellow],
+};
+
 const getGradient = (a: string, b: string, stops = [0, 1]): GradientFn => (
   ctx: CanvasRenderingContext2D,
   height: number,
@@ -22,11 +34,10 @@ const getGradient = (a: string, b: string, stops = [0, 1]): GradientFn => (
 ) => {
   const gradient = ctx.createLinearGradient(0, 0, 0, height);
   const [firstStop, secondStop] = stops;
-  console.log('getGradient', a, b);
   gradient.addColorStop(firstStop, a);
   gradient.addColorStop(secondStop, b);
   return gradient;
-}
+};
 
 export const GRADIENTS = {
   day: getGradient(WHITE, DAY),
