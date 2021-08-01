@@ -51,11 +51,11 @@ export const EndLevelReport = (scene: Phaser.Scene, score: Score, ratings: strin
 	text.setOrigin(0.5)
 		.setScrollFactor(0)
 		.setDepth(6);
-	const fog = ATMOSPHERE.endLevel(scene);
+	const destroyBkg = ATMOSPHERE.endLevel(scene);
 
 	// Returns disposer function
 	return () => {
-		fog.forEach(image => image.destroy());
+		destroyBkg()
 		text.destroy();
 	};
 };

@@ -9,7 +9,7 @@ import Sound from '../sound/LevelSounds';
 import { DynamicAtlas, TileData, asset } from '../util';
 import { addPipelines } from '../rendering/pipelines';
 
-export const MAP_SCALE = 1.2;
+export const MAP_SCALE = 1;
 const LEVEL_KEY = 'level';
 const VAN_KEY = 'van';
 class TheCity extends Phaser.Scene {
@@ -145,9 +145,10 @@ class TheCity extends Phaser.Scene {
 
 	restart() {
 		this.disposeReport();
+		this.background.applyFog(this.map);
 		this.NPCs.forEach(npc => npc.destroy());
 		this.NPCs = [];
-		this.score.pass ? this.continueToNextLevel() : this.scene.restart();
+		this.score.pass || true ? this.continueToNextLevel() : this.scene.restart();
 	}
 
 	spawnNPCs(layer: Phaser.Tilemaps.TilemapLayer) {
@@ -189,7 +190,7 @@ class TheCity extends Phaser.Scene {
 	}
 
 	nextScene() {
-		return this.scene.start('The CityII');
+		return this.scene.start('The CityIII');
 	}
 
   getBackground() {
