@@ -41,7 +41,7 @@ const addBlankBackground = (scene: Phaser.Scene, pipeline) => {
     BLANK_PIXEL_TEXTURE_KEY
   )
     .setScrollFactor(0)
-    .setScale(1000, 1000)
+    .setScale(pipeline.width, pipeline.height)
     .setPipeline(PIPELINE_KEYS.BACKGROUND_1);
 };
 
