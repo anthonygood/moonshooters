@@ -53,21 +53,24 @@ const fragShader = glsl`
 
   uniform vec3 colourOne;
   uniform vec3 colourTwo;
+  uniform float blendFactor;
 
   void main() {
     vec4 colour = texture2D(uMainSampler, outTexCoord);
-    vec4 mixControl = vec4(0.5, 0.5, 0.5, colour.a);
-
-    if (colour.a > 0.0) {
-      gl_FragColor = mix(gradient, colour, vec4(0.5));
+    if (colour.a > 0.9) {
+      vec4 mixControl = vec4(blendFactor, blendFactor, blendFactor, colour.a);
+      gl_FragColor = mix(colour, gradient, mixControl);
     } else {
       gl_FragColor = colour;
     }
   }
 `;
-
 export class GradientPipeline extends Phaser.Renderer.WebGL.Pipelines.SinglePipeline {
-  static key = 'Gradient';
+  static KEY = 'Gradient';
+  static count = 0;
+
+  key: string;
+
   constructor(game) {
     super({
       game,
@@ -77,10 +80,12 @@ export class GradientPipeline extends Phaser.Renderer.WebGL.Pipelines.SinglePipe
         'uMainSampler',
         'outTexCoord',
         'colourOne',
-        'colourTwo'
+        'colourTwo',
+        'blendFactor',
       ],
       vertShader,
       fragShader,
     });
+    this.key = `${GradientPipeline.KEY}${GradientPipeline.count++}`;
   }
 }

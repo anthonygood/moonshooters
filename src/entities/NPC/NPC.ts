@@ -153,7 +153,7 @@ class NPC extends Player {
 
   greyscale() {
     const sprite = this.container.getByName(SPRITE_KEY) as Phaser.GameObjects.Sprite;
-    sprite.setPipeline(GreyscalePipeline.key);
+    sprite.setPipeline(GreyscalePipeline.KEY);
   }
 
   createAnimations() {

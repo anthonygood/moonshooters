@@ -26,4 +26,4 @@ export const GreyscalePipeline = new Phaser.Class({
   },
 });
 
-GreyscalePipeline.key = 'Greyscale';
+GreyscalePipeline.KEY = 'Greyscale';
