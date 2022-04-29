@@ -52,6 +52,10 @@ export const COLOURS: ColourDict<number> = {
     morningorange: 0xfaea78,
     murkymustard: 0xe3d14d,
   },
+  pastel: {
+    turquoise: 0x40E0D0,
+    turqouiseGreen: 0x3febac,
+  },
 };
 
 const toColourString = (num: number) => '#' + (num).toString(16).padStart(6, '0');

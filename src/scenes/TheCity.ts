@@ -3,7 +3,7 @@ import Score from '../entities/Scoring/Score';
 import { rate } from '../entities/Scoring/Rater';
 import Player from '../entities/Player';
 import NPC from '../entities/NPC/NPC';
-import { Morning as Background } from '../entities/Background';
+import { Background, Morning } from '../entities/Background';
 import * as json from '../../assets/tilemaps/The City.json';
 import Sound from '../sound/LevelSounds';
 import { DynamicAtlas, TileData, asset } from '../util';
@@ -193,8 +193,8 @@ class TheCity extends Phaser.Scene {
 		return this.scene.start('The CityIII');
 	}
 
-  getBackground() {
-    return new Background(this);
+  getBackground(): Background {
+    return new Morning(this);
   }
 
   getLevelJson() {

@@ -55,7 +55,7 @@ interface Theme {
   clouds?: Phaser.Tilemaps.Tileset[],
 }
 
-class Background {
+export class Background {
   private scene: Phaser.Scene;
   private optimised: boolean;
   private layers: {
@@ -112,38 +112,38 @@ class Background {
     const defaultGrey = map.addTilesetImage('Skyscrapers', GREY_BKG_KEY);
 
 		// Variant skyscraper colours
-		const green     = map.addTilesetImage('Skyscrapers_alt_1', GREEN_BKG_KEY);
-		const yellow    = map.addTilesetImage('Skyscrapers_alt_2', YELLOW_BKG_KEY);
-		const turqouise = map.addTilesetImage('Skyscrapers_alt_3', TURQUOISE_BKG_KEY);
-		const pink      = map.addTilesetImage('Skyscrapers_alt_4', PINK_BKG_KEY);
-    const grey      = map.addTilesetImage('Skyscrapers_alt_5', GREY_BKG_KEY);
-    const orange    = map.addTilesetImage('Skyscrapers_alt_6', ORANGE);
-    const red       = map.addTilesetImage('Skyscrapers_alt_7', RED);
+		// const green     = map.addTilesetImage('Skyscrapers_alt_1', GREEN_BKG_KEY);
+		// const yellow    = map.addTilesetImage('Skyscrapers_alt_2', YELLOW_BKG_KEY);
+		// const turqouise = map.addTilesetImage('Skyscrapers_alt_3', TURQUOISE_BKG_KEY);
+		// const pink      = map.addTilesetImage('Skyscrapers_alt_4', PINK_BKG_KEY);
+    // const grey      = map.addTilesetImage('Skyscrapers_alt_5', GREY_BKG_KEY);
+    // const orange    = map.addTilesetImage('Skyscrapers_alt_6', ORANGE);
+    // const red       = map.addTilesetImage('Skyscrapers_alt_7', RED);
 
     this.variants = {
       defaultGrey,
-      green,
-      yellow,
-      turqouise,
-      pink,
-      grey,
-      orange,
-      red,
+      // green,
+      // yellow,
+      // turqouise,
+      // pink,
+      // grey,
+      // orange,
+      // red,
     };
 
     const defaultClouds   = map.addTilesetImage('Long clouds',       DEFAULT_CLOUD_KEY);
-    const pinkClouds      = map.addTilesetImage('Long clouds_alt_1', CLOUD_PINK_KEY);
-    const turqouiseClouds = map.addTilesetImage('Long clouds_alt_2', CLOUD_TURQOUISE_KEY);
-    const redClouds       = map.addTilesetImage('Long clouds_alt_3', CLOUD_RED_KEY);
-    const whiteClouds     = map.addTilesetImage('Long clouds_alt_4', CLOUD_WHITE_KEY);
-    const greyClouds      = map.addTilesetImage('Long clouds_alt_5', CLOUD_GREY_KEY);
+    // const pinkClouds      = map.addTilesetImage('Long clouds_alt_1', CLOUD_PINK_KEY);
+    // const turqouiseClouds = map.addTilesetImage('Long clouds_alt_2', CLOUD_TURQOUISE_KEY);
+    // const redClouds       = map.addTilesetImage('Long clouds_alt_3', CLOUD_RED_KEY);
+    // const whiteClouds     = map.addTilesetImage('Long clouds_alt_4', CLOUD_WHITE_KEY);
+    // const greyClouds      = map.addTilesetImage('Long clouds_alt_5', CLOUD_GREY_KEY);
 
     this.cloudVariants = {
       grey: defaultClouds,
-      pink: pinkClouds,
-      turqouise: turqouiseClouds,
-      red: redClouds,
-      white: whiteClouds,
+      // pink: pinkClouds,
+      // turqouise: turqouiseClouds,
+      // red: redClouds,
+      // white: whiteClouds,
     };
 
     const {
@@ -277,8 +277,8 @@ export class Pink extends Background {
   getTheme() {
     const { defaultGrey } = this.variants;
     return {
-      fog: Fog.pastel,
       layers: [defaultGrey, defaultGrey, defaultGrey],
+      fog: Fog.pastel,
     };
   }
 }

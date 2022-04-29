@@ -1,5 +1,5 @@
 import TheCity from './TheCity';
-import { Sunset as Background } from '../entities/Background';
+import { Sunset } from '../entities/Background';
 import * as json from '../../assets/tilemaps/The City III.json';
 
 export default class TheCityIII extends TheCity {
@@ -8,7 +8,7 @@ export default class TheCityIII extends TheCity {
   }
 
   getBackground() {
-    return new Background(this);
+    return new Sunset(this);
   }
 
   getLevelJson() {
