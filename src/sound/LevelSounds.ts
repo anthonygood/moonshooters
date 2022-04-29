@@ -1,5 +1,5 @@
-import { sample } from '../scenes/TheCity';
 import { sound } from './util';
+import { sample } from '../util';
 
 export const getStingKey = ((lastSting = 0) => () => {
 	const filteredIndices = [1,2,3].filter(i => i !== lastSting);
@@ -57,6 +57,7 @@ class LevelSounds {
   }
 
   playSting() {
+    return;
     const key = getStingKey();
     const config = { volume: STING_VOL, seek: 0.1 };
     this.scene.sound.play(key, config);
