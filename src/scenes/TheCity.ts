@@ -190,7 +190,7 @@ class TheCity extends Phaser.Scene {
 	}
 
 	nextScene() {
-		return this.scene.start('The CityIII');
+		return this.scene.start('The CityII');
 	}
 
   getBackground(): Background {
