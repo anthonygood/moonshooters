@@ -37,7 +37,7 @@ const config: Phaser.Types.Core.GameConfig = {
     activePointers: 3,
   },
   scale: {
-    // mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
 };
