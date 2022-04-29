@@ -30,6 +30,6 @@
   },
   "dependencies": {
     "@types/jest": "^26.0.15",
-    "phaser": "3.51.0"
+    "phaser": "3.55.2"
   }
 }
