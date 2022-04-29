@@ -128,6 +128,7 @@ class PlayerSounds {
   }
 
   bark(type: Bark = Bark.COLLECTED) {
+    return;
     if (this.playing) return;
     this.playing = true;
     const barks = Barks[type];
