@@ -1,0 +1,375 @@
+{
+	"frames": {
+		"bojo_frames.png": {
+			"frame": {
+				"x": 1,
+				"y": 1,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"eyes:big.png": {
+			"frame": {
+				"x": 67,
+				"y": 1,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"eyes:shifty.png": {
+			"frame": {
+				"x": 133,
+				"y": 1,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"eyes:small.png": {
+			"frame": {
+				"x": 199,
+				"y": 1,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"hair:balding.png": {
+			"frame": {
+				"x": 265,
+				"y": 1,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"hair:helmet.png": {
+			"frame": {
+				"x": 1,
+				"y": 105,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"headhands.png": {
+			"frame": {
+				"x": 67,
+				"y": 105,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"jacket.png": {
+			"frame": {
+				"x": 133,
+				"y": 105,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"mask.png": {
+			"frame": {
+				"x": 199,
+				"y": 105,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"mouth:plain.png": {
+			"frame": {
+				"x": 265,
+				"y": 105,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"shirt.png": {
+			"frame": {
+				"x": 1,
+				"y": 209,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"shirt:full.png": {
+			"frame": {
+				"x": 67,
+				"y": 209,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"tie.png": {
+			"frame": {
+				"x": 133,
+				"y": 209,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"tie:skinny.png": {
+			"frame": {
+				"x": 199,
+				"y": 209,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"top:blank.png": {
+			"frame": {
+				"x": 265,
+				"y": 209,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"trousers:dark.png": {
+			"frame": {
+				"x": 331,
+				"y": 1,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"trousers:light.png": {
+			"frame": {
+				"x": 331,
+				"y": 105,
+				"w": 64,
+				"h": 102
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 64,
+				"h": 102
+			},
+			"sourceSize": {
+				"w": 64,
+				"h": 102
+			}
+		},
+		"white van.png": {
+			"frame": {
+				"x": 1,
+				"y": 313,
+				"w": 96,
+				"h": 48
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 96,
+				"h": 48
+			},
+			"sourceSize": {
+				"w": 96,
+				"h": 48
+			}
+		}
+	},
+	"meta": {
+		"app": "http://www.codeandweb.com/texturepacker",
+		"version": "1.0",
+		"image": "spritesheet.png",
+		"format": "RGBA8888",
+		"size": {
+			"w": 396,
+			"h": 362
+		},
+		"scale": "1"
+	}
+}
