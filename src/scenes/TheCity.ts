@@ -148,7 +148,7 @@ class TheCity extends Phaser.Scene {
 		this.background.applyFog(this.map);
 		this.NPCs.forEach(npc => npc.destroy());
 		this.NPCs = [];
-		this.score.pass || true ? this.continueToNextLevel() : this.scene.restart();
+		this.score.pass || window.cheat ? this.continueToNextLevel() : this.scene.restart();
 	}
 
 	spawnNPCs(layer: Phaser.Tilemaps.TilemapLayer) {
